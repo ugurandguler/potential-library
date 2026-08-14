@@ -1,0 +1,19 @@
+# Pt - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Pt.ugur Pt
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (318 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Pt at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Pt Pt Pt 19.999999444296208 1.3889233783690871 0.61513228698936695 2.6839797087706851 1.3426851854962245 -1.5293672345616083 0.79613014301424412 10.20214 4.1619244480468414 -1 0 0

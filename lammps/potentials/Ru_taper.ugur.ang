@@ -1,0 +1,19 @@
+# Ru - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Ru_taper.ugur.ang Ru
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (304 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ru at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ru Ru Ru 10.992780735696412 0.45483592767127451 0.33577384983487502 3.2797609153084015 1.5078765647152506 6.9426281464526651 2.9613880193769817 7.0460000000000003 3.976393837422616 0.84999999999999998 1.7170456825252807 1.0172652646016429

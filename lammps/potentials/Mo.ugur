@@ -1,0 +1,19 @@
+# Mo - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Mo.ugur Mo
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (332 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mo at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mo Mo Mo 3.5937585498044076 0.34084178189616599 0.60911430662056865 3.2528210234457293 0.0038536243560251373 -30.685482433554327 3.0341022339027437 8.1821999999999999 4.0880729185644427 -1 0 0

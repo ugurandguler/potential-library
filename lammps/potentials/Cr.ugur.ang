@@ -1,0 +1,19 @@
+# Cr - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Cr.ugur.ang Cr
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: SUSPECT.  At 600 K this runs at 556 K where equipartition gives 300; something is releasing energy.  Check before trusting it.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Cr at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Cr Cr Cr 8.3398107025044261 0.28298307754667212 0.27546898798807218 3.7462958742310821 0.051502009764652579 -0.36201274440217235 0.013773677924408341 7.4981400000000002 3.7462959929609139 -1 1.6655974807387905 -0.30664727724332752

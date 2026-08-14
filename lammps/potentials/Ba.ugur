@@ -1,0 +1,19 @@
+# Ba - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Ba.ugur Ba
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (309 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ba at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ba Ba Ba 2.4961265523161122 0.095569944378351132 0.46614590877161399 6.0490721375291185 0.24431389019778932 0.20194558812214411 0.50915466195341808 13.072799999999999 6.5315635953422362 -1 0 0

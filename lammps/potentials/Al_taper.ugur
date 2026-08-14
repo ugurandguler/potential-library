@@ -1,0 +1,19 @@
+# Al - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Al_taper.ugur Al
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (294 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Al at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Al Al Al 5.0840738519366067 0.16937714709095969 0.42520668335161621 3.6823333575239903 0.90656651857432191 -0.95332218952925574 1.4346470148844821 10.528700000000001 4.2951433656223861 0.84999999999999998 0 0

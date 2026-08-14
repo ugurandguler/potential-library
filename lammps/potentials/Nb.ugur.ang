@@ -1,0 +1,19 @@
+# Nb - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Nb.ugur.ang Nb
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (344 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Nb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Nb Nb Nb 1.2000695066988523 0.3783611360029826 0.82590739108002909 3.8788445301521119 0.21662629064683503 -1.023761412695243 2.1734718989654023 8.5820800000000013 4.2878649792175132 -1 0.35157061677099344 -1.1999023387147918

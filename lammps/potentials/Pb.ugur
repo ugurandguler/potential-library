@@ -1,0 +1,19 @@
+# Pb - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Pb.ugur Pb
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (317 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Pb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Pb Pb Pb 8.8568757183678279 0.55222117063084342 0.45156519328006484 3.485086103800739 1.3880036243429914 -0.70807623690230659 0.39273755269667238 12.870519999999999 5.250479982344471 -1 0 0

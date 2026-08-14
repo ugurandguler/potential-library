@@ -1,0 +1,19 @@
+# Fe - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Fe.ugur.ang Fe
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: SUSPECT.  At 600 K this runs at 433 K where equipartition gives 300; something is releasing energy.  Check before trusting it.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Fe at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Fe Fe Fe 8.7929583029957179 0.28406558331130261 0.27013423108555679 3.7101644033255212 2.936139208232666e-07 -0.31837191044337976 0.019846357287836448 7.4528999999999996 3.7236927299221398 -1 -0.11069593700764793 -0.25462953272673128

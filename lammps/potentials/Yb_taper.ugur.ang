@@ -1,0 +1,19 @@
+# Yb - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Yb_taper.ugur.ang Yb
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (294 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Yb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Yb Yb Yb 1.4560775754621487 0.12515335817449186 0.62983382133652888 5.0098925829615562 2.3301895859396176 2.1982905748736656 1.9250137505118257 14.248000000000001 5.8124177413534213 0.84999999999999998 1.2485215554233899 -0.62594963135515469

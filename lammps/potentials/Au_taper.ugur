@@ -1,0 +1,19 @@
+# Au - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Au_taper.ugur Au
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (300 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Au at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Au Au Au 12.723161502564768 0.22919185527899621 0.18968276854603355 3.3804287252643941 2.3053607224337256 -33.265541744290019 2.189409408499789 10.60332 4.3255843125524667 0.84999999999999998 0 0

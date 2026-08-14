@@ -1,0 +1,19 @@
+# Ag - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Ag_taper.ugur Ag
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (294 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ag at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ag Ag Ag 1.2597130152877498 0.1924431549121372 0.75881443076039423 3.7505375976155721 2.004452503575056 -2.3036911356195553 2.424768241895733 10.622820000000001 4.3335392638408159 0.84999999999999998 0 0

@@ -1,0 +1,19 @@
+# Ta - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Ta_taper.ugur.ang Ta
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (310 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ta at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ta Ta Ta 1.4336607710726423 0.48128729301909018 0.72311875337756348 4.0187344369452163 1.034064765168899 -0.96418415437667715 2.4583043013032193 8.5950800000000012 4.2943601697458966 0.84999999999999998 0.0024353402756434979 0.001116769929373648

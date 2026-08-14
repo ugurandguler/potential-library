@@ -1,0 +1,19 @@
+# Ni - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Ni_taper.ugur.ang Ni
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (299 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ni at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ni Ni Ni 1.2194986328782442 0.34705347138785148 1.0821112597664111 3.1446812101565902 1.7471864388919065 -0.22195284695584569 1.8401561534222211 9.1623999999999999 3.7377664453520905 0.84999999999999998 -0.070142074440126018 -0.20614432796741577

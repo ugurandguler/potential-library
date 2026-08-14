@@ -1,0 +1,19 @@
+# Cu - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Cu.ugur Cu
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: screened - holds its structure at 600 K (309 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Cu at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Cu Cu Cu 13.780279742791631 0.33269524557810759 0.28533539866999896 2.9362555011706082 1.6415792337505386 -0.56432076731650072 0.36033833250378144 9.3990000000000009 3.8342865209840538 -1 0 0

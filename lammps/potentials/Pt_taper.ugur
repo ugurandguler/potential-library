@@ -1,0 +1,19 @@
+# Pt - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Pt_taper.ugur Pt
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (306 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Pt at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Pt Pt Pt 1.2084584091199044 0.44196170387889588 0.78800177426015283 3.2850241815283399 1.8337624412298643 -5.5947291671473929 2.3502010137283174 10.20214 4.1619244480468414 0.84999999999999998 0 0

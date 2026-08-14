@@ -1,0 +1,19 @@
+# Co - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Co_taper.ugur.ang Co
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (297 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Co at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Co Co Co 1.2000000806119655 0.46351363749304614 1.7089965418993867 2.7748483336584329 5.9564651586941751e-07 -0.41620771148685215 2.3820155155311031 6.5184600000000001 3.7450170019002291 0.84999999999999998 -0.18153849770271882 0.55119892624101541

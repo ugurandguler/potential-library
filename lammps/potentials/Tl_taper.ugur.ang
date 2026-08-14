@@ -1,0 +1,19 @@
+# Tl - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Tl_taper.ugur.ang Tl
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (308 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Tl at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Tl Tl Tl 1.3267469603703019 0.15179873014457515 0.87099800525817561 4.1302703685014253 0.40899391878866581 -5.464862679547128 2.5511685172720098 8.9960000000000004 5.110657652784913 0.84999999999999998 1.000447701468367 -0.87302311115921127

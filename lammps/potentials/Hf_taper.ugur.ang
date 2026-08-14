@@ -1,0 +1,19 @@
+# Hf - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Hf_taper.ugur.ang Hf
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (297 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Hf at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Hf Hf Hf 1.200000321542966 0.5907879570422131 1.1780433456741164 3.7384631606917669 1.23519090735292e-05 -0.086826509085655201 1.3464537080036625 8.2940000000000005 4.6880419031516301 0.84999999999999998 0.62321542433664645 1.1999977092417367

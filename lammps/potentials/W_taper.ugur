@@ -1,0 +1,19 @@
+# W - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * W_taper.ugur W
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (301 K, as equipartition requires).
+#
+# Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 10323x that displacement and settles 0.89 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of W at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+W W W 6.4655405917885886 0.444915026467953 0.4895856528161594 3.385806488851165 2.7226133105841567e-07 -11.312401084157365 2.8702325588966264 8.2295200000000008 4.1117154120877579 0.84999999999999998 0 0

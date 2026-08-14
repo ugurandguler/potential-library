@@ -1,0 +1,80 @@
+cff-version: 1.2.0
+message: >-
+  If you use these parameters or this code, please cite this repository and
+  state which release you used. The numbers move as the fits improve, so a
+  result that does not name a release cannot be reproduced.
+title: "Ugur and Guler interatomic potential library"
+abstract: >-
+  A two-body plus three-body interatomic potential for 38 metals in three
+  nested forms (AU, MAU, UG), refitted against experimental elastic constants,
+  lattice constants and cohesive energies, with a LAMMPS pair style and a
+  self-contained interactive library page. The elastic tensor at the fitted
+  volume is reproduced to a median 1.45 per cent RMS; defect, surface and
+  stacking-fault energies are not, and the README states by how much.
+type: software
+#  CITATION.cff 1.2.0 has no field for an academic title, and bibliographic
+#  style omits them in any case, so the names appear here as given-names and
+#  family-names only.  The titles are carried where they belong: on the
+#  library page and in the papers.
+authors:
+  - family-names: "Uğur"
+    given-names: "Gökay"
+    affiliation: "Gazi University"
+  - family-names: "Uğur"
+    given-names: "Şule"
+    affiliation: "Gazi University"
+  - family-names: "Güler"
+    given-names: "Melek"
+    affiliation: "Ankara Hacı Bayram Veli University"
+  - family-names: "Güler"
+    given-names: "Emre"
+    affiliation: "Ankara Hacı Bayram Veli University"
+version: "1.0.0"
+date-released: "2026-08-14"
+license: GPL-2.0-only
+repository-code: "https://github.com/ugurandguler/potential-library"
+url: "https://ugurandguler.github.io/potential-library/"
+keywords:
+  - interatomic potential
+  - molecular dynamics
+  - LAMMPS
+  - elastic constants
+  - lattice dynamics
+  - metals
+
+#  The functional form is not this repository's to claim.  These are the papers
+#  to cite for the potential itself; the repository is cited for the parameters,
+#  which are a fresh fit and are not the published ones.
+references:
+  - type: article
+    title: >-
+      A new interatomic potential for metals: application to Pd-10%Fe
+    authors:
+      - family-names: "Akgün"
+        given-names: "İ."
+      - family-names: "Uğur"
+        given-names: "G."
+    journal: "Physical Review B"
+    volume: 51
+    start: 3458
+    year: 1995
+  - type: article
+    authors:
+      - family-names: "Akgün"
+        given-names: "İ."
+      - family-names: "Uğur"
+        given-names: "G."
+    journal: "Il Nuovo Cimento D"
+    volume: 19
+    start: 779
+    year: 1997
+  - type: article
+    authors:
+      - family-names: "Akgün"
+        given-names: "İ."
+      - family-names: "Uğur"
+        given-names: "G."
+    journal: "Il Nuovo Cimento D"
+    volume: 20
+    start: 1549
+    year: 1998

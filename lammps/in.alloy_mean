@@ -1,0 +1,23 @@
+# Mean-crystal (VCA) Pd-10%Fe with the Akgun-Ugur two-body potential.
+# This is the 2-body half of the papers' model: the pair function itself is
+# concentration-averaged, which reproduces their eq.(10) force-constant average exactly.
+# The 3-body term of the papers is NOT included -- see README.
+units           metal
+atom_style      atomic
+boundary        p p p
+
+lattice         fcc 3.872
+region          box block 0 6 0 6 0 6
+create_box      1 box
+create_atoms    1 box
+mass            1 101.3625                 # (1-x)M_Pd + x M_Fe, x = 0.1
+
+pair_style      table linear 15000
+pair_coeff      1 1 AkgunUgur1995.table PdFe_mean 7.80
+
+velocity        all create 300.0 12345 mom yes rot yes
+fix             1 all nvt temp 300.0 300.0 0.1
+timestep        0.002
+thermo          200
+thermo_style    custom step temp pe etotal press
+run             5000

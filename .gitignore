@@ -1,0 +1,53 @@
+#  Nothing in this list may ever be committed.  Git history is permanent: a file
+#  removed in a later commit is still downloadable from the earlier one, so the
+#  only safe moment to catch these is before the first `git add`.
+
+#  --- credentials -----------------------------------------------------------
+mp_key.txt
+*.key
+.env
+
+#  --- third-party copyrighted material --------------------------------------
+#  The Landolt-Boernstein volumes, the Akgun-Ugur papers and the other journal
+#  PDFs are publisher copyright.  Individual measured constants are facts and
+#  are cited normally in refdata.py; the volumes themselves are not ours to
+#  redistribute, and neither is text extracted wholesale from them.
+*.pdf
+LB13a_text.json
+LB13a_index.json
+gulp-*.gz
+*.tar.gz
+*.tgz
+
+#  --- bulk run output -------------------------------------------------------
+#  Search output is large, uninteresting and regenerable.  fit.json is the
+#  distilled result and IS tracked.
+runs/
+rc3test/
+hcptest/
+dense_*.json
+log_*.txt
+*-[0-9]*.out
+*-[0-9]*.err
+
+#  --- large derived data ----------------------------------------------------
+#  library.json is ~4 MB and is rebuilt by refresh.py from fit.json in a few
+#  minutes; docs/index.html already carries everything a reader needs.
+library.json
+mfp_all.json
+*_phonon.json
+
+#  --- the long-form notes ---------------------------------------------------
+#  Not published.  Excluding only the .docx would miss the point: the builder
+#  scripts carry the entire text inline, so they are excluded too.
+doc/
+*.docx
+HANDBOOK.md
+
+#  --- housekeeping ----------------------------------------------------------
+__pycache__/
+*.pyc
+.DS_Store
+_probe*.docx
+*.bak
+*.pre-*

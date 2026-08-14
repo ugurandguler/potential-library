@@ -1,0 +1,19 @@
+# Tl - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Tl.ugur.ang Tl
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 338 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Tl at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Tl Tl Tl 4.4251395649951144 0.48778246497612254 0.69816496746629952 3.3255294096610033 0.70594749357602904 -0.51952344752826685 0.53156580219349991 8.9960000000000004 5.110657652784913 -1 1.191851018441191 -0.16410003191962258

@@ -1,0 +1,19 @@
+# Mg - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Mg_taper.ugur.ang Mg
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (295 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mg at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mg Mg Mg 1.2000008878254453 0.17398163973759281 1.4207911029254763 3.4670287685813963 5.3028803640130699e-07 -0.1215327894774732 1.2148816738898802 8.3444400000000005 4.7956569334702728 0.84999999999999998 -0.25365949035993768 0.73722739688657679

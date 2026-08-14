@@ -1,0 +1,19 @@
+# Hf - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Hf.ugur Hf
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 297 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Hf at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Hf Hf Hf 13.179549443798059 0.47220886393573802 0.35607159487167572 3.3841250393672397 6.0598089566375497e-07 -0.22133932162197134 0.38732727681869644 8.2940000000000005 4.6879879746006168 -1 0 0

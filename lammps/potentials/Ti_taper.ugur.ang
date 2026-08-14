@@ -1,0 +1,19 @@
+# Ti - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Ti_taper.ugur.ang Ti
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (303 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ti at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ti Ti Ti 1.2000034165502484 0.44641923687854601 1.282131081195685 3.4312488139633932 4.9814004145888659e-07 -0.27003620722743893 1.9582023777130921 7.6715600000000004 4.3437309040412861 0.84999999999999998 -0.073094466930685179 1.1999998339429849

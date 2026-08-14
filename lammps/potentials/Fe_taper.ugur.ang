@@ -1,0 +1,19 @@
+# Fe - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Fe_taper.ugur.ang Fe
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (296 K, as equipartition requires).
+#
+# Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 8877x that displacement and settles 0.34 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Fe at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Fe Fe Fe 5.8759585816431077 0.22985717461692032 0.58263574903596416 3.1188085436778792 0.048638413136355037 -1.2682098988064681 2.6805449113421833 7.4528999999999996 3.7236927299221398 0.84999999999999998 0.0048672088950688242 -0.0030483750140963403

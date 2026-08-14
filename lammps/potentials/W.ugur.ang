@@ -1,0 +1,19 @@
+# W - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * W.ugur.ang W
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: SUSPECT.  At 600 K this runs at 893 K where equipartition gives 300; something is releasing energy.  Check before trusting it.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of W at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+W W W 3.0031651271629149 0.93150871299736226 0.53305681141690398 4.1101468143868392 2.8602338026291172e-07 -0.18086139013540553 0.090253062660356376 8.2295200000000008 4.1117154120877579 -1 -0.062711907995068317 -0.88676599441118831

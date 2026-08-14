@@ -1,0 +1,19 @@
+# Y - Ugur interatomic potential, hard truncation, the reference parameters
+#
+# pair_style ugur
+# pair_coeff * * Y.ugur Y
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 300 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Y at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Y Y Y 10.807458336060703 0.2690983990375409 0.18565105771371623 4.7497613148656148 4.215245877982439e-08 -0.10761241321577932 0.009282588878018307 9.4900000000000002 5.3348271996382408 -1 0 0

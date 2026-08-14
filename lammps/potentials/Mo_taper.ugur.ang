@@ -1,0 +1,19 @@
+# Mo - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Mo_taper.ugur.ang Mo
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (291 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mo at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mo Mo Mo 8.4432394415985073 0.34084004241137594 0.36594538024976236 3.3874231494187819 0.59105377137431259 -16.010058075864528 2.7239307649644138 8.1821999999999999 4.0880729185644427 0.84999999999999998 1.4296805157486707 -0.60549319223228881

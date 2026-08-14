@@ -1,0 +1,25 @@
+#  Store everything with LF, whatever the checkout platform does.
+#
+#  Not cosmetic.  This project has lost cluster time twice to line endings: a
+#  Slurm script written on Windows failed at submission because of its CRLFs,
+#  and a job list read as `fc_k4\r` silently matched nothing, so one of five
+#  calculations was skipped while the run reported success.  A repository that
+#  hands a Linux cluster CRLF shell scripts repeats that for everyone who
+#  clones it.
+* text=auto eol=lf
+
+#  Explicit for the ones that end up on a cluster or in a compiler.
+*.py    text eol=lf
+*.sh    text eol=lf
+*.cpp   text eol=lf
+*.h     text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.table text eol=lf
+*.ugur  text eol=lf
+*.ugur.ang text eol=lf
+in.*    text eol=lf
+
+#  The library page is generated; keep it byte-identical to what make_gui.py
+#  wrote, so a diff means the page changed and not that a tool touched it.
+docs/index.html -text

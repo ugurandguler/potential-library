@@ -1,0 +1,19 @@
+# Mo - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Mo_taper.ugur Mo
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (304 K, as equipartition requires).
+#
+# Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 12846x that displacement and settles 1.06 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mo at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mo Mo Mo 6.8793988688940573 0.34084000110693125 0.4632864407896875 3.2907301446928496 0.085825243618898719 -18.012861161367329 2.7714781250310754 8.1821999999999999 4.0880729185644427 0.84999999999999998 0 0

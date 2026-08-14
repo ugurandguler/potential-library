@@ -1,0 +1,19 @@
+# Li - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Li_taper.ugur Li
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: DO NOT USE.  At 600 K this structure disintegrates - 432 atoms become 10 and LAMMPS stops.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Li at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Li Li Li 1.2000029509963239 0.12957839194739512 1.084751955220856 3.9619537699237073 0.0043383912607423015 59.999946001369011 5.5245318396172172 9.0766000000000009 4.5349420269172134 0.84999999999999998 0 0

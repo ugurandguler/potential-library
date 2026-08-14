@@ -1,0 +1,19 @@
+# Cr - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Cr_taper.ugur Cr
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 974 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
+#
+# Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 12266x that displacement and settles 1.11 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Cr at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Cr Cr Cr 5.5396761222701052 0.27114370644937208 0.54894007671084255 3.2784710500659067 5.461146364489771e-08 -0.060062005743562907 0.10766407179821222 7.4981400000000002 3.7462959929609139 0.84999999999999998 0 0

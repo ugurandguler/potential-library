@@ -1,0 +1,19 @@
+# Nb - Ugur interatomic potential, cutoff switched off over its outer 15 %
+#
+# pair_style ugur
+# pair_coeff * * Nb_taper.ugur Nb
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: SUSPECT.  At 600 K this runs at 487 K where equipartition gives 300; something is releasing energy.  Check before trusting it.
+#
+# Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 13204x that displacement and settles 0.97 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Nb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Nb Nb Nb 1.2452715973028821 0.41450376241765313 0.76624304690182066 3.9296217358172481 0.39884504624925488 -0.96062976826232482 2.0311388476944661 8.5820800000000013 4.2878649792175132 0.84999999999999998 0 0

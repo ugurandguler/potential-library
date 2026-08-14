@@ -1,0 +1,19 @@
+# Li - Ugur interatomic potential, hard truncation, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Li.ugur.ang Li
+#
+# Truncation: hard - phi2 is cut at rcut2 and does NOT vanish there, so this set is for static properties, not dynamics
+# MD: DO NOT USE.  At 600 K this structure disintegrates - 432 atoms become 10 and LAMMPS stops.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Li at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Li Li Li 1.2000025846486944 0.1090562956940829 0.98141002338038386 4.181198896758497 1.4417006236934222e-06 10.172237144376272 5.1040726767646003 9.0766000000000009 4.5349420269172134 -1 1.8999976997612491 1.199972294063687

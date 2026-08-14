@@ -1,0 +1,19 @@
+# Sc - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Sc_taper.ugur.ang Sc
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (301 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Sc at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Sc Sc Sc 1.3287629436339286 0.3576668659706051 1.0866767134389004 3.8866042441165836 1.150506460872857e-05 -0.047555006051855891 1.1579457578544552 8.6059999999999999 4.8824633002960764 0.84999999999999998 -0.47673076699495742 1.1990274656030488

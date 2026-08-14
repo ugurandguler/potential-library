@@ -1,0 +1,19 @@
+# Sr - Ugur interatomic potential, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Sr_taper.ugur.ang Sr
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# MD: screened - holds its structure at 600 K (302 K, as equipartition requires).
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Sr at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Sr Sr Sr 2.2328562232267606 0.14302893143292639 0.67119823325187367 5.0444679361335814 0.057435074283038789 -0.029144419295205448 0.839914394186978 15.820740000000001 6.4540110792630356 0.84999999999999998 0.015939574990651802 -0.00079042722915296441
