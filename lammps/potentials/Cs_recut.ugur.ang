@@ -1,0 +1,33 @@
+# Cs - Ugur interatomic potential, CANDIDATE, re-cut, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Cs_recut.ugur.ang Cs
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (355 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Measured dispersion: 3.9 % against 16.7 % for the published switched
+# arm - better.
+# Read that beside the finite-temperature note below rather than instead of
+# it.  Both are the same fact: a dispersion at 0 K is a property of the
+# curvature AT the minimum, and this arm has that neighbourhood right
+# while the shape of the well away from it is wrong.
+#
+# FINITE TEMPERATURE: this candidate passes the screens above and fails
+# below room temperature - thermal expansion comes out NEGATIVE (-40e-6/K against a measured 97); C11 RISES 183 % between 0 K and 181 K instead of softening.
+# Use it for static properties only, if at all.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Cs at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Cs Cs Cs 5.1231614171898823 0.14461209742217318 0.18047730023290737 6.1270224613955921 1.8445534709463196 -0.11537591362432228 0.12444060234198959 7.2967152261192672 7.8526853488153971 0.84999999999999998 0.26690436325081157 -0.60976045857659522

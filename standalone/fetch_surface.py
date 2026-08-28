@@ -148,13 +148,17 @@ def main():
                     for s in (d.surfaces or [])}
             out[el] = rec
             if not rec.get("facets"):
-                #  No facet-resolved DFT for this entry.  The record is KEPT if
-                #  it still carries the experimental value, because the test
-                #  that matters - whether the close-packed face is the cheapest
-                #  - is a universal ordering and needs no per-element
-                #  reference at all.  Dropping these silently removed cobalt,
-                #  rhenium and ytterbium from the sweep entirely, which is not
-                #  the same as having nothing to say about them.
+                #  No facet-resolved DFT for this entry.  The record is KEPT
+                #  if it still carries the experimental value: the magnitude
+                #  comparison needs no facets, and the ordering falls back on
+                #  the close-packed rule, flagged as such (order_basis="rule"
+                #  in add_surface.py).  That fallback is weaker than it looks
+                #  - the rule is NOT universal, and the reference contradicts
+                #  it for 17 of the 35 elements it does cover - so a verdict
+                #  resting on it is a guess, not a measurement.  Dropping
+                #  these silently removed cobalt, rhenium and ytterbium from
+                #  the sweep entirely, which is not the same as having
+                #  nothing to say about them.
                 rec.pop("weighted", None)
                 rec.pop("anisotropy", None)
                 if not rec.get("tyson"):

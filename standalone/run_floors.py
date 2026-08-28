@@ -24,7 +24,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 #  one core left for everything else, and OMP pinned to 1: these are 3x3 and 6x6
 #  matrices, so a threaded BLAS only oversubscribes.  On a cluster node set
-#  FLOOR_NPROC to the cores allocated - barbun gives 40, which runs all
+#  FLOOR_NPROC to the cores allocated - 40 on the nodes used here, which runs all
 #  twenty three at once.
 NPROC = int(os.environ.get("FLOOR_NPROC", "7"))
 

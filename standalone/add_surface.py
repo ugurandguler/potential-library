@@ -9,11 +9,14 @@ these would come out two to three times high, for the same reason the vacancy
 does - was directionally right and quantitatively too optimistic: the measured
 factor is nearer three and a half, and aluminium is worse than that.
 
-**Ordering** is the one that cannot be rescaled away.  In a real metal, and in
-every published potential run through this same code, the close-packed face is
-the cheapest: gamma(111) < gamma(100) < gamma(110) for fcc.  A form that puts
-the close-packed face highest is not describing a surface, whatever its
-magnitude, and no amount of refitting the six parameters changes an ordering.
+**Ordering** is the one that cannot be rescaled away.  The usual rule is that
+the close-packed face is the cheapest - gamma(111) < gamma(100) < gamma(110)
+for fcc - but the reference contradicts that rule for 17 of the 35 elements it
+covers, so each record is scored against its OWN element's reference ordering,
+and orderings the reference resolves by less than ORDER_MARGIN are not scored
+at all.  On the records that can be judged, published potentials get 22 of 32
+and ours get 3 of 38.  A form that inverts a resolvable ordering is not
+describing a surface, whatever its magnitude.
 
 The comparison is only worth anything because the published potentials went
 through the identical slab thickness, vacuum, bulk reference and relaxation.
@@ -38,6 +41,9 @@ RIGHT = {"fcc": ["111", "100", "110"],
          "bcc": ["110", "100", "111"],
          "hcp": ["0001", "10-10", "11-20"]}
 
+#  reference facets closer together than this are treated as a tie
+ORDER_MARGIN = 0.05
+
 
 def summarise(struct, gam, ref):
     """what to say about one record's three facets"""
@@ -45,15 +51,36 @@ def summarise(struct, gam, ref):
     if len(fs) < 2:
         return None
     order = sorted(fs, key=fs.get)
-    want = [f for f in RIGHT[struct] if f in fs]
-    out = {"gamma": fs, "order": order, "order_ok": bool(order == want),
-           "order_want": want,
+    rf = (ref or {}).get("facets") or {}
+    #  RIGHT is a rule of thumb and the reference calculation contradicts it
+    #  for 17 of the 35 elements it covers: close packing does not always
+    #  win.  Where the reference has every facet the record does, ITS order
+    #  is the target and the rule is only the fallback.
+    #
+    #  But the target has to carry its own margin.  In 19 of those 35 the two
+    #  closest reference facets are within 5 % of each other - Ca 0.6 %,
+    #  Zr 0.7 %, Rh 0.8 % - and demanding that a potential resolve a gap that
+    #  narrow asks for an accuracy neither it nor the reference has.  Those
+    #  orderings are recorded as unresolved rather than scored, so a record is
+    #  neither credited nor blamed for a coin toss.
+    ref_ord = [f for f in sorted(rf, key=rf.get) if f in fs]
+    margin = None
+    if len(ref_ord) == len(fs) and len(ref_ord) > 1:
+        want, basis = ref_ord, "reference"
+        v = [rf[f] for f in ref_ord]
+        margin = min((v[i + 1] - v[i]) / v[i] for i in range(len(v) - 1))
+    else:
+        want, basis = [f for f in RIGHT[struct] if f in fs], "rule"
+    resolved = margin is None or margin >= ORDER_MARGIN
+    out = {"gamma": fs, "order": order,
+           "order_ok": bool(order == want) if resolved else None,
+           "order_want": want, "order_basis": basis,
+           "order_margin": margin, "order_resolved": bool(resolved),
            #  spread as a fraction of the mean: a form with no facet
            #  anisotropy at all is a different failure from one with the
            #  wrong anisotropy, and the number separates them
            "spread": (max(fs.values()) - min(fs.values()))
            / (sum(fs.values()) / len(fs))}
-    rf = (ref or {}).get("facets") or {}
     rat = {f: fs[f] / rf[f] for f in fs if rf.get(f)}
     if rat:
         out["ratio_dft"] = rat
@@ -78,7 +105,7 @@ def main():
     ref = load(os.path.join(HERE, "surface_ref.json"))
     labels = load(os.path.join(HERE, "baseline_labels.json"))
 
-    nours = nbase = nbad = 0
+    nours = nbase = nbad = ntie = 0
     for key, fs in surf.items():
         el, tag = key.split("|", 1)
         if el not in lib:
@@ -100,7 +127,10 @@ def main():
         elif tag in lib[el] and isinstance(lib[el][tag], dict):
             lib[el][tag]["surface"] = s
             nours += 1
-            nbad += 0 if s["order_ok"] else 1
+            if s["order_ok"] is None:
+                ntie += 1
+            elif not s["order_ok"]:
+                nbad += 1
         else:
             continue
 
@@ -171,7 +201,8 @@ def main():
             lib[el]["surface_ref"] = r
             nref += 1
 
-    print(f"ours {nours} records ({nbad} with the facet ordering wrong), "
+    print(f"ours {nours} records ({nbad} with the facet ordering wrong, "
+          f"{ntie} where the reference facets are too close to call), "
           f"baseline {nbase} records, reference {nref} elements")
     ours = [lib[el][t]["surface"] for el in lib
             for t in ("tap", "tap_ug")
@@ -186,9 +217,11 @@ def main():
     if rb:
         rb.sort()
         nb_ok = sum(1 for s in bs if s.get("order_ok"))
+        nb_tie = sum(1 for s in bs if s.get("order_ok") is None)
         print(f"ratio to DFT, published baselines: median {rb[len(rb)//2]:.2f}, "
               f"range {rb[0]:.2f}-{rb[-1]:.2f}, {len(rb)} records; "
-              f"siralamasi dogru olan {nb_ok}/{len(bs)}")
+              f"siralamasi dogru olan {nb_ok}/{len(bs)}"
+              f" ({nb_tie} ayirt edilemez)")
     if dry:
         print("--dry: nothing written")
         return

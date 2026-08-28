@@ -1,0 +1,22 @@
+# Co - Ugur interatomic potential, CANDIDATE, re-cut, switched
+#
+# pair_style ugur
+# pair_coeff * * Co_recut.ugur Co
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (293 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Co at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Co Co Co 1.4192157190143175 0.39305636403322602 1.3160705064803502 2.9331718876284749 0.40001060804693733 -0.25686371431351779 1.8606987197114713 7.649821395881534 3.7450170019002291 0.84999999999999998 0 0

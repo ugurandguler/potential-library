@@ -529,6 +529,38 @@ def frequencies_many(cry, pot, qs, Phi=None):
     return np.sign(w2) * np.sqrt(np.abs(w2)) * THZ
 
 
+def modes_many(cry, pot, qs, Phi=None):
+    """
+    (frequencies, polarisations) at many q, shapes (Q, 3N) and (Q, 3N, 3N).
+
+    Same frequencies as frequencies_many - this exists because identifying a
+    measured branch as longitudinal or transverse needs the eigenVECTOR, and
+    sorted position will not do it.  Along <111> past P, and along <110> past
+    K, the longitudinal branch stops being the highest one.
+
+    vecs[:, :, k] is the polarisation of branch k, in CARTESIAN components,
+    because the force-constant blocks are Cartesian.
+    """
+    Phi = force_constants(cry, pot) if Phi is None else Phi
+    B, I, J, R = _flat(Phi)
+    qs = np.atleast_2d(np.asarray(qs, float))
+    n = len(cry.frac)
+    ph = np.exp(2j * np.pi * (qs @ R.T))
+    D = np.zeros((len(qs), 3 * n, 3 * n), complex)
+    for b in range(len(B)):
+        D[:, 3*I[b]:3*I[b]+3, 3*J[b]:3*J[b]+3] += ph[:, b, None, None] * B[b]
+    M = np.repeat(cry.mass, 3)
+    D /= np.sqrt(np.outer(M, M))
+    D = 0.5 * (D + np.conj(np.transpose(D, (0, 2, 1))))
+    w2, vecs = np.linalg.eigh(D)
+    return np.sign(w2) * np.sqrt(np.abs(w2)) * THZ, vecs
+
+
+def reciprocal(cry):
+    """rows are the reciprocal basis vectors, so q_cart = q_frac @ reciprocal"""
+    return 2.0 * np.pi * np.linalg.inv(cry.lat).T
+
+
 # --------------------------------------------------------------------------
 #  elastic constants
 # --------------------------------------------------------------------------

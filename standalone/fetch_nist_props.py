@@ -8,9 +8,10 @@ publishes the results.  That makes it something this project has not had
 before: an INDEPENDENT calculation of the same quantity, for the same
 potential, by different code.
 
-The reason to want it is a specific claim.  Our surface energies say that
-seventy-two of seventy-six records get the facet ordering wrong while
-forty-eight of fifty-one published potentials get it right, and the whole
+The reason to want it is a specific claim.  Our surface energies say that of
+the thirty-eight records whose facet ordering can be judged at all, three come
+out right, while published potentials manage twenty-two of thirty-two, and the
+whole
 weight of that rests on our slab machinery being correct.  So far the argument
 for that has been internal: the published potentials land where a published
 potential should.  NIST's numbers close it from outside.  For Mishin's 2001

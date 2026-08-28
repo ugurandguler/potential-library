@@ -42,7 +42,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "standalone"))
 
 #  windows+wsl here, a plain shell on the cluster
-LOCAL = not os.path.exists("/arf")
+LOCAL = os.environ.get("LMP_LOCAL", "1") != "0"
 HOME = (subprocess.run(["wsl", "-e", "bash", "-lc", "echo $HOME"],
                        capture_output=True, text=True).stdout.strip()
         if LOCAL else os.path.expanduser("~"))

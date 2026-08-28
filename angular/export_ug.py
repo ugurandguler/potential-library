@@ -23,7 +23,7 @@ raises:
                       the fit sees only the q -> 0 limit
 
     python export_ug.py                       # default run directory
-    python export_ug.py runs/truba_ang5_on runs/2026-08-03_ug
+    python export_ug.py runs/cluster_ang5_on runs/2026-08-03_ug
 
 Writes ug_results.json.
 """
@@ -44,7 +44,7 @@ import refdata_phonon as RP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "ug_results.json")
-DEFAULT_RUN = "runs/truba_ang5_on"
+DEFAULT_RUN = "runs/cluster_ang5_on"
 TOL = -1e-3          # cm^-1; odd meshes contain Gamma, where zero reads -1e-5
 THZ = 33.35641       # cm^-1 per THz
 

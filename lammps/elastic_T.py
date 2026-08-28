@@ -67,7 +67,12 @@ DELTA = 1.0e-6
 #  fractions of the melting point; 0.05 stands in for "cold" without asking a
 #  thermostat to hold a temperature the Langevin damping cannot resolve
 FRACS = (0.05, 0.15, 0.30, 0.45, 0.60, 0.75, 0.90)
-OURS = {"tap": ("ugur", "ugur"), "tap_ug": ("ugur/ang", "ugur.ang")}
+OURS = {"tap": ("ugur", "ugur"), "tap_ug": ("ugur/ang", "ugur.ang"),
+        #  The re-ranked candidates (REFIT 8b), through the SAME door as the
+        #  shipped arms rather than a private one - see the note below on why
+        #  that matters.  Same pair styles, same taper; only the cutoff and
+        #  the parameters fitted at it differ, so nothing else here changes.
+        "rc": ("ugur", "ugur"), "rc_ug": ("ugur/ang", "ugur.ang")}
 
 #  A candidate parameter set can be tested exactly like a shipped one by
 #  pointing PICKS at a nudge_picked.json.  It joins PACK under the name "pick",

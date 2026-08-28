@@ -68,9 +68,14 @@ def main():
     for el, d in lib.items():
         if not isinstance(d, dict):
             continue
-        for t in ("tap", "tap_ug"):
-            if isinstance(d.get(t), dict) and "expansion" in d[t]:
-                del d[t]["expansion"]
+        #  Every sub-record that carries one, not a fixed list of arm names.
+        #  The list said ("tap", "tap_ug") and the re-ranked candidates arrived
+        #  under "rc" and "rc_ug", so their results would have survived a
+        #  rerun that no longer produced them - which is the exact failure the
+        #  note above describes, one arm later.
+        for t, sub in list(d.items()):
+            if isinstance(sub, dict) and "expansion" in sub:
+                del sub["expansion"]
                 cleared += 1
         d.pop("baseline_expansion", None)
 
@@ -116,9 +121,10 @@ def main():
             print(f"     {k:14s} {why[:58]}")
 
     #  and the gap that matters: parameters exist, no result came back
+    #  the same question, over whichever arms this element actually has
     gone = sorted(f"{el}|{t}" for el, d in lib.items()
                   if isinstance(d, dict)
-                  for t in ("tap", "tap_ug")
+                  for t in ("tap", "tap_ug", "rc", "rc_ug")
                   if isinstance(d.get(t), dict)
                   and "expansion" not in d[t] and f"{el}|{t}" not in npt)
     if gone:

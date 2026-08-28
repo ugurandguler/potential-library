@@ -122,7 +122,7 @@ def main():
                     "rms": 100.0 * r["score"], "rms_best": r["best_rms"],
                     "rank": r["rank"], "seed": r.get("seed"),
                     "Cij": r.get("Cij"),
-                    "from": "nudge_filter.py, TRUBA 6222389",
+                    "from": "nudge_filter.py, cluster run",
                     "why": ("best solution in the same pool that passes the nudge test; "
                             "the original record does not pass")})
         v = verify.get(f"{el}|candidate")

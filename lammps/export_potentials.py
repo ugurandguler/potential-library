@@ -46,6 +46,22 @@ sys.path.insert(0, os.path.join(ROOT, "standalone"))
 import refdata          # noqa: E402
 
 OUT = os.path.join(HERE, "potentials")
+def phi2_at_cut(rec):
+    """phi2 at the cutoff, in eV - the size of the step a hard cut leaves
+
+    Written here rather than taken from the library because it is a property
+    of the record's own parameters and has to follow them if they change.
+    Evaluated just inside rcut2, since at rcut2 exactly the pair term is
+    defined to be zero by the cutoff rather than by the function.
+
+    The STANDALONE latdyn is used even for the angular records, which is
+    normally the mistake curve_mae warns about.  It is safe here and only
+    here: the angular factor multiplies the three-body term, phi2 is the
+    same function in both modules, and phi2 is all this asks for.
+    """
+    import latdyn as _L
+    return float(_L.Potential.from_record(rec).phi2(rec["rcut2"] - 1e-6))
+
 KEYS = ("m", "D", "alpha", "r0", "gamma", "C", "alpha3", "rcut2", "rcut3")
 
 #  (label, library key, pair style, filename suffix, description)
@@ -58,6 +74,17 @@ SETS = (
      "hard truncation, with the angular factor"),
     ("ug_taper", "tap_ug", "ugur/ang", "_taper.ugur.ang",
      "switched, with the angular factor"),
+    #  The shell-gap re-cut candidates.  NOT part of the shipped library and
+    #  named so they cannot be mistaken for it: same pair styles and the same
+    #  0.85 taper as the two switched sets above, but fitted at a different
+    #  cutoff.  Before using either one, read the verdict column on the page -
+    #  they repair molybdenum and tungsten and they break the alkalis, whose
+    #  elastic constants come out three times too stiff at 300 K and whose
+    #  thermal expansion comes out negative.
+    ("rc", "rc", "ugur", "_recut.ugur",
+     "CANDIDATE, re-cut, switched"),
+    ("rc_ug", "rc_ug", "ugur/ang", "_recut.ugur.ang",
+     "CANDIDATE, re-cut, switched, with the angular factor"),
 )
 
 HEADER = """\
@@ -121,18 +148,85 @@ def main():
             vals = [rec[k] for k in KEYS] + [taper,
                                              rec.get("lam2", 0.0),
                                              rec.get("lam4", 0.0)]
-            trunc = ("hard - phi2 is cut at rcut2 and does NOT vanish there, "
-                     "so this set is for static properties, not dynamics"
-                     if taper <= 0 else
-                     f"switched from {taper:g} of each cutoff to the cutoff, "
-                     "quintic, C2 - energy is conserved in MD")
+            #  What each truncation is for, with the measurement behind it.
+            #
+            #  The hard sets reproduce the MEASURED dispersion better - 9.5 %
+            #  mean over the 29 elements that carry a neutron curve against
+            #  12.6 % for the switched ones, and better in 24 of the 29 - and
+            #  they cannot be run at temperature.  Both halves are measured
+            #  and neither is a preference.  The discontinuity is what does
+            #  it, so each file carries its own rather than an average: it
+            #  runs from 0.25 meV for palladium to 123 meV for yttrium, a
+            #  factor of five hundred, and "not for dynamics" is not equally
+            #  true across that range.
+            jump = abs(phi2_at_cut(rec)) * 1000.0        # meV
+            kT296 = 8.617333e-5 * 296 * 1000.0           # meV
+            if taper <= 0:
+                trunc = (
+                    "hard - phi2 does not vanish at rcut2, it stops at "
+                    f"{-abs(jump):.3g} meV ({jump / kT296:.3g} of k_B T at "
+                    "296 K).  USE for static properties and for lattice "
+                    "dynamics: measured against neutron dispersion the hard "
+                    "sets average 9.5 % over the 29 elements that have one, "
+                    "against 12.6 % for the switched sets, and are closer in "
+                    "24 of them.  DO NOT use for molecular dynamics: "
+                    "copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in "
+                    "NVE and climbs from 296 K to over 1100 K in 200 ps")
+            elif name in ("rc", "rc_ug"):
+                #  A different cutoff, so the 12.6 % measured on the shipped
+                #  switched sets is not theirs.  Measured on the 17 elements
+                #  that have both a re-cut record and a neutron curve, the
+                #  re-cut arm reaches 8.8 % against 11.6 % for the shipped
+                #  switched arm on the same 17, and is closer in 12 of them.
+                #
+                #  That is not a recommendation, and the reason is the whole
+                #  point of these files.  The biggest gains are the alkalis -
+                #  lithium 25.2 % to 5.8, caesium 16.7 to 3.9, rubidium 13.5
+                #  to 5.4 - and those are exactly the elements the re-cut
+                #  BREAKS once the crystal is warm.  Both facts have the same
+                #  cause: a dispersion at 0 K and an elastic constant are
+                #  properties of the curvature AT the minimum, and the re-cut
+                #  gets that neighbourhood right while getting the shape of
+                #  the well away from it wrong.
+                trunc = (
+                    f"switched from {taper:g} of each cutoff to the cutoff, "
+                    "quintic, C2 - energy is conserved in MD.  CANDIDATE, not "
+                    "part of the published library.  Against measured neutron "
+                    "dispersion this arm reaches 8.3 % over the 16 elements "
+                    "that have both a candidate record and a neutron curve "
+                    "and were not rejected outright, against 11.2 % for the "
+                    "published switched arm on the same 16.  That gap is "
+                    "almost all alkali: sodium, potassium, rubidium and "
+                    "caesium are where the arm gains most and are also what "
+                    "it breaks warm.  Leave them out and it is 8.3 % against "
+                    "8.9 % over 11 elements, better in 7 - a wash.  There is "
+                    "no measured reason to prefer this arm for its dispersion")
+            else:
+                trunc = (
+                    f"switched from {taper:g} of each cutoff to the cutoff, "
+                    "quintic, C2 - energy is conserved in MD: measured drift "
+                    "0.4 meV/atom/ns for copper, 876x less than its hard "
+                    "twin.  USE for molecular dynamics, which no hard set "
+                    "can do.  It pays for that on the dispersion: the "
+                    "switched sets average 12.6 % against the hard sets' "
+                    "9.5 %, because switching the pair term off over the "
+                    "outer 15 % moves the force constants at the largest "
+                    "separations, which is the short-wavelength end, and "
+                    "nothing in the fit sees it")
             #  the measured verdict, which is not the same question as whether
             #  the fit reproduced its targets
             #  the export labels the sets mau/mau_taper/ug/ug_taper and the
             #  screen labels them hard/tap/ug/tap_ug; without this the lookup
             #  silently misses and every file claims "not screened"
-            md = scr.get((el, {"mau": "hard", "mau_taper": "tap",
-                               "ug": "ug", "ug_taper": "tap_ug"}[name]))
+            #  The candidate arms keep their screen inside their own record
+            #  rather than in md_screen_all.json, so they are looked up there.
+            #  The four shipped sets keep the old path untouched - reading
+            #  rec first for those would change what they report.
+            if name in ("rc", "rc_ug"):
+                md = rec.get("md_screen")
+            else:
+                md = scr.get((el, {"mau": "hard", "mau_taper": "tap",
+                                   "ug": "ug", "ug_taper": "tap_ug"}[name]))
             if md is None:
                 warn = "# MD: not screened."
             elif md.get("lost"):
@@ -150,15 +244,28 @@ def main():
                         f" where equipartition gives 300; something is"
                         f" releasing energy.  Check before trusting it.")
             else:
-                warn = (f"# MD: screened - holds its structure at 600 K"
-                        f" ({md['T']} K, as equipartition requires).")
+                warn = (f"# MD: structure screened - holds its shape at"
+                        f" 600 K ({md['T']} K, as equipartition requires)."
+                        f"  This tested the SHAPE, not energy conservation;"
+                        f" for that see the truncation line above.")
+            #  What three warm screens say about the candidates, which no
+            #  cold screen can see.  The alkalis pass every 0 K test - they
+            #  hit every fitted target and are dynamically stable along the
+            #  whole symmetry path, MORE stable than the published arm, which
+            #  has imaginary modes at H-N for K, Rb and Cs - and then fail
+            #  every warm one.
             #  The nudge test, which is a different question from the MD
             #  screen and from the phonon screen: both of those can pass while
             #  the lattice fails to survive a 1e-5 A displacement.  Five bcc
             #  records do exactly that, and a user running a defect or an
             #  interface calculation would meet it immediately.
-            jg = jig.get((el, {"mau": "hard", "mau_taper": "tap",
-                               "ug": "ug", "ug_taper": "tap_ug"}[name]))
+            #  same split as the screen above: the candidates carry their
+            #  own jiggle result, the shipped four keep the old lookup
+            if name in ("rc", "rc_ug"):
+                jg = rec.get("jiggle")
+            else:
+                jg = jig.get((el, {"mau": "hard", "mau_taper": "tap",
+                                   "ug": "ug", "ug_taper": "tap_ug"}[name]))
             nl = chr(10)
             if jg is None:
                 jwarn = "#" + nl + "# Nudge test: not run."
@@ -176,7 +283,134 @@ def main():
                          " so the elastic constants above are the constants of"
                          " a structure it does not hold.  Static reference"
                          " only; do not use for defects, surfaces or dynamics.")
+            #  The symmetry-path stability screen.  It is a DIFFERENT question
+            #  from the 600 K run above: that one asks whether the crystal
+            #  survives being heated, this one whether the reference lattice
+            #  is a harmonic minimum at all.  They do not cover each other -
+            #  caesium's tapered set holds its structure at 600 K, passes the
+            #  nudge test, and still carries a mode at -1.5 cm^-1 between two
+            #  symmetry points.  A half-shifted Monkhorst-Pack mesh cannot see
+            #  a mode confined to a line however fine it is made, which is why
+            #  the fit's own check calls these records stable.
+            dyn = rec.get("dyn") or {}
+            if dyn.get("stable") is False:
+                mn = dyn.get("min_path_cm1")
+                if mn is None:
+                    mn = dyn.get("most_neg_cm1")
+                warn = (warn + nl + "#" + nl
+                        + "# LATTICE STABILITY: this set is NOT a harmonic"
+                        " minimum." + nl
+                        + f"# Along the Setyawan-Curtarolo path its frequencies"
+                        f" reach {mn} cm^-1," + nl
+                        + f"# with {100 * dyn.get('imag_frac', 0.0):.2f} % of"
+                        " the sampled modes imaginary.  That is a separate"
+                        + nl + "# failure from the 600 K screen above and is"
+                        " not covered by it.")
+            elif dyn:
+                warn = (warn + nl + "#" + nl
+                        + "# Lattice stability: screened on the 8^3 and 9^3"
+                        " meshes AND along the" + nl
+                        + "# symmetry path; no imaginary modes.")
             warn = warn + nl + jwarn
+            #  What the measured dispersion says about this candidate,
+            #  which is NOT a second copy of the finite-temperature warning
+            #  further down - it is the other half of the same fact.  The
+            #  re-cut reaches 8.8 % over the 17 elements that have both a
+            #  candidate record and a neutron curve, against 11.6 % for the
+            #  published switched arm on the same 17, closer in 12 of them.
+            #  Its largest gains are the alkalis, and the alkalis are exactly
+            #  what it breaks warm: a 0 K dispersion and an elastic constant
+            #  are both properties of the curvature AT the minimum, so an arm
+            #  can have that neighbourhood right and the shape of the well
+            #  away from it wrong.
+            RC_DISP = {"Ag": (13.0, 12.7), "Au": (4.2, 4.4), "Ba": (8.3, 9.6),
+                       "Ca": (8.6, 8.3), "Cs": (3.9, 16.7), "Cu": (9.3, 10.0),
+                       "K": (16.6, 11.4), "Li": (5.8, 25.2), "Mg": (8.3, 6.6),
+                       "Na": (9.4, 15.4), "Ni": (12.1, 13.4), "Pb": (10.6, 15.9),
+                       "Pd": (3.5, 3.6), "Pt": (4.8, 4.7), "Rb": (5.4, 13.5),
+                       "W": (17.2, 17.8), "Yb": (8.5, 8.6)}
+            warm = ""
+            if name in ("rc", "rc_ug") and el in RC_DISP:
+                mine, pub = RC_DISP[el]
+                verdict = ("better" if mine < pub - 0.5 else
+                           "worse" if mine > pub + 0.5 else "the same")
+                warm = ("#" + nl
+                        + f"# Measured dispersion: {mine:g} % against"
+                        f" {pub:g} % for the published switched" + nl
+                        + f"# arm - {verdict}." + nl)
+                if el in ("Na", "K", "Rb", "Cs", "Li"):
+                    warm += ("# Read that beside the finite-temperature note"
+                             " below rather than instead of" + nl
+                             + "# it.  Both are the same fact: a dispersion at"
+                             " 0 K is a property of the" + nl
+                             + "# curvature AT the minimum, and this arm has"
+                             " that neighbourhood right" + nl
+                             + "# while the shape of the well away from it is"
+                             " wrong." + nl)
+                else:
+                    warm += ("# On the 41 accepted candidate records the"
+                             " re-cut is close to break-even" + nl
+                             + "# overall: thermal expansion 30.7 % -> 25.6 %"
+                             " median, 10 better and 10" + nl
+                             + "# worse; 300 K elastic constants 3.4 % ->"
+                             " 2.7 %, 7 better and 3 worse." + nl)
+                warm = warm.rstrip(nl)
+            warn = warn + (nl + warm if warm else "")
+            #  The 600 K screen asks whether the crystal survives, which is
+            #  not the same question as whether it behaves.  Sodium's
+            #  candidate holds its structure and still expands the wrong way
+            #  and stiffens as it is heated, so the screen alone reads as
+            #  reassurance it has not earned.  This adds the two finite-
+            #  temperature failures to the header, where somebody who copies
+            #  the file will meet them.
+            if name in ("rc", "rc_ug"):
+                #  Four of these records did not pass selection at all -
+                #  molybdenum and tungsten in both arms, on a mode at about
+                #  -13 cm^-1 on the symmetry path.  They are kept as the
+                #  control the others are read against.  Without this line the
+                #  file says CANDIDATE, reports the 600 K screen and the nudge
+                #  test as passed, and never mentions that it was rejected.
+                gr = rec.get("ground") or {}
+                if rec.get("stable") is False or gr.get("ok") is False:
+                    bits = []
+                    if rec.get("stable") is False:
+                        bits.append("it carries a mode at"
+                                    f" {rec.get('min_cm1', 0.0):.1f} cm^-1 on"
+                                    " the symmetry path")
+                    if gr.get("ok") is False:
+                        bits.append(f"it puts {gr.get('lowest')} lowest,"
+                                    f" {abs(gr.get('rel', 0)):.0f} meV/atom"
+                                    f" below {gr.get('want')}")
+                    warn = (warn + nl + "#" + nl
+                            + "# REJECTED: this record did NOT pass selection -"
+                            + nl + "# " + "; ".join(bits) + "." + nl
+                            + "# It is kept as the control the accepted"
+                            " records are read against," + nl
+                            + "# not as a potential.  Do not use it.")
+                ft = []
+                xp = rec.get("expansion") or {}
+                a, ae = xp.get("alpha_1e6"), xp.get("alpha_exp_1e6")
+                if a is not None and ae and a < 0 < ae:
+                    ft.append(f"thermal expansion comes out NEGATIVE"
+                              f" ({a:.0f}e-6/K against a measured {ae:.0f})")
+                et = (lib[el].get("elasticT") or {}).get(name) or {}
+                pts = [q for q in et.get("pts", [])
+                       if q.get("T") is not None
+                       and q["T"] <= 0.7 * (et.get("Tmelt") or 1e9)]
+                if len(pts) >= 4 and pts[0].get("C11"):
+                    rise = (pts[-1]["C11"] - pts[0]["C11"]) / pts[0]["C11"]
+                    if rise > 0.05:
+                        ft.append(f"C11 RISES {100 * rise:.0f} % between 0 K"
+                                  f" and {pts[-1]['T']:.0f} K instead of"
+                                  " softening")
+                if ft:
+                    warn = (warn + nl + "#" + nl
+                            + "# FINITE TEMPERATURE: this candidate passes the"
+                            " screens above and fails" + nl
+                            + "# below room temperature - "
+                            + ("; ".join(ft)) + "." + nl
+                            + "# Use it for static properties only, if at"
+                            " all.")
             open(os.path.join(OUT, el + suffix), "w").write(HEADER.format(
                 el=el, fn=el + suffix, style=style, what=what, trunc=trunc,
                 warn=warn,

@@ -1,0 +1,35 @@
+# W - Ugur interatomic potential, CANDIDATE, re-cut, switched
+#
+# pair_style ugur
+# pair_coeff * * W_recut.ugur W
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (299 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# LATTICE STABILITY: this set is NOT a harmonic minimum.
+# Along the Setyawan-Curtarolo path its frequencies reach -10.903 cm^-1,
+# with 0.23 % of the sampled modes imaginary.  That is a separate
+# failure from the 600 K screen above and is not covered by it.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Measured dispersion: 17.2 % against 17.8 % for the published switched
+# arm - better.
+# On the 41 accepted candidate records the re-cut is close to break-even
+# overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10
+# worse; 300 K elastic constants 3.4 % -> 2.7 %, 7 better and 3 worse.
+#
+# REJECTED: this record did NOT pass selection -
+# it carries a mode at -10.9 cm^-1 on the symmetry path; it puts fcc lowest, 424 meV/atom below bcc.
+# It is kept as the control the accepted records are read against,
+# not as a potential.  Do not use it.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of W at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+W W W 9.0666842106002896 0.44624374265424993 0.25231796041973503 3.7622752943146818 1.0743715814936896 -0.51734865656856566 0.66995358056718979 9.158160794523468 4.1117154120877579 0.84999999999999998 0 0

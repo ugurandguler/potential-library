@@ -66,7 +66,10 @@ KEEP_MAX = 10.0
 DE_MAX = -5.0e-5      # eV/atom
 
 SETS = {"hard": (None, "ugur"), "tap": ("tap", "ugur"),
-        "ug": ("ug", "ugur/ang"), "tap_ug": ("tap_ug", "ugur/ang")}
+        "ug": ("ug", "ugur/ang"), "tap_ug": ("tap_ug", "ugur/ang"),
+        #  the re-ranked candidates (REFIT 8b).  Same taper, same pair
+        #  style; only the cutoff and the parameters behind it differ.
+        "rc": ("rc", "ugur"), "rc_ug": ("rc_ug", "ugur/ang")}
 
 POTFILE = """# {el}, written by jiggle_test.py
 {el} {el} {el} {m:.17g} {D:.17g} {alpha:.17g} {r0:.17g} {gamma:.17g} {C:.17g} {alpha3:.17g} {rcut2:.17g} {rcut3:.17g} {taper:.17g} {lam2:.17g} {lam4:.17g}

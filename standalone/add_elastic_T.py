@@ -44,6 +44,9 @@ SOURCES = [
     (os.path.join(ROOT, "lammps", "elastic_T_newbase.json"), True),
     (os.path.join(ROOT, "lammps", "elastic_T_meam.json"), True),
     (os.path.join(ROOT, "lammps", "elastic_T_sheng.json"), True),
+    #  the re-cut candidates, one cluster job - 399 runs, 45
+    #  records, tags rc and rc_ug
+    (os.path.join(ROOT, "lammps", "elastic_T_rc.json"), True),
     (os.path.join(ROOT, "lammps", "hcp_born.json"), False),
 ]
 KS = ("C11", "C12", "C13", "C33", "C44", "C66")
@@ -164,7 +167,9 @@ def main():
                 rec["citation"] = meta.get("citation", "")
                 rec["kind"] = "base"
             else:
-                rec["label"] = {"tap": "MAU", "tap_ug": "UG"}.get(tag, tag)
+                rec["label"] = {"tap": "MAU", "tap_ug": "UG",
+                                "rc": "MAU re-cut",
+                                "rc_ug": "UG re-cut"}.get(tag, tag)
                 rec["kind"] = "ours"
             #  a Tmelt-scaled run supersedes a fixed-grid one for the same
             #  series; the fixed grid only exists for the ruthenium comparison

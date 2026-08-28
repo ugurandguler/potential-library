@@ -3,8 +3,13 @@
 # pair_style ugur
 # pair_coeff * * Nb_taper.ugur Nb
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.6 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
 # MD: SUSPECT.  At 600 K this runs at 487 K where equipartition gives 300; something is releasing energy.  Check before trusting it.
+#
+# LATTICE STABILITY: this set is NOT a harmonic minimum.
+# Along the Setyawan-Curtarolo path its frequencies reach -11.711 cm^-1,
+# with 0.23 % of the sampled modes imaginary.  That is a separate
+# failure from the 600 K screen above and is not covered by it.
 #
 # Nudge test: FAILED.  Displace every atom by 1e-5 A and relax, and the crystal keeps 13204x that displacement and settles 0.97 meV/atom LOWER.  The reference lattice is not this potential's minimum, so the elastic constants above are the constants of a structure it does not hold.  Static reference only; do not use for defects, surfaces or dynamics.
 #

@@ -46,13 +46,59 @@ LB = ("Landolt-B&ouml;rnstein III/13a (Springer 1981), inelastic neutron "
 PHONON_EXP = {
     #  fcc: X and L, transverse branches doubly degenerate
     "Al": {"X": [5.78, 5.78, 9.69], "L": [4.19, 4.19, 9.69], "ref": LB},
-    "Pb": {"X": [0.89, 0.89, 1.86], "L": [0.89, 0.89, 2.18], "ref": LB},
+    #  The 100 K measurement, and the temperature belongs in the label: lead
+    #  has a Debye temperature near 105 K and the library's lattice constant
+    #  is the 293 K one, so part of the disagreement on this element is that
+    #  mismatch rather than the potential.  Both values are the zeta = 1 and
+    #  zeta = 0.867 rows of the source's own tables.
+    "Pb": {"X": [0.89, 0.89, 1.86], "L": [0.89, 0.89, 2.18],
+           "ref": LB + ", at 100 K (B. N. Brockhouse, T. Arase, G. Caglioti, "
+                       "K. R. Rao and A. D. B. Woods, Phys. Rev. <b>128</b>, "
+                       "1099 (1962), Tables I and II)"},
     "Cu": {"X": [5.13, 5.13, 7.25], "L": [3.42, 3.42, 7.30], "ref": LB},
-    "Pd": {"X": [4.64, 4.64, 6.72], "L": [3.34, 3.34, 7.02], "ref": LB},
+    #  This is the 120 K column of Miller and Brockhouse, not a room-
+    #  temperature figure: their table gives 120, 296, 673 and 853 K, and
+    #  4.64/6.72 at X and 3.34/7.02 at L match the 120 K column exactly.  The
+    #  generic reference above does not say so, and a phonon frequency without
+    #  its temperature cannot be compared with anything - palladium's [00z]L
+    #  at X moves 6.72 -> 6.70 -> 6.47 THz from 120 to 673 K.
+    "Pd": {"X": [4.64, 4.64, 6.72], "L": [3.34, 3.34, 7.02],
+           "ref": LB + ", at 120 K (A. P. Miller and B. N. Brockhouse, "
+                       "Can. J. Phys. <b>49</b>, 704 (1971), Table 3)"},
+    #  Read off the papers themselves rather than through a compilation, so
+    #  each carries its own page and temperature.  Both are the zeta = 1 point
+    #  of [00z] and the zeta = 0.5 point of [zzz] in refdata_phonon_curves,
+    #  which is where the whole branch lives.
+    "Au": {"X": [2.75, 2.75, 4.61], "L": [1.86, 1.86, 4.70],
+           "ref": "J. W. Lynn, H. G. Smith and R. M. Nicklow, Phys. Rev. B "
+                  "<b>8</b>, 3493 (1973), Table I, 296 K"},
+    "Pt": {"X": [3.84, 3.84, 5.80], "L": [2.90, 2.90, 5.85],
+           "ref": "D. H. Dutton, B. N. Brockhouse and A. P. Miller, Can. J. "
+                  "Phys. <b>50</b>, 2915 (1972), Table 1, 90 K"},
+    #  Zone-boundary values read off the same tables as the full branches in
+    #  refdata_phonon_curves: X is zeta = 1 on [00z], L is zeta = 0.5 on
+    #  [zzz].  Each carries its own paper and temperature rather than
+    #  inheriting a compilation's.
+    "Ca": {"X": [3.63, 3.63, 4.52], "L": [2.36, 2.36, 4.61],
+           "ref": "C. Stassis et al., Phys. Rev. B <b>27</b>, 3303 (1983), "
+                  "Table I, 295 K"},
+    "Yb": {"X": [1.85, 1.85, 2.40], "L": [1.16, 1.16, 2.30],
+           "ref": "C. Stassis et al., Phys. Rev. B <b>26</b>, 4106 (1982), "
+                  "Table I, 295 K"},
+    "Ni": {"X": [6.27, 6.27, 8.55], "L": [4.24, 4.24, 8.88],
+           "ref": "R. J. Birgeneau, J. Cordes, G. Dolling and A. D. B. Woods, "
+                  "Phys. Rev. <b>136</b>, A1359 (1964), Table I, 296 K"},
     #  bcc: H triply degenerate, N has three distinct branches
     "Nb": {"H": [6.49, 6.49, 6.49], "N": [3.93, 5.07, 5.66], "ref": LB},
     "Ta": {"H": [5.03, 5.03, 5.03], "N": [2.63, 4.35, 4.35], "ref": LB},
     "Mo": {"H": [5.52, 5.52, 5.52], "N": [4.56, 5.73, 8.14], "ref": LB},
+    #  H is the zeta = 1 end of [z00], where the three branches meet; the
+    #  table stops at 0.95 on L and reaches 1.0 on T, and they agree there
+    #  (2.13 against 2.15), which is the degeneracy showing up in the data
+    #  rather than being assumed.  N is zeta = 0.5 on [zz0].
+    "Ba": {"H": [2.15, 2.15, 2.15], "N": [0.75, 1.53, 2.30],
+           "ref": "J. Mizuki, Y. Chen, K.-M. Ho and C. Stassis, Phys. Rev. B "
+                  "<b>32</b>, 666 (1985), Table I, 295 K"},
     #  Read directly off III/13a rather than through the tabulation above, so
     #  these carry their own page reference.  The H values are the safest
     #  numbers in the volume: the [00zeta] L and T columns are listed

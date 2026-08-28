@@ -45,7 +45,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "standalone"))
 
-LOCAL = not os.path.exists("/arf")
+LOCAL = os.environ.get("LMP_LOCAL", "1") != "0"
 HOME = (subprocess.run(["wsl", "-e", "bash", "-lc", "echo $HOME"],
                        capture_output=True, text=True).stdout.strip()
         if LOCAL else os.path.expanduser("~"))
@@ -262,7 +262,9 @@ def main():
         a300 = float(np.interp(300.0, Ts, aa))
         alpha = slope / a300 * 1e6
         exp = X.ALPHA_EXP.get(el)
-        lab = {"tap": "MAU", "tap_ug": "UG"}.get(tag, tag.replace("base|", ""))
+        lab = {"tap": "MAU", "tap_ug": "UG",
+               "rc": "MAU re-cut", "rc_ug": "UG re-cut"}.get(
+                   tag, tag.replace("base|", ""))
         out[key] = {"T": list(Ts), "a": list(aa), "alpha_1e6": alpha,
                     "alpha_exp_1e6": exp,
                     "ratio": (alpha / exp) if exp else None,

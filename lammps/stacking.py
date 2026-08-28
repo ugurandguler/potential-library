@@ -69,7 +69,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "standalone"))
 
-LOCAL = not os.path.exists("/arf")
+LOCAL = os.environ.get("LMP_LOCAL", "1") != "0"
 HOME = (subprocess.run(["wsl", "-e", "bash", "-lc", "echo $HOME"],
                        capture_output=True, text=True).stdout.strip()
         if LOCAL else os.path.expanduser("~"))
@@ -380,7 +380,9 @@ def main():
         rec.update(reduce_curve(fr, [g[f] for f in fr]))
         out[key] = rec
         isf, usf = rec.get("isf"), rec.get("usf")
-        lab = {"tap": "MAU", "tap_ug": "UG"}.get(tag, tag.replace("base|", ""))
+        lab = {"tap": "MAU", "tap_ug": "UG",
+               "rc": "MAU re-cut", "rc_ug": "UG re-cut"}.get(
+                   tag, tag.replace("base|", ""))
         note = "ISF NEGATIF" if isf is not None and isf < 0 else ""
         if rec.get("closure_ok") is False:
             note = (note + " KAPANMA BOZUK %.1f" % rec["closure"]).strip()

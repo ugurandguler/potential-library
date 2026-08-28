@@ -216,7 +216,7 @@ def _build(el, p):
     return cry, pot
 
 
-def verify(run="runs/truba_ang2_off"):
+def verify(run="runs/cluster_ang2_off"):
     """
     With lam = 0 this must reproduce the analytic force constants exactly.
 
@@ -261,7 +261,7 @@ def verify(run="runs/truba_ang2_off"):
     return ok
 
 
-def screen(run="runs/truba_ang2_on"):
+def screen(run="runs/cluster_ang2_on"):
     """dynamical stability of every fit in a run directory"""
     best = {}
     for f in glob.glob(os.path.join(HERE, run, "dense_*.json")):

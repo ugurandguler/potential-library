@@ -7,12 +7,22 @@ potential's own derivatives - no external code is involved anywhere in the chain
 
 Source is deliberately pure ASCII; Greek letters go in as HTML entities.
 """
+import datetime as _dt
 import json, math, os
 
 import refdata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = json.load(open(os.path.join(HERE, "library.json")))
+#  The finite-temperature table, built by make_finiteT.py from the
+#  cluster results.  Kept in its own file so a new run folds in by
+#  re-running that and rebuilding, without touching the renderer.
+#  Absent on a tree that has not run the study - the panel then does
+#  not appear, rather than appearing empty.
+try:
+    FT = json.load(open(os.path.join(HERE, "finiteT.json")))
+except OSError:
+    FT = {"rows": {}, "out": {}}
 
 POS = {
     "Li": (2, 1), "Be": (2, 2),
@@ -49,6 +59,12 @@ NAMES = {
 for el, v in DATA.items():
     v["pos"] = POS.get(el)
     v["name"] = NAMES.get(el, el)
+    #  The SYMBOL, which is otherwise only the dictionary key and so is not
+    #  reachable from a record once one has been handed to a function.  Three
+    #  places had reached for d.name instead and got "Copper": the download
+    #  table named files that do not exist, and two per-element lookups
+    #  silently missed every time.
+    v["sym"] = el
 
 REQUIRED = ("m", "gamma", "D", "alpha", "r0", "alpha3", "C", "dnn",
             "rcut2", "rcut3", "a0", "rms", "struct", "pos", "ld")
@@ -275,6 +291,12 @@ h3 .sub{display:block;font-size:12.5px;font-weight:400;line-height:1.45;margin-t
   cursor:pointer;position:relative;transition:border-color .12s,transform .12s;
   min-height:56px}
 .cell:hover{border-color:var(--phi3);transform:translateY(-1px)}
+/*  A cell showing a set the selector did not ask for, because this element
+    has no such set.  Without a mark the table reads as though every colour
+    came from the selected fit; the tooltip said otherwise but a tooltip is
+    not the picture.  Dashed, and the tier bar dimmed.  */
+.cell.fellback{border-style:dashed}
+.cell.fellback .tier{opacity:.35}
 .cell:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .cell[aria-pressed="true"]{border-color:var(--phi3);border-width:2px;
   background:var(--sunk)}
@@ -324,6 +346,24 @@ th:first-child,td:first-child{text-align:left}
 th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink-3);font-weight:600}
 td.err{width:1%;white-space:nowrap}
+/*  The finite-temperature table.  Narrower than the wide comparison tables
+    above it because it is five rows of one number each, and the verdict row
+    is set apart by a rule rather than by a colour block: the colour says
+    which way it went, the rule says that it is a conclusion and not another
+    measurement.  A row marked mid is one whose difference is smaller than
+    the run could resolve, which is the commonest case and must not read as
+    a failure.  */
+table.ft{width:auto;min-width:min(100%,430px);margin:11px 0 3px;
+  font-size:13px}
+table.ft td{padding:5px 14px 5px 0}
+table.ft td:last-child{text-align:right;padding-right:0;
+  font-family:ui-monospace,Consolas,monospace;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+table.ft tr:last-child td{border-bottom:none;border-top:1px solid var(--ink-3);
+  padding-top:8px}
+table.ft tr.ok td:last-child{color:var(--good)}
+table.ft tr.bad td:last-child{color:var(--bad)}
+table.ft tr.warn td:last-child{color:var(--mid)}
 .bar{display:inline-block;height:9px;background:var(--phi2);opacity:.5;
   vertical-align:middle;margin-left:6px}
 .cols3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
@@ -493,6 +533,9 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
     <span><i class="mk good"></i><span class="lbl">RMS &le; 20%</span></span>
     <span><i class="mk mid"></i><span class="lbl">20-35%</span></span>
     <span><i class="mk bad"></i><span class="lbl">&gt; 35% &mdash; refit before use</span></span>
+    <span><span class="lbl" style="color:var(--ink-3)">&mdash; of the parameter
+      set selected below; dashed cell = that element has no such set, so its
+      colour is MAU</span></span>
     <span><i class="mk" style="background:var(--phi3);border-color:var(--phi3);
       border-radius:0"></i><span class="lbl">UG fit available &mdash; __NUG__
       metals carry the angular term beside MAU</span></span>
@@ -605,11 +648,43 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
   library already struggles. The Debye temperatures behind those figures are
   not in the reference data; they were entered by hand to size the effect, so
   the ordering is sound and the third digit is not.
+  <p class="plotnote" style="margin-top:14px;opacity:.7">
+  <b>__TREE__ tree</b> &middot; built __BUILT__ &middot; __NSET__ elements
+  with more than one selectable parameter set. Two trees produce a page of
+  this name and, since 1.1.0, they carry the same panels &mdash; the screen
+  tree's renderer and library were promoted into the published one for the
+  release &mdash; so this line says only which tree wrote the file you have
+  open. If the timestamp is older than the change you are looking for, the
+  browser is showing a cached copy &mdash; reload with the cache
+  bypassed.</p>
 </footer>
 </div>
 
 <script>
+/*  A runtime error in this script is otherwise invisible: the browser writes
+    it to a console nobody has open, and the page just stops - half-drawn, or
+    with the logo frozen because the animation never got its first frame.
+    Anything thrown from here on says so on the page itself.  The esprima
+    check in make_gui.py catches SYNTAX errors before the file is written;
+    this is the other half.  */
+addEventListener("error", e => {
+  let b = document.getElementById("jserr");
+  if(!b){
+    b = document.createElement("div");
+    b.id = "jserr";
+    b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:9999;"
+      + "background:#a00;color:#fff;font:12px ui-monospace,monospace;"
+      + "padding:8px 12px;white-space:pre-wrap;max-height:40vh;overflow:auto";
+    (document.body||document.documentElement).appendChild(b);
+  }
+  b.textContent += `script error: ${e.message}
+    at ${e.filename||"page"}`
+                 + `:${e.lineno}:${e.colno}
+`;
+});
+
 const DATA = __DATA__;
+const FT = __FT__;
 const $ = (s,r=document)=>r.querySelector(s);
 const fmt=(x,n=4)=>(x===null||x===undefined||isNaN(x))?"&mdash;":Number(x).toFixed(n);
 const tier=r=>r<=20?"good":r<=35?"mid":"bad";
@@ -668,31 +743,142 @@ function hRange(u){
     those sections sit far below the fold. */
 let cur="Pd";
 
+/*  This block must stay ABOVE the table: buildTable() runs as soon as it is
+    defined and reads PAR_SET, and `let` in the temporal dead zone is a
+    ReferenceError, not undefined.  Declared 600 lines lower down it killed the
+    whole script at load - no table, no plots, nothing - because everything
+    after the throw never ran.  */
+/*  Which parameter set the panels describe.  This was a boolean while there
+    were two sets; it is a key so that adding one is a data change.  PAR_UG
+    is kept as a derived value because several panels ask only "is this the
+    angular arm", which is true of both UG sets.  */
+let PAR_SET = "mau";
+/*  Four selectable parameter sets, not two.  The re-cut candidates are full
+    records - their own m, D, alpha, gamma, Cij, dispersion, expansion and
+    screens - so the whole panel can stand on one of them, which is the only
+    way to read the candidate against the published arm rather than beside
+    fragments of it.  */
+const SETKEY = {mau:d=>d, ug:d=>d.ug, rc:d=>d.rc, rc_ug:d=>d.rc_ug};
+const parSet = d => ((SETKEY[PAR_SET]||SETKEY.mau)(d)) || d;
+
+Object.defineProperty(window,"PAR_UG",{get:()=>PAR_SET==="ug"});
+
 const pt=$("#pt");
-Object.keys(DATA).sort((a,b)=>DATA[a].pos[0]-DATA[b].pos[0]
-  ||DATA[a].pos[1]-DATA[b].pos[1]).forEach(el=>{
-  const d=DATA[el], b=document.createElement("button");
-  b.className="cell"; b.style.setProperty("--r",d.pos[0]-1);
-  b.style.setProperty("--c",d.pos[1]);
-  b.setAttribute("aria-pressed",el===cur); b.dataset.el=el;
-  const unst=d.dyn&&d.dyn.stable===false;
-  /*  Only fourteen metals have been fitted with the angular term, so without a
-      mark on the table the comparison is invisible: the page opens on an
-      element that has none, and nothing says where to look. */
-  const hasUG=!!d.ug;
-  b.innerHTML=`<i class="tier ${tier(d.rms)}"></i>
-    <span class="sym disp">${el}${unst?'<sup style="color:var(--bad)">&#9888;</sup>':""}</span>
-    ${hasUG?'<i class="ugdot" title="UG comparison available"></i>':""}
-    <span class="st">${d.struct}</span>`;
-  b.title=`${d.name} - ${d.struct}, elastic RMS ${d.rms.toFixed(0)}%`
-    +(unst?` - dynamically unstable (${(d.dyn.imag_frac*100).toFixed(1)}% imaginary modes)`:"")
-    +(hasUG?` - UG fit available, ${d.ug.rms.toFixed(1)}%`:"");
-  b.onclick=()=>{cur=el;
-    pt.querySelectorAll(".cell").forEach(c=>
-      c.setAttribute("aria-pressed",c.dataset.el===el));
-    render();};
-  pt.appendChild(b);
-});
+/*  All four sets of every element, in display order, for whichever of them
+    that element actually has.  */
+/*  The one place the arms are named.  Every plot and every table used to
+    carry its own [["tap",d.tap],["tap_ug",d.tap_ug]], written out by hand in
+    more than eighty places, so adding a set meant editing all of them and
+    forgetting one was a certainty rather than a risk - the same "changed it
+    here, left it there" failure that put a stale caption under a marker whose
+    meaning had changed.  Adding a set is now a data question: give an element
+    the key and it appears wherever it has something to show.
+    Solid line = no angular term, dashed = angular.  */
+/*  rc and rc_ug are the SHELL-GAP RE-CUT candidates, not part of the
+    published library.  They are here because the comparison is the whole
+    point: they pass every cold screen - lattice constant, cohesive energy,
+    C11, C12, C44, B, and dynamical stability along the whole symmetry path,
+    more of it than the published arm - and then fail the warm ones for a
+    specific set of elements.  Keeping them off the page would leave that
+    finding invisible.  */
+const ARMS = [["tap", "MAU"], ["tap_ug", "UG"],
+              ["rc", "re-cut"], ["rc_ug", "re-cut UG"]];
+const ARM_DASH = {tap: [], tap_ug: [6, 3], rc: [2, 2], rc_ug: [5, 2, 1, 2]};
+const ARM_ANG  = {tap: false, tap_ug: true, rc: false, rc_ug: true};
+/*  Four of the forty-five candidate records failed selection outright -
+    Mo and W in both arms, with a mode near -13 cm^-1 on the symmetry path and
+    molybdenum also putting fcc 209 meV/atom below bcc.  They are kept as the
+    control the accepted ones are read against, and they say so in their own
+    label, because a rejected fit drawn beside an accepted one with the same
+    styling is a trap.  */
+/*  Rejection means DYNAMICALLY unstable, and nothing else.  Testing
+    ground.ok as well looked equivalent - the four rejected candidates fail
+    both - and is not: 72 of the 76 SHIPPED tapered records also predict the
+    wrong ground state, which is a known finding of this library and not a
+    reason to stamp them rejected.  The two criteria agree only on the
+    candidates, which is exactly the case that hides the difference.  */
+const armBad = r => !!(r && r.stable === false);
+/*  [key, record, label] for every arm this element has that satisfies `has` */
+const armRecs = (d, has) =>
+  ARMS.map(a => [a[0], d[a[0]], a[1] + (armBad(d[a[0]]) ? " — REJECTED"
+                                                       : "")])
+      .filter(o => o[1] && has(o[1]));
+
+/*  ARM_DASH in words, for the caption.  The two have to agree, so they sit
+    together: a pattern here that no longer matches the one the plot uses is
+    worse than no legend at all.  */
+const ARM_STYLE = {tap:"solid", tap_ug:"dashed",
+                   rc:"dotted", rc_ug:"dash-dot"};
+
+/*  The legend for a panel, built from the SAME armRecs call that panel draws
+    from.  Written by hand it named MAU and UG in four captions while the
+    plots drew up to four curves, which is the failure the ARMS table exists
+    to prevent.  */
+const armKey = recs => recs.map(o =>
+  `<i class="swatch" style="background:var(--${ARM_ANG[o[0]]?"phi3":"phi2"})"></i>`
+  + o[2] + ` (${ARM_STYLE[o[0]]||"solid"})`).join("&nbsp;&middot;&nbsp;");
+
+const setsOf = d => [["mau","MAU",d],["ug","UG",d.ug],
+                     ["rc","re-cut",d.rc],["rc_ug","re-cut UG",d.rc_ug]]
+                    .filter(o=>o[2]&&typeof o[2].rms==="number");
+
+/*  The table used to colour every cell by d.rms - the hard-cut MAU fit -
+    whatever set was selected, and it was built once so it could not follow a
+    change.  That put the library's WORST arm on the front page as though it
+    were the library: iridium read 10.65 % while its tapered and angular sets
+    are at or under 6.26, and niobium read 20.35 against a tapered 0.00.  It
+    is the same defect as a stability badge that
+    disagrees with the dispersion drawn beside it - a verdict measured from
+    something other than what is on screen - so the cell now follows the
+    selection, and falls back to MAU for an element that has no such set.  The
+    title carries every set the element has, because one number cannot say
+    that the spread is a factor of six.  */
+function buildTable(){
+  pt.innerHTML="";
+  Object.keys(DATA).sort((a,b)=>DATA[a].pos[0]-DATA[b].pos[0]
+    ||DATA[a].pos[1]-DATA[b].pos[1]).forEach(el=>{
+    const d=DATA[el], b=document.createElement("button");
+    b.className="cell"; b.style.setProperty("--r",d.pos[0]-1);
+    b.style.setProperty("--c",d.pos[1]);
+    b.setAttribute("aria-pressed",el===cur); b.dataset.el=el;
+    const sets=setsOf(d);
+    const shown=(sets.find(o=>o[0]===PAR_SET)||sets[0]);
+    /*  The warning triangle has to belong to the set the cell is showing.  It
+        read the root record whatever was selected, so a candidate arm that is
+        unstable where the published one is not - or the other way round -
+        went unmarked.  */
+    const unst=((shown[2].dyn)||d.dyn||{}).stable===false;
+    const rms=shown[2].rms, fellBack=shown[0]!==PAR_SET;
+    if(fellBack) b.classList.add("fellback");
+    /*  The dot marks "has a UG fit".  That was informative when fourteen
+        elements had one; all thirty-eight do now, so it marks nothing.  Kept
+        rather than removed because a legend entry that stops appearing is a
+        change with no reader behind it.  */
+    const hasUG=!!d.ug;
+    b.innerHTML=`<i class="tier ${tier(rms)}"></i>
+      <span class="sym disp">${el}${unst?'<sup style="color:var(--bad)">&#9888;</sup>':""}</span>
+      ${hasUG?'<i class="ugdot" title="UG comparison available"></i>':""}
+      <span class="st">${d.struct}</span>`;
+    /*  Newlines via fromCharCode, not an escape: this JS lives inside a
+        Python string, so a backslash-n written here is turned into a real
+        line break before it ever reaches the browser and the string literal
+        it sits in ends early.  export_potentials.py uses chr(10) for the same
+        reason.  */
+    const NL=String.fromCharCode(10);
+    b.title=`${d.name} - ${d.struct}`+NL
+      +sets.map(o=>`${o[1]}: ${o[2].rms.toFixed(2)} %`).join(NL)
+      +(fellBack?NL+`(no ${PAR_SET} set - showing ${shown[1]})`:"")
+      +(unst?NL+`dynamically unstable: ${
+          ((((shown[2].dyn)||d.dyn||{}).imag_frac||0)*100).toFixed(1)
+        } % imaginary modes`:"");
+    b.onclick=()=>{cur=el;
+      pt.querySelectorAll(".cell").forEach(c=>
+        c.setAttribute("aria-pressed",c.dataset.el===el));
+      render();};
+    pt.appendChild(b);
+  });
+}
+buildTable();
 
 function setup(id,ratio=0.62){
   const cv=$(id); if(!cv) return null;
@@ -785,8 +971,8 @@ function drawElasticT(d){
     c.textAlign="right";
     c.fillText(Math.abs(v)>=100?v.toFixed(0):v.toFixed(2),L-6,y+4);}
   for(let k=0;k<=4;k++){const t=tmax*k/4;
-    c.textAlign="center";c.fillText(String(Math.round(t)),X(t),H-9);}
-  c.textAlign="left";c.fillText("T (K)",L,H-9);
+    c.textAlign="center";c.fillText(String(Math.round(t)),X(t),H-17);}
+  c.textAlign="center";c.fillText("T (K)",L+pw/2,H-3);
   frame(c,L,T,pw,ph,ink,[0,1,2,3,4].map(k=>X(tmax*k/4)),
         [0,1,2,3,4].map(k=>Y(lo+(hi-lo)*k/4)));
 
@@ -800,14 +986,19 @@ function drawElasticT(d){
 
   series.forEach(o=>{
     const ours=o.r.kind==="ours";
-    const col = o.r.nudge_bad ? bad : (ours ? (o.k==="tap"?p2:p3) : ref);
+    /*  Colour says angular or not and the dash says which arm, both from the
+        tables every other panel reads.  Written out by hand here it gave the
+        re-cut arms the same colour AND the same dash, so two potentials were
+        one line, and gave the non-angular re-cut the angular colour.  */
+    const col = o.r.nudge_bad ? bad
+              : (ours ? (ARM_ANG[o.k] ? p3 : p2) : ref);
     const pts=o.r.pts.filter(q=>isFinite(q[ET_Q]));
     /*  Line style carries the identity, colour only the warning.  The three
         colours here sit within 1.4 of each other in luminance, so on a
         greyscale print or to a colour-blind reader they are one curve drawn
         three times; the dash pattern is what survives that.  It also matches
         the potential panel, where MAU is already solid and UG dashed.       */
-    const dash = o.r.kind==="base" ? [1.5,2.5] : (o.k==="tap_ug" ? [6,3] : []);
+    const dash = o.r.kind==="base" ? [1.5,2.5] : (ARM_DASH[o.k]||[]);
     c.strokeStyle=col; c.lineWidth=ours?2:1.3; c.save();
     c.setLineDash(dash);
     c.beginPath(); pts.forEach((q,i)=>{const x=X(q.T),y=Y(q[ET_Q]);
@@ -898,8 +1089,7 @@ function drawElasticT(d){
     the melting point, tantalum 3.2 meV never fails.  A published potential run
     through the identical scan rises monotonically to twelve per cent.         */
 function drawBain(d){
-  const recs=[["tap",d.tap],["tap_ug",d.tap_ug]]
-    .filter(o=>o[1]&&o[1].bain&&o[1].bain.E&&o[1].bain.E.length);
+  const recs=armRecs(d,r=>r.bain&&r.bain.E&&r.bain.E.length);
   if(!recs.length) return;
   const s=setup("#bain",0.52); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
@@ -922,8 +1112,8 @@ function drawBain(d){
     c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();
     c.textAlign="right";c.fillText(v.toFixed(0),L-6,y+4);}
   for(let k=0;k<=4;k++){const x=-dmax+2*dmax*k/4;
-    c.textAlign="center";c.fillText(x.toFixed(2),X(x),H-9);}
-  c.textAlign="left";c.fillText("tetragonal strain δ",L,H-9);
+    c.textAlign="center";c.fillText(x.toFixed(2),X(x),H-17);}
+  c.textAlign="center";c.fillText("tetragonal strain δ",L+pw/2,H-3);
   c.save();c.translate(13,T+ph/2);c.rotate(-Math.PI/2);c.textAlign="center";
   c.fillText("E − E₀  (meV/atom)",0,0);c.restore();
   frame(c,L,T,pw,ph,ink,[0,1,2,3,4].map(k=>X(-dmax+2*dmax*k/4)),
@@ -934,9 +1124,9 @@ function drawBain(d){
   c.beginPath();c.moveTo(L,Y(0));c.lineTo(W-R,Y(0));c.stroke();c.restore();
 
   recs.forEach(o=>{
-    const b=o[1].bain, col=o[0]==="tap"?p2:p3;
+    const b=o[1].bain, col=ARM_ANG[o[0]]?p3:p2;
     c.strokeStyle=col;c.lineWidth=2;c.save();
-    c.setLineDash(o[0]==="tap_ug"?[6,3]:[]);
+    c.setLineDash(ARM_DASH[o[0]]||[]);
     c.beginPath();
     b.d.forEach((x,i)=>{const y=Y(Math.max(lo,Math.min(hi,b.E[i]*1000)));
       i?c.lineTo(X(x),y):c.moveTo(X(x),y);});
@@ -956,11 +1146,17 @@ function drawBain(d){
     one and the fault is permanent.  So the zero line is drawn heavier than
     the grid, and the two points that have names are marked.                */
 function drawGamma(d){
-  const recs=[["tap",d.tap],["tap_ug",d.tap_ug]]
-    .filter(o=>o[1]&&o[1].stacking&&o[1].stacking.gamma
-                &&o[1].stacking.gamma.length);
-  const bases=Object.entries(d.baseline_stacking||{})
-    .filter(o=>o[1]&&o[1].gamma&&o[1].gamma.length);
+  /*  frac as well as gamma: the curve is drawn from g.frac.forEach with
+      g.gamma[i] read inside it, so a record carrying one and not the other
+      takes the whole panel down with "reading 'forEach' of undefined".  Every
+      record in the library has both, which is exactly why the guard was
+      written against gamma alone and the mismatch went unnoticed: the first
+      record to arrive half-written from a separate run would have found it,
+      and a guard that only holds because the data happens to be complete is
+      not a guard.  */
+  const ok=r=>r&&r.gamma&&r.gamma.length&&r.frac&&r.frac.length;
+  const recs=armRecs(d,r=>ok(r.stacking));
+  const bases=Object.entries(d.baseline_stacking||{}).filter(o=>ok(o[1]));
   if(!recs.length&&!bases.length) return;
   const s=setup("#gamma",0.52); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
@@ -980,9 +1176,9 @@ function drawGamma(d){
     c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();
     c.textAlign="right";c.fillText(v.toFixed(0),L-6,y+4);}
   [[0,"0"],[1/6,"1/6"],[1/3,"1/3"],[2/3,"2/3"],[1,"1"]].forEach(t=>{
-    c.textAlign="center";c.fillText(t[1],X(t[0]),H-9);});
-  c.textAlign="left";
-  c.fillText("shift along [11̄2̄], in periods",L,H-9);
+    c.textAlign="center";c.fillText(t[1],X(t[0]),H-17);});
+  c.textAlign="center";
+  c.fillText("shift along [11̄2̄], in periods",L+pw/2,H-3);
   c.save();c.translate(13,T+ph/2);c.rotate(-Math.PI/2);c.textAlign="center";
   c.fillText("γ  (mJ/m²)",0,0);c.restore();
   frame(c,L,T,pw,ph,ink,[0,1/6,1/3,2/3,1].map(X),
@@ -1004,9 +1200,9 @@ function drawGamma(d){
     c.stroke();});
 
   recs.forEach(o=>{
-    const g=o[1].stacking, col=o[0]==="tap"?p2:p3;
+    const g=o[1].stacking, col=ARM_ANG[o[0]]?p3:p2;
     c.strokeStyle=col;c.lineWidth=2;c.save();
-    c.setLineDash(o[0]==="tap_ug"?[6,3]:[]);
+    c.setLineDash(ARM_DASH[o[0]]||[]);
     c.beginPath();
     g.frac.forEach((x,i)=>{const y=Y(g.gamma[i]);
       i?c.lineTo(X(x),y):c.moveTo(X(x),y);});
@@ -1024,8 +1220,7 @@ function drawGamma(d){
     curve is normalised to its own value at the lowest temperature, since what
     is being compared is a slope and not a lattice constant.               */
 function drawExpansion(d){
-  const recs=[["tap",d.tap],["tap_ug",d.tap_ug]]
-    .filter(o=>o[1]&&o[1].expansion&&o[1].expansion.T&&o[1].expansion.T.length>1);
+  const recs=armRecs(d,r=>r.expansion&&r.expansion.T&&r.expansion.T.length>1);
   const bases=Object.entries(d.baseline_expansion||{})
     .filter(o=>o[1]&&o[1].T&&o[1].T.length>1);
   if(!recs.length&&!bases.length) return;
@@ -1033,8 +1228,8 @@ function drawExpansion(d){
   const {c,W,H,p2,p3,lin,ink}=s;
   const L=62,R=16,T=12,B=30, pw=W-L-R, ph=H-T-B;
 
-  const series=recs.map(o=>({g:o[1].expansion,col:o[0]==="tap"?p2:p3,
-                             dash:o[0]==="tap_ug"?[6,3]:[],wide:2}))
+  const series=recs.map(o=>({g:o[1].expansion,col:ARM_ANG[o[0]]?p3:p2,
+                             dash:ARM_DASH[o[0]]||[],wide:2}))
     .concat(bases.map(o=>({g:o[1],col:lin,dash:[],wide:1})));
   let t0=Infinity,t1=-Infinity,lo=Infinity,hi=-Infinity;
   const norm=g=>g.a.map(x=>100*(x/g.a[0]-1));
@@ -1060,8 +1255,8 @@ function drawExpansion(d){
     c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();
     c.textAlign="right";c.fillText(v.toFixed(2),L-6,y+4);}
   for(let k=0;k<=4;k++){const t=t0+(t1-t0)*k/4;
-    c.textAlign="center";c.fillText(t.toFixed(0),X(t),H-9);}
-  c.textAlign="left";c.fillText("T (K)",L,H-9);
+    c.textAlign="center";c.fillText(t.toFixed(0),X(t),H-17);}
+  c.textAlign="center";c.fillText("T (K)",L+pw/2,H-3);
   c.save();c.translate(13,T+ph/2);c.rotate(-Math.PI/2);c.textAlign="center";
   c.fillText("Δa/a  (%)",0,0);c.restore();
   frame(c,L,T,pw,ph,ink,[0,1,2,3,4].map(k=>X(t0+(t1-t0)*k/4)),
@@ -1092,7 +1287,8 @@ function drawExpansion(d){
     thermal expansion plot, from reading a property off the wrong array.  Now
     the canvas says so.                                                     */
 function plots(d){
-  const jobs=[["dispersion",drawDisp],["thermo",drawThermo],
+  const jobs=[["dispersion",drawDisp],["finite-T dispersion",drawFT],
+              ["thermo",drawThermo],
               ["polar",drawPolar],["elasticT",drawElasticT],
               ["bain",drawBain],["gamma",drawGamma],
               ["expansion",drawExpansion],["main",draw]];
@@ -1110,7 +1306,7 @@ function plots(d){
 function draw(d){
   const s=setup("#plot",0.92); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
-  const u=ugData(d), hr_=u?hRange(u):null;
+  const u=ugData(d);          //  hRange now travels with each extra series
   const L=52,R=12,GAP=26,TOP=10,BOT=30;
   const ph=(H-TOP-BOT-GAP)/2, pw=W-L-R;
   /*  Where the window starts is data, not a constant.  It was fixed at
@@ -1132,17 +1328,48 @@ function draw(d){
     for(let i=imin;i>=0;i--) if(v[i][1]>=Math.abs(vmin)) return v[i][0];
     return null;                      // monotone inward: no wall exists
   }
-  const walls=[wallOf(d)].concat(u?[wallOf(u)]:[]).filter(w=>w!==null);
+  const walls=[wallOf(d)].concat(u?[wallOf(u)]:[])
+      .concat(["rc","rc_ug"].filter(k=>d[k]&&typeof d[k].D==="number")
+                            .map(k=>wallOf(d[k])))
+      .filter(w=>w!==null);
   const r0=walls.length?Math.max(0.45*d.dnn,
               Math.min(0.78*d.dnn, Math.min.apply(null,walls)-0.04*d.dnn))
             :0.78*d.dnn,
         r1=2.05*d.dnn, N=380;
-  const xs=[],y2=[],y3=[],u2=[],u3lo=[],u3hi=[];
+  /*  Every record drawn beside the reference.  A record carrying lam2 or
+      lam4 is drawn as a BAND, not a line: with the angular factor phi3 is an
+      interval at each leg-sum, one value per apex angle, and a single curve
+      would be a picture of a potential that does not exist.  That is why UG
+      has always been a band here.  */
+  const extras=[];
+  if(u) extras.push({rec:u, label:"UG", dash:[5,3]});
+  /*  The re-cut candidates belong here more than anywhere else on the page:
+      what makes them a different potential is where phi2 is cut - rcut3 is
+      unchanged for every element - and the parameters that go with it are not
+      small adjustments: copper's m goes 13.78 to 1.87 and its alpha 0.285 to
+      0.833.  Everywhere else on the page the candidate is read through a
+      consequence; here it is the curve itself.  */
+  [["rc","re-cut",[2,2]],["rc_ug","re-cut UG",[6,2,1,2]]].forEach(a=>{
+    const r=d[a[0]];
+    if(r && typeof r.D==="number")
+      extras.push({rec:r, label:a[1]+(armBad(r)?" — REJECTED":""),
+                   dash:a[2]});
+  });
+  extras.forEach(e=>{
+    e.ang=!!(e.rec.lam2||e.rec.lam4);
+    e.hr=e.ang?hRange(e.rec):null;
+    e.p2=[]; e.lo=[]; e.hi=[];
+  });
+  const xs=[],y2=[],y3=[];
   for(let i=0;i<N;i++){const r=r0+(r1-r0)*i/(N-1);
     xs.push(r); y2.push(phi2(r,d)); y3.push(phi3(2*r,d));
-    if(u){const b=phi3(2*r,u); u2.push(phi2(r,u));
-      u3lo.push(Math.min(b*hr_[0],b*hr_[1]));
-      u3hi.push(Math.max(b*hr_[0],b*hr_[1]));}}
+    extras.forEach(e=>{
+      const b=phi3(2*r,e.rec);
+      e.p2.push(phi2(r,e.rec));
+      if(e.ang){e.lo.push(Math.min(b*e.hr[0],b*e.hr[1]));
+                e.hi.push(Math.max(b*e.hr[0],b*e.hr[1]));}
+      else {e.lo.push(b); e.hi.push(b);}
+    });}
   const X=r=>L+(r-r0)/(r1-r0)*pw;
   c.font="11px ui-monospace,Consolas,monospace";
 
@@ -1173,7 +1400,7 @@ function draw(d){
       }
       c.fillStyle=ink;c.fillText(t,x+25,yy+4);});
   };
-  const panel=(T,sets,label)=>{
+  const panel=(T,sets,label,cuts)=>{
     let lo=0,hi=0;
     sets.forEach(([ys])=>ys.forEach((v,i)=>{
       if(v<lo)lo=v;
@@ -1209,19 +1436,41 @@ function draw(d){
       ys.forEach((v,i)=>{if(v>hi||v<lo){on=false;return;}
         const x=X(xs[i]),y=Y(v); on?c.lineTo(x,y):(c.moveTo(x,y),on=true);});
       c.stroke();c.setLineDash([]);});
+    /*  A cut that falls inside the window is marked on the axis.  Most do
+        not - copper's rcut2 is 8.3 A against a window that ends at 5.2 - but
+        where the re-cut moved it a long way inwards it is the whole story:
+        caesium goes from 15.72 A to 7.30, and 7.30 is on screen.  */
+    (cuts||[]).forEach(cu=>{
+      if(cu.r<=r0||cu.r>=r1) return;
+      const x=X(cu.r);
+      c.save();c.strokeStyle=cu.col;c.globalAlpha=0.8;c.lineWidth=1.2;
+      c.setLineDash(cu.dash&&cu.dash.length?cu.dash:[3,3]);
+      c.beginPath();c.moveTo(x,T);c.lineTo(x,T+ph);c.stroke();c.restore();
+      c.save();c.fillStyle=ink;c.globalAlpha=0.75;c.textAlign="center";
+      c.font="10px ui-monospace,Consolas,monospace";
+      c.fillText(cu.tag,x,T+ph-4);c.restore();
+    });
     frame(c,L,T,pw,ph,ink,[0,1,2,3,4].map(k=>X(r0+(r1-r0)*k/4)),
           [0,1,2,3].map(k=>Y(lo+(hi-lo)*k/3)));
     c.fillStyle=ink;c.textAlign="left";c.fillText(label,L+7,T+13);
   };
 
-  panel(TOP, u?[[y2,p2,2.2],[u2,p2,1.6,[5,3]]]:[[y2,p2,2.2]],
-        "φ₂(r)");
-  if(u) key(TOP, [["MAU","line",p2],["UG","dash",p2]]);
+  const cuts2=[{r:d.rcut2,col:p2,dash:[],tag:"cut"}].concat(
+      extras.map(e=>({r:e.rec.rcut2,col:p2,dash:e.dash,tag:"cut"})))
+    .filter(cu=>typeof cu.r==="number");
+  panel(TOP, [[y2,p2,2.2]].concat(extras.map(e=>[e.p2,p2,1.6,e.dash])),
+        "φ₂(r)", cuts2);
+  if(extras.length)
+    key(TOP, [["MAU","line",p2]].concat(extras.map(e=>[e.label,"dash",p2])));
+  //  bands first so the lines stay readable on top of them
   panel(TOP+ph+GAP,
-        u?[[u3hi,p3,0,null,u3lo],[y3,p3,1.8]]:[[y3,p3,1.8]],
+        extras.filter(e=>e.ang).map(e=>[e.hi,p3,0,null,e.lo])
+          .concat([[y3,p3,1.8]])
+          .concat(extras.filter(e=>!e.ang).map(e=>[e.lo,p3,1.6,e.dash])),
         "φ₃(r,r)");
-  if(u) key(TOP+ph+GAP, [["MAU","line",p3],
-                         ["UG, all θ","band",p3]]);
+  if(extras.length)
+    key(TOP+ph+GAP, [["MAU","line",p3]].concat(extras.map(e=>
+      [e.ang?e.label+", all θ":e.label, e.ang?"band":"dash", p3])));
 
   /*  one axis label for both panels: the quantity is the same in each and the
       unit was previously carried inside the panel captions, where it read as
@@ -1229,9 +1478,16 @@ function draw(d){
   c.save();c.translate(14,TOP+ph+GAP/2);c.rotate(-Math.PI/2);
   c.textAlign="center";c.fillStyle=ink;c.fillText("Energy (eV)",0,0);c.restore();
   c.fillStyle=ink;c.textAlign="center";
-  for(let k=0;k<=4;k++){const r=r0+(r1-r0)*k/4;c.fillText(r.toFixed(2),X(r),H-10);}
-  c.textAlign="left";c.fillText("r (A)",L,H-10);
-  c.textAlign="center";c.fillText("d_nn",X(d.dnn),H-10);
+  /*  d_nn shares the tick row, so a tick that lands under it is dropped
+      rather than drawn through it.  The marker is the more useful of the two
+      - it says where the nearest neighbour sits - and one missing tick out of
+      five costs nothing, while two labels on the same pixels cost the row. */
+  const xdnn=X(d.dnn);
+  for(let k=0;k<=4;k++){const r=r0+(r1-r0)*k/4;
+    if(Math.abs(X(r)-xdnn)<24) continue;
+    c.fillText(r.toFixed(2),X(r),H-18);}
+  c.textAlign="center";c.fillText("d_nn",xdnn,H-18);
+  c.fillText("r (A)",L+(W-L-12)/2,H-4);
 }
 
 let DISP_MODE = null;
@@ -1257,6 +1513,18 @@ let DISP_MODE = null;
     Off by default - the single-potential view is the common case - and only
     offered where d.ug exists and was fitted at the same three-body cutoff. */
 const ugData = d => (d.ug && d.ug.comparable) ? d.ug : null;
+/*  The selector's "two potentials together" modes.  UG needs `comparable`
+    because it is a different FORM fitted to the same targets and the flag says
+    whether the two can be put on one axis; the re-cut candidates are the same
+    form at a different cutoff, so having a dispersion on the standard path is
+    the whole condition.  */
+const SECOND = {
+  ug:       d => ugData(d),
+  recut:    d => (d.rc    && d.rc.ld    && d.rc.ld.std)    ? d.rc    : null,
+  recut_ug: d => (d.rc_ug && d.rc_ug.ld && d.rc_ug.ld.std) ? d.rc_ug : null,
+};
+const SECOND_LABEL = {ug: "UG", recut: "re-cut", recut_ug: "re-cut UG"};
+const secondOf = (d, m) => (SECOND[m] ? SECOND[m](d) : null);
 
 /*  Does phi2 turn over on the way in, or fall for ever?  A pair term with no
     minimum has no repulsive core: two atoms lower their energy by merging.
@@ -1278,8 +1546,6 @@ function coreless(d){
     fits - iron's D is 0.345 eV for MAU and 0.284 for UG - so showing lambda
     beside MAU's D would describe a potential that was never fitted.  The row
     switches as a whole or not at all. */
-let PAR_UG = false;
-const parSet = d => (PAR_UG && d.ug) ? d.ug : d;
 
 /* frequencies are stored in cm-1 and plotted in THz */
 const CM1_PER_THZ=33.35641;
@@ -1294,7 +1560,14 @@ function niceStep(span,want){
 }
 
 function drawDisp(d){
-  const g=d.ld||{};
+  /*  The "this potential only" view follows the parameter set on screen, so
+      the dispersion belongs to the parameters printed above it.  The DFT
+      modes cannot: their `ours` array was resampled at the reference's own
+      q-points for the ROOT record only, and no such resampling exists for
+      the other arms - so those views stay MAU whatever is selected, and the
+      note under the panel says so rather than letting a reader assume.  */
+  const Pd=parSet(d);
+  const g=(Pd.ld&&Pd.ld.std)?Pd.ld:(d.ld||{});
   /* Two independent DFT references, and they cover different metals: MP has
      13 of ours, MC3D adds Ag Au Cr Mo Nb Ni Pb Pd Rh Ta - including the bcc
      transition metals whose anisotropy the form cannot reach, which had no
@@ -1311,14 +1584,24 @@ function drawDisp(d){
   const has=k=>REF[k]&&REF[k].ours;
   /*  Al Ba Co Cr Na have JARVIS and nothing else, so it has to be reachable as
       a default too - otherwise their only comparison sits in the data unseen. */
-  if(DISP_MODE==="ug" && !ugData(d)) DISP_MODE=null;   // element without one
-  if(DISP_MODE===null||!(DISP_MODE==="std"||DISP_MODE==="ug"||has(DISP_MODE)))
-    DISP_MODE = has("mp") ? "mp"
-              : (has("mc3d") ? "mc3d" : (has("jarvis") ? "jarvis" : "std"));
+  if(SECOND[DISP_MODE] && !secondOf(d,DISP_MODE)) DISP_MODE=null;  // no such arm
+  if(DISP_MODE===null||!(DISP_MODE==="std"||SECOND[DISP_MODE]||has(DISP_MODE)))
+    /*  Where a MEASURED curve exists it is the better default, and it is only
+        drawn on the standard path - the DFT modes replace that path with the
+        reference's own.  Opening on a DFT comparison for an element that has
+        neutron data would hide the stronger test behind a selector.  The same
+        applies to a MODEL curve: vanadium and cobalt have no measured points
+        and opened on Materials Project and JARVIS respectively, with their
+        reconstructed dispersions invisible until someone changed the
+        selector.  Either kind of reference counts.  */
+    DISP_MODE = ((d.exp_curve && d.exp_curve.segs)
+              || (d.model_curve && d.model_curve.segs)) ? "std"
+              : (has("mp") ? "mp"
+              : (has("mc3d") ? "mc3d" : (has("jarvis") ? "jarvis" : "std")));
   /*  The DFT references are stored at THEIR q-points and UG at ours, so the
       two cannot share an x axis; "ug" is therefore a view of the standard path
       with the second potential drawn on it, not a reference mode. */
-  const withUG = (DISP_MODE === "ug") && ugData(d);
+  const withUG = secondOf(d, DISP_MODE);
   const MODE = withUG ? "std" : DISP_MODE;
   const mpp = REF[MODE];
   const s=setup("#disp",0.66); if(!s) return;
@@ -1333,6 +1616,12 @@ function drawDisp(d){
      negative frequencies, and the range opens downwards to keep them inside
      the box instead of drawing them off the bottom of the canvas. */
   const axes=(loRaw,hiRaw)=>{
+    /*  A mode at -0.1 cm^-1 is arithmetic, not an instability, and letting it
+        open the axis downwards costs a fifth of the panel and puts a negative
+        tick under a dispersion that has nothing negative in it.  Anything
+        shallower than 1 cm^-1 is floored to zero; anything deeper is drawn,
+        because a real imaginary branch must be visible.  */
+    if(loRaw > -1.0/CM1_PER_THZ) loRaw = 0;
     const step=niceStep(hiRaw-Math.min(0,loRaw),5);
     const hi=Math.ceil(hiRaw/step)*step || step;
     const lo=loRaw<0?-Math.ceil(-loRaw/step)*step:0;
@@ -1396,7 +1685,19 @@ function drawDisp(d){
     const unit=(pw-GAP*brk.size)/Math.max(n-1-brk.size,1);
     const xs=new Array(n); xs[0]=L;
     for(let i=1;i<n;i++) xs[i]=xs[i-1]+(brk.has(i-1)?GAP:unit);
-    (mpp.marks||[]).forEach(([i,name])=>vline(xs[i],name));
+    /*  A label's index is the nearest SAMPLE, and the reference path does not
+        have to sample the point it brackets - silver's interior Gamma is
+        never visited, the list steps from (0.0117,0.0117,0.0235) straight to
+        (0.0096,0.0096,0.0096).  Drawing the line on the nearest index put it
+        a little to the left of Gamma, where the acoustic branches have not
+        reached zero, and the plot then seemed to show frequencies that do
+        not vanish there.  marks_x carries the fractional index computed in
+        fix_mark_x.py; xat interpolates the x between the two samples.  */
+    const MX = mpp.marks_x || mpp.marks || [];
+    const xat = xf => {const j=Math.floor(xf), t=xf-j;
+      return (j+1<xs.length) ? xs[j]+t*(xs[j+1]-xs[j])
+                             : xs[Math.min(j,xs.length-1)];};
+    MX.forEach(([xf,name])=>vline(xat(xf),name));
     const curve=(set,col,w,dash)=>{
       c.strokeStyle=col;c.lineWidth=w;c.setLineDash(dash);
       set.forEach(b=>{c.beginPath();
@@ -1407,14 +1708,14 @@ function drawDisp(d){
     };
     curve(mp,p3,1.4,[4,3]);
     curve(ours,p2,1.8,[]);
-    (mpp.marks||[]).forEach(([i,name])=>marker(xs[i],name,Y));
+    MX.forEach(([xf,name])=>marker(xat(xf),name,Y));
     return;
   }
 
   /* ---- our curve on the same path, no MP reference available ---- */
   const segs = g.std||[];
   if(!segs.length) return;
-  const u=withUG?ugData(d):null, usegs=(u&&u.ld)?u.ld.std:null;
+  const u=withUG||null, usegs=(u&&u.ld)?u.ld.std:null;
   let hi=0, lo=0;
   const span=set=>set.forEach(p=>p.branches.forEach(b=>b.forEach(v=>{
     if(v===null)return; if(v>hi)hi=v; if(v<lo)lo=v;})));
@@ -1444,15 +1745,62 @@ function drawDisp(d){
     if(usegs&&usegs[i]) panel(usegs[i],k=>x0+(usegs[i].n>1?k/(usegs[i].n-1):0)*w,
                               p3,1.5,[5,3]);
     panel(p,X,p2,1.8,[]);
+    /*  Measured points along this segment, with their quoted error.  Drawn
+        after the curves so they sit on top, and as open circles so a
+        measurement is never mistaken for a computed line.  The fraction t
+        already runs in the direction this segment is drawn - the flip for
+        Sigma, measured Gamma->K and drawn K->Gamma, is done in
+        add_phonon_curves.py where the path is defined.  */
+    /*  A fitted model, drawn as a LINE and never as the circles used for
+        measured phonons.  Strontium, chromium and rhodium have one, for
+        different reasons - strontium because a powder spectrum plus a
+        Born-von Karman fit is all anyone has for it, the other two because
+        their papers tabulate the fitted force constants rather than the
+        frequencies.  Giving any of them the same symbol as gold's 114
+        individually measured frequencies would say something the data
+        cannot support; the reason is carried per element in
+        model_curve.why.  */
+    const mcs=(d.model_curve&&d.model_curve.segs)
+              ?d.model_curve.segs[p.a+"|"+p.b]:null;
+    if(mcs&&mcs.length){
+      c.save();c.strokeStyle=ink;c.globalAlpha=0.55;c.lineWidth=1.3;
+      c.setLineDash([4,3]);
+      /*  not always three: molybdenum's source tabulates two of the three
+          [zz0] branches, so the row is shorter there and the missing one is
+          drawn as missing rather than faked  */
+      for(let br=1;br<mcs[0].length;br++){
+        c.beginPath();
+        mcs.forEach((row,k)=>{const x=x0+row[0]*w, y=Y(row[br]);
+          k?c.lineTo(x,y):c.moveTo(x,y);});
+        c.stroke();}
+      c.restore();
+    }
+    const ecs=(d.exp_curve&&d.exp_curve.segs)?d.exp_curve.segs[p.a+"|"+p.b]:null;
+    if(ecs){
+      c.save();c.strokeStyle=ink;c.lineWidth=1.1;c.globalAlpha=0.85;
+      ecs.forEach(pt=>{
+        const x=x0+pt[0]*w, y=Y(pt[1]), e=pt[2]||0;
+        if(e>0){const y1=Y(pt[1]-e), y2=Y(pt[1]+e);
+          c.beginPath();c.moveTo(x,y1);c.lineTo(x,y2);c.stroke();}
+        c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();});
+      c.restore();
+    }
     x0 += w + (brk[i]?GAP:0);
   });
-  if(usegs) legend(c,L+8,T+14,ink,p2,p3);
+  if(usegs) legend(c,L+8,T+14,ink,p2,p3,
+                   SECOND_LABEL[DISP_MODE]||"UG",
+                   {mau:"MAU",ug:"UG",rc:"re-cut",rc_ug:"re-cut UG"}[PAR_SET]
+                   ||"MAU");
 }
 
 /*  two-entry key, drawn inside the frame so it cannot be clipped */
-function legend(c,x,y,ink,p2,p3){
+function legend(c,x,y,ink,p2,p3,second,first){
+  /*  The second curve is not always UG - it is whichever arm the selector
+      names - so the key has to be told, or it will label a re-cut candidate
+      as the angular potential.  */
   c.font="11px ui-monospace,Consolas,monospace";c.textAlign="left";
-  [["MAU",p2,[]],["UG",p3,[5,3]]].forEach(([t,col,dash],i)=>{
+  [[first||"MAU",p2,[]],[second||"UG",p3,[5,3]]]
+    .forEach(([t,col,dash],i)=>{
     const yy=y+i*14;
     c.strokeStyle=col;c.lineWidth=2;c.setLineDash(dash);
     c.beginPath();c.moveTo(x,yy);c.lineTo(x+20,yy);c.stroke();c.setLineDash([]);
@@ -1473,19 +1821,57 @@ const MPROP={
   nu:  {keys:["nu_min","nu_max"],unit:"",    name:"Poisson's ratio"},
 };
 let MPROP_SEL="E";
+/*  Which arm the panel draws BESIDE the published one.  It used to be UG and
+    only UG, hard-coded, which was fine while UG was the only other fit; with
+    the re-cut candidates on the page a fixed second curve would silently show
+    one comparison and label it as the comparison.  */
+let MARM = "ug";
+/*  every arm of this element that has directional data, as [key, label].
+    MAU is in the list: once the main curve follows the selection, a reader
+    looking at a re-cut candidate needs the published arm as the thing to
+    compare it against, and leaving it out made that the one comparison the
+    panel could not draw.  */
+const marmRec = (d, k) => k === "mau" ? d
+                : k === "ug" ? ((d.ug && d.ug.comparable) ? d.ug : null)
+                : d[k];
+const marmOpts = d => [["mau", "MAU"], ["ug", "UG"]].concat(
+    ARMS.filter(a => a[0] !== "tap")
+        .map(a => [a[0], a[1] + (armBad(d[a[0]]) ? " — REJECTED" : "")]))
+  .filter((o, i, all) => all.findIndex(x => x[0] === o[0]) === i)
+  .filter(o => {const r = marmRec(d, o[0]); return r && r.mech_planes;});
 
 function drawPolar(d){
-  const pl=d.mech_planes; if(!pl) return;
+  /*  The MAIN curve is the set on screen, not the root record.  It was
+      d.mech_planes unconditionally, so selecting a re-cut candidate changed
+      the Hill table and the anisotropy beside this panel while the panel
+      itself went on drawing MAU - the two disagreeing about the same
+      element, side by side.  */
+  const Pp=parSet(d);
+  const pl=(Pp.mech_planes||d.mech_planes); if(!pl) return;
   const s=setup("#polar",0.36); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
   const spec=MPROP[MPROP_SEL], sc=spec.scale||1;
-  const planes=["xy","xz","yz"];
+  /*  The fourth panel is not a coordinate plane and that is the point.  The
+      x-y, x-z and y-z sections between them contain [100], [110] and [101]
+      and NO member of <111> - which is where Young's modulus is extremal for
+      a cubic crystal, so three panels understate the stiffest direction
+      badly and silently.  Measured on this library's own tensors: Rb 2.1
+      against 4.8 GPa, W 195 against 401, Cu 130 against 191.  Nothing about
+      the three panels looks wrong.  "d" is the plane spanned by [110] and
+      [001]; its normal is [110] x [001] = [1 -1 0], so it is (11-0) with the
+      bar on the second digit, and <111> sits inside it at 35.26 degrees.  */
+  const planes=["xy","xz","yz"].concat(pl["d"]?["d"]:[]);
   /*  Drawn whenever a comparable UG fit exists, not behind the overlay switch:
       the table beside this panel now shows both potentials unconditionally, and
       a plot that disagreed with the table next to it would be a trap.  The
       switch stays for the dispersion and the thermodynamics, where the second
       curve changes how the first is read. */
-  const u=(d.ug&&d.ug.comparable)?d.ug:null, upl=u?u.mech_planes:null;
+  /*  The comparison curve is any arm EXCEPT the one already drawn as the main
+      one, or the panel would put a potential beside itself.  */
+  const opts=marmOpts(d).filter(o=>o[0]!==PAR_SET);
+  if(!opts.some(o=>o[0]===MARM)) MARM = opts.length ? opts[0][0] : null;
+  const u = MARM ? marmRec(d, MARM) : null;
+  const upl = (u && u.mech_planes) ? u.mech_planes : null;
   /* one radial scale for all three panels, so they are comparable - and the
      same scale for both potentials, or the shapes could not be compared */
   let vmax=-Infinity, vmin=Infinity;
@@ -1493,7 +1879,7 @@ function drawPolar(d){
     planes.forEach(p=>spec.keys.forEach(k=>(src[p]||{})[k]&&src[p][k].forEach(v=>{
       const x=v*sc; if(x>vmax)vmax=x; if(x<vmin)vmin=x;})));});
   const floor=Math.min(0,vmin), span=(vmax-floor)||1;
-  const pad=26, w=W/3, R=Math.min(w,H)/2-pad;
+  const pad=26, w=W/planes.length, R=Math.min(w,H)/2-pad;
   c.font="11px ui-monospace,Consolas,monospace";
   planes.forEach((p,ip)=>{
     const cx=w*(ip+0.5), cy=H/2;
@@ -1530,26 +1916,43 @@ function drawPolar(d){
       loop(pl[p][k],ik?p3:p2,1.7,ik?[4,3]:[]);
     });
     c.fillStyle=ink;c.textAlign="center";
-    c.fillText(p[0]+"-"+p[1]+" plane",cx,H-7);
+    /*  fillText does not decode HTML entities - an &ndash; here once reached
+        the canvas as the literal text "&ndas" - so the bar is the real
+        combining macron U+0304, and it sits on the digit it belongs to.  */
+    c.fillText(p==="d" ? "(11̄0) plane" : p[0]+"-"+p[1]+" plane",cx,H-7);
   });
   c.fillStyle=ink;c.textAlign="left";
   c.fillText(`${(vmax).toFixed(vmax<10?2:0)} ${spec.unit}`.trim()+" outer ring"
-             +(upl?"   (thin = UG)":""), 6,12);
+             +(upl?"   (thin = "
+                +((marmOpts(d).find(o=>o[0]===MARM)||[0,"UG"])[1])+")":""),
+             6,12);
 }
 
 function drawThermo(d){
-  const g=d.ld||{}; if(!g.thermo) return;
+  /*  same rule as the dispersion: the solid curve is the set on screen  */
+  const Pt=parSet(d);
+  const g=(Pt.ld&&Pt.ld.thermo)?Pt.ld:(d.ld||{}); if(!g.thermo) return;
   const s=setup("#thermo"); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
   const L=48,R=10,T=10,B=26, pw=W-L-R, ph=H-T-B;
   const th=g.thermo.filter(r=>r.S!==undefined&&r.Cv!==undefined);
   if(!th.length) return;
-  const u=ugData(d);          // unconditional, as for the polar panels
-  const uth=(u&&u.ld&&u.ld.thermo)
-            ?u.ld.thermo.filter(r=>r.S!==undefined&&r.Cv!==undefined):null;
+  /*  Every arm that has a thermodynamic curve, not just UG.  S(T) and Cv(T)
+      come from the same dispersion the panel above draws, so an arm whose
+      phonons differ shows it here - which is the point for the re-cut
+      candidates, whose whole disagreement with the published arm is thermal.  */
+  const extra = armRecs(d, r => r.ld && r.ld.thermo)
+      .filter(o => o[0] !== "tap" && o[0] !== PAR_SET)
+      .map(o => [o[2], o[1].ld.thermo.filter(
+                          r => r.S !== undefined && r.Cv !== undefined)])
+      .filter(o => o[1].length)
+      .concat((()=>{const u=ugData(d);
+        return (u&&u.ld&&u.ld.thermo)?[["UG", u.ld.thermo.filter(
+          r=>r.S!==undefined&&r.Cv!==undefined)]]:[];})());
+  const uth = extra.length ? extra[0][1] : null;
   const Tm=th[th.length-1].T;
   let hi=Math.max(...th.map(r=>Math.max(r.S,r.Cv)), d.S298||0, d.Cp298||0,
-                  ...(uth?uth.map(r=>Math.max(r.S,r.Cv)):[0]));
+                  ...extra.flatMap(o=>o[1].map(r=>Math.max(r.S,r.Cv))), 0);
   hi=Math.ceil(hi/10)*10;
   const X=t=>L+t/Tm*pw, Y=v=>T+ph-v/hi*ph;
   c.strokeStyle=lin;c.lineWidth=1;
@@ -1558,8 +1961,8 @@ function drawThermo(d){
     c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();
     c.textAlign="right";c.fillText(String(Math.round(v)),L-6,y+4);}
   for(let k=0;k<=4;k++){const t=Tm*k/4;
-    c.textAlign="center";c.fillText(String(Math.round(t)),X(t),H-8);}
-  c.textAlign="left";c.fillText("T (K)",L,H-8);
+    c.textAlign="center";c.fillText(String(Math.round(t)),X(t),H-16);}
+  c.textAlign="center";c.fillText("T (K)",L+pw/2,H-3);
   frame(c, L, T, pw, ph, ink,
         [0,1,2,3,4].map(k=>X(Tm*k/4)),
         [0,1,2,3,4].map(k=>Y(hi*k/4)));
@@ -1575,11 +1978,18 @@ function drawThermo(d){
     c.setLineDash(dash);c.beginPath();
     rows.forEach((r,i)=>{const x=X(r.T),y=Y(r[key]);i?c.lineTo(x,y):c.moveTo(x,y);});
     c.stroke();c.setLineDash([]);};
-  if(uth){line(uth,"S",p2,1.3,[5,3]); line(uth,"Cv",p3,1.3,[5,3]);}
+  const DASHES=[[5,3],[2,2],[6,2,1,2],[1,3]];
+  extra.forEach((o,i)=>{const dl=DASHES[i%DASHES.length];
+    line(o[1],"S",p2,1.3,dl); line(o[1],"Cv",p3,1.3,dl);});
   line(th,"S",p2,2,[]); line(th,"Cv",p3,2,[]);
-  if(uth){c.fillStyle=ink;c.textAlign="left";
+  if(extra.length){c.fillStyle=ink;c.textAlign="left";
     c.font="11px ui-monospace,Consolas,monospace";
-    c.fillText("dashed = UG",L+6,T+12);}
+    extra.forEach((o,i)=>{
+      const yy=T+12+i*13, dl=DASHES[i%DASHES.length];
+      c.strokeStyle=ink;c.lineWidth=1.3;c.setLineDash(dl);
+      c.beginPath();c.moveTo(L+6,yy-4);c.lineTo(L+26,yy-4);c.stroke();
+      c.setLineDash([]);
+      c.fillText(o[0],L+32,yy);});}
   const ring=(t,v,col)=>{if(!v)return;c.strokeStyle=col;c.lineWidth=2;
     c.beginPath();c.arc(X(t),Y(v),4.5,0,6.284);c.stroke();};
   ring(298,d.S298,p2); ring(298,d.Cp298,p3);
@@ -1623,12 +2033,413 @@ function tv(g,key){
     turns into a 4559 K liquid - and the two questions had never been asked
     separately.  A user copies a file out of a directory and takes its header
     with it; they do not take the README.  So the warning lives in both.        */
+/*  The argument above used to end at the citation.  It no longer has to:
+    LAMMPS ships Nb.uf3, which is that potential for niobium, and it went
+    through this page's own elastic and surface machinery unchanged, so only
+    the potential differed.  A page that says "published work reports" when it
+    has its own number is weaker than it needs to be.  */
+function uf3Note(nb, here){
+  const u = nb && nb.uf3; if(!u) return "";
+  const f = k => ["110","100","111"].map(x=>(u.facets[x]||{})[k])
+                   .filter(v=>v!=null).map(v=>v.toFixed(2)).join(" / ");
+  const ord = k => u.order[k].join(" &lt; ");
+  return `<br><br><strong>That is measured here, not only cited.</strong>
+  ${here?"For this element":"For niobium"} the two potentials went through
+  the same code and only the potential differed &mdash; 110 / 100 / 111 in
+  J&nbsp;m<sup>&minus;2</sup>: reference ${f("ref")}, ours ${f("ours")},
+  the UF3 ${f("uf3")}. Mean deviation <strong>${u.mean_pct.ours.toFixed(0)} %
+  for ours against ${u.mean_pct.uf3.toFixed(0)} % for the UF3</strong>, on a
+  property neither was fitted to. The ordering goes the same way: the
+  reference gives ${ord("ref")}, the UF3 reproduces ${ord("uf3")} exactly,
+  ours gives ${ord("ours")}. ${u.caveat}</p><p class="note">${u.why}
+  <br><span style="opacity:.75">${u.ref}</span>`;
+}
+
+/*  What to make of the re-cut candidate for THIS element, which is not the
+    same answer twice.  The arm looks strong in aggregate - 8.3 % against the
+    published switched arm's 11.2 % over the 16 elements that have both and
+    were not rejected - and that number is misleading on its own: almost all
+    of the gap is sodium, potassium, rubidium and caesium, which are exactly
+    the elements the arm breaks once the crystal is warm.  Take them out and
+    it is 8.3 against 8.9 over 11 elements, better in 7.  A wash.
+
+    So the page says it per element rather than quoting the aggregate.  The
+    dispersion numbers are the measured comparison, arm against published
+    switched arm, as a percentage of that element's highest measured
+    frequency; the warm classes come from three independent screens - thermal
+    expansion, 300 K elastic constants, and the sign of dC11/dT.  */
+const RC_DISP = {Ag:[13.0,12.7], Au:[4.2,4.4], Ba:[8.3,9.6], Ca:[8.6,8.3],
+                 Cs:[3.9,16.7], Cu:[9.3,10.0], K:[16.6,11.4], Li:[5.8,25.2],
+                 Mg:[8.3,6.6], Na:[9.4,15.4], Ni:[12.1,13.4], Pb:[10.6,15.9],
+                 Pd:[3.5,3.6], Pt:[4.8,4.7], Rb:[5.4,13.5], W:[17.2,17.8],
+                 Yb:[8.5,8.6]};
+const RC_BROKEN = ["Na","K","Rb","Cs"];      /* warm screens: catastrophic  */
+const RC_SUSPECT = ["Yb"];                   /* the same failure, milder    */
+const RC_REPAIRED = ["Ba","Ir","Mg","Co","Re","Pb","Cu","Sr","Ni","Au","Rh"];
+/*  Why an element has no candidate at all.  It is not that the fit was tried
+    and failed - a cutoff has to sit in a GAP between neighbour shells, and
+    in two of the three structures there is nowhere to put one.  Shells in
+    neighbour-distance units: fcc 1.000 1.414 1.732, bcc 1.000 1.155 1.633,
+    hcp 1.000 1.019 1.428.  A 0.019 gap is not a place for a cutoff; it is
+    two shells with a cutoff on top of both.  */
+const RC_NOGAP = {
+  bcc: "1.000 and 1.155 &mdash; the first two shells nearly touch",
+  hcp: "1.000 and 1.019 &mdash; the densest of the three, and c/a-dependent",
+  fcc: "1.000, 1.414 and 1.732 &mdash; wide and evenly spaced"};
+
+function recutNote(d){
+  const has = d.rc || d.rc_ug;
+  const el = d.sym, nm = d.name;
+  if(!has){
+    return `<p class="plotnote"><strong>No re-cut candidate exists for
+      ${nm}.</strong> That is a property of its crystal rather than a failed
+      fit: a re-cut moves the pair cutoff into a GAP between neighbour shells,
+      and ${d.struct} shells sit at ${RC_NOGAP[d.struct]||"distances that leave no usable gap"} in neighbour-distance units. A gap of two per cent
+      is not a place to put a cutoff; it is two shells with a cutoff on top of
+      both. Twenty-five of the thirty-eight elements have one &mdash; every
+      fcc metal, eight of thirteen bcc, four of twelve hcp.</p>`;
+  }
+  const rej = armBad(d.rc) || armBad(d.rc_ug);
+  if(rej){
+    return `<p class="plotnote"><strong>${el}'s re-cut records failed
+      selection.</strong> A mode near &minus;13 cm<sup>&minus;1</sup> on the
+      symmetry path${el==="Mo"?", and fcc 209 meV/atom below bcc":""}. They
+      are kept as the control the accepted candidates are read against, and
+      are not to be used for anything.</p>`;
+  }
+  const dsp = RC_DISP[el];
+  const cmp = dsp ? (dsp[0] < dsp[1] - 0.5 ? "better than"
+                   : dsp[0] > dsp[1] + 0.5 ? "worse than" : "the same as") : null;
+  const num = dsp ? `Against the measured dispersion it reaches
+      <strong>${dsp[0].toFixed(1)}&nbsp;%</strong> where the published
+      switched arm reaches ${dsp[1].toFixed(1)}&nbsp;% &mdash; ${cmp} it.`
+    : `${el} has no measured dispersion, so that comparison cannot be made
+      here.`;
+  if(RC_BROKEN.indexOf(el) >= 0){
+    return `<p class="plotnote"><strong>${el}: do not use the re-cut at finite
+      temperature.</strong> ${num} And it fails every warm screen: thermal
+      expansion comes out NEGATIVE, &minus;36 to &minus;42&times;10<sup>&minus;6</sup>/K
+      against a measured +80; the 300&nbsp;K elastic constants land 84&ndash;94&nbsp;%
+      off against 12&ndash;18&nbsp;% for the published arm; and
+      dC<sub>11</sub>/dT has the wrong SIGN. Those two are one fact, not two:
+      a dispersion at 0&nbsp;K and an elastic constant are both properties of
+      the curvature AT the minimum, and this arm has that neighbourhood right
+      while the shape of the well away from it is wrong. Static properties
+      only, and with care.</p>`;
+  }
+  if(RC_SUSPECT.indexOf(el) >= 0){
+    return `<p class="plotnote"><strong>${el}: treat the re-cut as
+      suspect.</strong> ${num} It shows a milder form of the failure that
+      rules the alkalis out &mdash; check thermal expansion and the 300&nbsp;K
+      elastic constants before using it warm.</p>`;
+  }
+  const rep = RC_REPAIRED.indexOf(el) >= 0;
+  return `<p class="plotnote"><strong>${el}: the re-cut is usable, and there
+    is no measured reason to prefer it.</strong> It passes every screen${
+    rep?", and it is one of the elements the re-cut modestly REPAIRS warm":""}.
+    ${num} Read that against the arm as a whole: its aggregate advantage is
+    almost entirely sodium, potassium, rubidium and caesium, which cannot be
+    used warm at all. With those out it is 8.3&nbsp;% against 8.9&nbsp;% over
+    eleven elements, better in seven &mdash; a wash. It remains a candidate,
+    not a replacement.</p>`;
+}
+
+/*  The finite-temperature dispersion, measured rather than computed.
+
+    Everything else on this page that carries a phonon is a 0 K harmonic
+    calculation from the force constants.  This is the spectrum LAMMPS
+    measures by displacement correlation during equilibrium molecular
+    dynamics at the temperature the neutron experiment was actually run at,
+    which is the thing the experiment sees: renormalised by anharmonicity and
+    by whatever thermal expansion the potential predicts.
+
+    WHICH ARM, first, because it is not the one the selector shows.  Every
+    number here is the SWITCHED record, <El>_taper.ugur, while the
+    parameter-set selector's "MAU" is the hard-truncated root record.  The
+    switched arm is used because it is the only one that can be run at
+    temperature: a hard cut leaves the pair energy discontinuous and copper
+    drifts 350 meV/atom/ns in constant-energy dynamics, reaching 1100 K from
+    a 296 K start inside 200 ps.
+
+    THE FLOOR decides what may be read.  fix phonon imposes no symmetry on
+    what it inverts, so two wavevectors the crystal forces to be equal do not
+    come out equal; every q is scored twice and the spread is the run's
+    resolution.  The verdict column is computed from it, because twelve of
+    the twenty-four differences are smaller than it and a reader subtracting
+    two printed numbers would rank the library on noise.                    */
+const FT_WHY = {
+  cold: T => `measured at ${T} K, far below the Debye temperature &mdash; `
+           + `classical dynamics describes the wrong physics there, and a `
+           + `finite-temperature run would be answering a different question`,
+  screen: () => `the molecular-dynamics screen fails: this record does not `
+           + `hold its structure when heated, so there is nothing to measure `
+           + `a spectrum on`,
+  /*  The element's OWN reason, the same string the dispersion panel above
+      prints, because the six elements in this group are in six different
+      positions and one sentence about all of them is unfair to most.  No
+      single crystal of strontium large enough for triple-axis spectroscopy
+      has ever been grown; molybdenum's frequencies WERE measured and the
+      paper simply tabulated Fourier coefficients instead of them.  Saying
+      the same thing about both told the reader neither.
+      And the closing clause is the general rule rather than a special
+      pleading for this panel: a reconstruction is drawn everywhere in this
+      library and scored nowhere, at 0 K as much as at temperature.  */
+  model: (T, d) => {
+    const w = d && d.model_curve && d.model_curve.why;
+    const lead = w ? (/^[A-Z][a-z]/.test(w) ? w[0].toLowerCase() + w.slice(1) : w)
+                   : `the reference here is a reconstruction`;
+    //  a full stop, not another clause: strontium's own reason already ends
+    //  in "so its phonons were reached by fitting to a powder", and a second
+    //  "so" in the same sentence makes the reader read the join twice
+    return lead + `. What exists for it is therefore a RECONSTRUCTED `
+         + `dispersion rather than individually measured frequencies, and a `
+         + `reconstruction is drawn throughout this library, never scored, `
+         + `at 0 K as much as at temperature`;
+  },
+  none: () => `no dispersion reference exists for this element, measured or `
+           + `reconstructed`,
+};
+const FT_V = {gain: ["gain", "ok"], loss: ["loss", "bad"],
+              flat: ["below the floor", "warn"]};
+
+/*  The finite-temperature dispersion.  finiteTBlock is the panel; this is its
+    picture.  ld.std is cm^-1 and phana returns THz, so the harmonic curve is
+    converted on the way in and the axis is THz throughout - the same axis the
+    dispersion panel uses.                                                   */
+function drawFT(d){
+  const cv=(FT.curve||{})[d.sym], segs=(d.ld||{}).std;
+  if(!cv||!segs||!segs.length) return;
+  const s=setup("#ftdisp",0.60); if(!s) return;
+  const {c,W,H,p2,p3,lin,ink}=s;
+  const L=58,R=16,T=20,B=34, pw=W-L-R, ph=H-T-B;
+  const G=String.fromCharCode(915), lab=t=>t==="G"?G:t;
+  const GAP=10, npt=cv.npt, sub=new Set(cv.sub||[]);
+
+  /*  One range over BOTH curves.  Two auto-scaled axes would make a softening
+      look like an artefact of the scale, which is the one thing this plot
+      exists to show.  It does not open downwards: the substitution near Gamma
+      removed the last negative frequency in the set, and a curve that still
+      had one would be a fault to fix rather than a range to widen.          */
+  let hi=0;
+  segs.forEach(p=>p.branches.forEach(b=>b.forEach(v=>{
+    if(v!==null&&THZ(v)>hi) hi=THZ(v);})));
+  cv.f.forEach(r=>r.forEach(v=>{if(v>hi)hi=v;}));
+  const step=niceStep(hi,5);
+  hi=Math.ceil(hi/step)*step||step;
+  const dec=(step<1||Math.abs(step-Math.round(step))>1e-9)?1:0;
+  const Y=v=>T+ph-v/hi*ph;
+
+  c.font="11px ui-monospace,Consolas,monospace";
+  for(let k=0;k<=Math.round(hi/step);k++){
+    const v=k*step, y=Y(v);
+    c.strokeStyle=ink;c.lineWidth=1.2;
+    c.beginPath();c.moveTo(L,y);c.lineTo(L+5,y);c.stroke();
+    c.beginPath();c.moveTo(W-R,y);c.lineTo(W-R-5,y);c.stroke();
+    c.fillStyle=ink;c.textAlign="right";c.fillText(v.toFixed(dec),L-8,y+4);
+  }
+  c.strokeStyle=ink;c.lineWidth=1.2;c.strokeRect(L,T,pw,ph);
+  c.fillStyle=ink;c.textAlign="center";
+  c.save();c.translate(15,T+ph/2);c.rotate(-Math.PI/2);
+  c.fillText("Frequency (THz)",0,0);c.restore();
+
+  const vline=(x,name)=>{
+    c.save();c.strokeStyle=ink;c.lineWidth=1;c.globalAlpha=0.55;
+    c.setLineDash([5,4]);
+    c.beginPath();c.moveTo(x,T);c.lineTo(x,T+ph);c.stroke();c.restore();
+    c.strokeStyle=ink;c.lineWidth=1.2;
+    c.beginPath();c.moveTo(x,T+ph);c.lineTo(x,T+ph-6);c.stroke();
+    c.beginPath();c.moveTo(x,T);c.lineTo(x,T+6);c.stroke();
+    c.textAlign="center";c.fillStyle=ink;c.fillText(lab(name),x,T+ph+17);
+  };
+
+  /*  Same segment layout as the dispersion panel: width in proportion to the
+      segment's length in reciprocal space, and a gap rather than a straight
+      line across a genuine discontinuity of the path.                       */
+  const brk=segs.map((p,i)=>i<segs.length-1&&p.b!==segs[i+1].a);
+  const tot=segs.reduce((a,p)=>a+p.len,0);
+  const avail=pw-GAP*brk.filter(Boolean).length;
+  let x0=L;
+  segs.forEach((p,i)=>{
+    const w=avail*p.len/tot;
+    vline(x0,p.a);
+    if(i===segs.length-1||brk[i]) vline(x0+w,p.b);
+
+    /*  0 K first and dashed, so the finite-temperature curve sits on top of
+        it.  ld.std carries sixty points a segment against the curve's twenty
+        and keeps all sixty here - it costs nothing, it is already in the
+        page, and drawing the reference at the coarser sampling would blunt
+        exactly the sharp features the comparison is about.                  */
+    /*  p3 dashed, not the gridline colour.  --line-2 is #DCE3EB, which is
+        what a gridline is meant to be and leaves the reference curve
+        invisible against the panel; the page's own grammar for "the thing
+        being compared against" is already p3 dashed, in the dispersion
+        panel directly above.                                              */
+    const n=p.n;
+    c.save();c.setLineDash([5,3]);c.strokeStyle=p3;c.lineWidth=1.3;
+    c.globalAlpha=0.85;
+    p.branches.forEach(b=>{c.beginPath();let on=false;
+      b.forEach((v,k)=>{if(v===null){on=false;return;}
+        const x=x0+(n>1?k/(n-1):0)*w, y=Y(THZ(v));
+        if(on){c.lineTo(x,y);}else{c.moveTo(x,y);on=true;}});
+      c.stroke();});
+    c.restore();
+
+    /*  The measured curve, drawn one interval at a time so the dash can
+        change mid-branch: inside the first mesh cell nothing was resolved
+        and the value there is the leading behaviour of the branch rather
+        than a measurement.  Solid for measured, dotted for substituted, and an
+        interval touching a substituted end is dotted - it is the join that
+        is uncertain, not one of its two ends.                               */
+    const nb=cv.f[0].length;
+    c.strokeStyle=p2;c.lineWidth=1.8;
+    for(let b=0;b<nb;b++)
+      for(let k=1;k<npt;k++){
+        const ia=i*npt+k-1, ib=i*npt+k;
+        const va=cv.f[ia][b], vb=cv.f[ib][b];
+        if(va===null||vb===null||va===undefined||vb===undefined) continue;
+        c.save();c.setLineDash((sub.has(ia)||sub.has(ib))?[2,2.5]:[]);
+        c.beginPath();
+        c.moveTo(x0+(k-1)/(npt-1)*w,Y(va));
+        c.lineTo(x0+k/(npt-1)*w,Y(vb));
+        c.stroke();c.restore();
+      }
+
+    /*  and the neutron points on top, as open circles with their error bar,
+        the same symbol the dispersion panel uses - a measurement must never
+        be drawn with the same mark as a computed line.  The fraction t
+        already runs in the direction this segment is drawn.                 */
+    const ecs=(d.exp_curve&&d.exp_curve.segs)?d.exp_curve.segs[p.a+"|"+p.b]:null;
+    if(ecs){
+      c.save();c.strokeStyle=ink;c.lineWidth=1.1;c.globalAlpha=0.85;
+      ecs.forEach(pt=>{
+        const x=x0+pt[0]*w, y=Y(pt[1]), e=pt[2]||0;
+        if(e>0){c.beginPath();c.moveTo(x,Y(pt[1]-e));c.lineTo(x,Y(pt[1]+e));
+          c.stroke();}
+        c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();});
+      c.restore();
+    }
+    x0+=w+(brk[i]?GAP:0);
+  });
+
+  /*  A key inside the frame.  The caption below says the same thing in words,
+      but a figure that has to be read together with a paragraph underneath it
+      is a figure that will be read wrong once it is on its own.             */
+  const rT=(FT.rows||{})[d.sym];
+  const keys=[[p2,[],(rT?rT.T:"")+" K, molecular dynamics"],
+              [p3,[5,3],"0 K, harmonic"]];
+  /*  On an opaque patch of the panel's own background.  Titanium's highest
+      branch runs through this corner, and a key drawn straight onto the
+      curves is a key that has to be deciphered.                            */
+  c.textAlign="left";
+  const kw=Math.max(...keys.map(k=>c.measureText(k[2]).width))+44;
+  c.fillStyle=getComputedStyle(document.documentElement)
+              .getPropertyValue("--surface").trim();
+  c.fillRect(L+1,T+1,kw,keys.length*14+8);
+  keys.forEach(([col,dash,txt],k)=>{
+    const yy=T+14+k*14;
+    c.strokeStyle=col;c.lineWidth=2;c.setLineDash(dash);
+    c.beginPath();c.moveTo(L+10,yy);c.lineTo(L+30,yy);c.stroke();
+    c.setLineDash([]);c.fillStyle=ink;c.fillText(txt,L+36,yy+4);
+  });
+}
+
+
+function finiteTBlock(d){
+  const el = d.sym, nm = d.name,
+        r = (FT.rows||{})[el], o = (FT.out||{})[el];
+  if(!r && !o) return "";
+  if(!r){
+    return `<h3>The dispersion at the temperature it was measured</h3>
+      <p class="plotnote"><strong>${nm} is outside this study</strong> &mdash;
+      ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. Twenty-four of the thirty-eight
+      elements carry a finite-temperature measurement; this is one of the
+      fourteen that do not, and that is a fact about the reference data rather
+      than about the potential.</p>`;
+  }
+  const [word, cls] = FT_V[r.v];
+  const cv = (FT.curve||{})[el], hasCurve = !!cv && !!((d.ld||{}).std);
+  const amRow = (r.am !== r.a0) ? `<tr><td>0 K, at the paper's own lattice
+      constant</td><td>${r.am.toFixed(1)} %</td></tr>` : "";
+  return `<h3>The dispersion at the temperature it was measured</h3>
+  ${hasCurve?`<canvas id="ftdisp"></canvas>
+  <p class="plotnote">The same path as the harmonic dispersion above, on the
+    same axis, so the two temperatures can be read against each other. The
+    open circles with their error bars are the neutron measurement itself,
+    at ${d.exp_curve?d.exp_curve.T_K:r.T}&nbsp;K.
+    <br><strong>The dotted stretch beside &Gamma; was not measured.</strong>
+    The mesh is fixed by the box &mdash; ${r.mesh} cells &mdash; and inside
+    the first mesh cell there is nothing to interpolate between, so each
+    branch is carried in from the first mesh shell along its
+    own direction by its own leading behaviour: the three acoustic branches
+    by &omega;&nbsp;=&nbsp;v|q|, which is exact as
+    q&nbsp;&rarr;&nbsp;0${cv.f[0].length>3?`, and the optic branches by
+    &omega;&nbsp;=&nbsp;&omega;(&Gamma;)&nbsp;+&nbsp;&Delta;(q/q<sub>s</sub>)<sup>2</sup>,
+    which is flat at &Gamma; as an optic branch must be. &Gamma; itself is a
+    mesh point and keeps its measured value`:""}. That is the physics rather
+    than a fit to it, but it is not a measurement, and drawing it solid would
+    pass it off as one.${d.exp_curve&&d.exp_curve.ref?`
+    <br>Source: ${d.exp_curve.ref}.`:""}</p>`:""}
+  <table class="ft"><tbody>
+    <tr><td>0 K harmonic, at the library's lattice constant</td>
+        <td>${r.a0.toFixed(1)} %</td></tr>
+    ${amRow}
+    <tr><td><strong>measured by molecular dynamics at ${r.T} K</strong></td>
+        <td><strong>${r.ft.toFixed(1)} %</strong></td></tr>
+    <tr><td>the run's own symmetry floor</td>
+        <td>${r.floor.toFixed(1)} %</td></tr>
+    <tr class="${cls}"><td>difference, against that floor</td>
+        <td>${r.d>0?"+":""}${r.d.toFixed(1)} &mdash; <strong>${word}</strong></td></tr>
+  </tbody></table>
+  <p class="plotnote">Per cent of the highest measured frequency, over
+    ${r.n} points. ${r.mesh} cells, ${(r.steps/1e6).toFixed(1)} million steps
+    of 2 fs under a barostat, so the volume is the potential's own at that
+    temperature and not one imposed on it.
+    <strong>This is the switched record</strong>
+    (<code>${el}_taper.ugur</code>), which is NOT what the parameter-set
+    selector above calls MAU &mdash; that is the hard-truncated root record.
+    The switched arm is the only one that can be run at temperature at all:
+    a hard cut leaves the pair energy discontinuous, and copper drifts
+    350 meV per atom per nanosecond under it.
+    ${r.v==="flat"?`<br>The difference here is smaller than what the run can
+      resolve, so it is <strong>not a result</strong> in either direction.
+      Twelve of the twenty-four elements are in that position; the floor is
+      printed so that the reader does not have to guess which.`:""}</p>`;
+}
+
+
 function lammpsBlock(d){
+  /*  The "what" column carries the USE, not just the name.  Which truncation
+      a reader wants is not a matter of taste and the two answers point
+      opposite ways: measured against neutron dispersion the hard sets average
+      9.5 % over the 29 elements that have a curve and the switched ones
+      12.6 %, hard being closer in 24 of the 29 - and no hard set can be run
+      at temperature, because phi2 does not vanish at the cutoff.  Copper
+      drifts 350 meV per atom per nanosecond in NVE with the hard set and 0.4
+      with the switched one, a factor of 876.  Each file's own header carries
+      its own discontinuity, which runs from 0.25 meV for palladium to 123 for
+      yttrium, so "not for dynamics" is not equally true across the library.  */
   const SETS = [
-    ["hard", d,        d.name+".ugur",             "ugur",     "hard truncation"],
-    ["tap",  d.tap,    d.name+"_taper.ugur",       "ugur",     "switched"],
-    ["ug",   d.ug,     d.name+".ugur.ang",         "ugur/ang", "hard + angular"],
-    ["tap_ug", d.tap_ug, d.name+"_taper.ugur.ang", "ugur/ang", "switched + angular"]
+    ["hard", d,        d.sym+".ugur",             "ugur",
+     "hard truncation &mdash; static properties and lattice dynamics, "
+     + "<strong>not molecular dynamics</strong>"],
+    ["tap",  d.tap,    d.sym+"_taper.ugur",       "ugur",
+     "switched &mdash; <strong>the only sets that can run MD</strong>; "
+     + "about 3 points worse on the measured dispersion"],
+    ["ug",   d.ug,     d.sym+".ugur.ang",         "ugur/ang",
+     "hard + angular &mdash; static properties and lattice dynamics, "
+     + "<strong>not molecular dynamics</strong>"],
+    ["tap_ug", d.tap_ug, d.sym+"_taper.ugur.ang", "ugur/ang",
+     "switched + angular &mdash; <strong>MD</strong>; about 3 points worse "
+     + "on the measured dispersion"],
+    /*  The re-cut candidates ship too, under their own stem, because a reader
+        who wants to reproduce the comparison on this page needs the file the
+        comparison was made with.  They are NOT part of the published library,
+        and the row says so.  */
+    ["rc",    d.rc,    d.sym+"_recut.ugur",     "ugur",
+     "re-cut candidate, not published" + (armBad(d.rc)?" — REJECTED":"")],
+    ["rc_ug", d.rc_ug, d.sym+"_recut.ugur.ang", "ugur/ang",
+     "re-cut + angular, not published"
+     + (armBad(d.rc_ug)?" — REJECTED":"")]
   ].filter(r=>r[1]);
   if(!SETS.length) return "";
   const V = r => (r[1] && r[1].md_screen) || null;
@@ -1647,6 +2458,7 @@ function lammpsBlock(d){
     return `<tr${cls?` class="${cls}"`:""}><td><code>${r[2]}</code></td>
       <td><code>${r[3]}</code></td><td>${r[4]}</td><td>${verdict}</td></tr>`;
   }).join("");
+  const rcnote = recutNote(d);
   return `<h3>Running this in LAMMPS</h3>
   ${bad.length?`<div class="warn" style="border-left-color:var(--bad)">
     <strong>${bad.length===SETS.length?"None of the":
@@ -1662,6 +2474,7 @@ function lammpsBlock(d){
   <table class="tbl"><thead><tr><th>file</th><th>pair_style</th>
     <th>parameters</th><th>molecular dynamics</th></tr></thead>
     <tbody>${rows}</tbody></table>
+  ${rcnote}
   <p class="note">Files are in <code>lammps/potentials/</code>. The extension
   says which pair style the file needs, the way <code>.eam</code> and
   <code>.eam.alloy</code> do; the stem says which parameter set it is, a plain
@@ -1805,15 +2618,46 @@ function tvn(g,key){
   return best[key];
 }
 
-function erow(label,pair,frozen,mpval,unc){
+/*  One elastic number out of whichever arm, whatever shape it stores.  The
+    root record and UG keep [fit, experiment] pairs; the tapered and re-cut
+    arms keep a Cij dict and a scalar B, because they were produced by a
+    different driver.  Reading the wrong shape returns undefined and prints an
+    em-dash, which looks like "not measured" rather than like a bug - so the
+    two shapes are handled in one place instead of at each call.  */
+function elVal(r, k){
+  if(!r) return null;
+  if(k==="Ecoh") return Array.isArray(r.Ecoh)?r.Ecoh[0]
+                      :(typeof r.Ecoh==="number"?r.Ecoh:null);
+  if(k==="B") return Array.isArray(r.B)?r.B[0]
+                   :(typeof r.B==="number"?r.B:null);
+  if(r.Cij && typeof r.Cij[k]==="number") return r.Cij[k];
+  return Array.isArray(r[k])?r[k][0]:null;
+}
+/*  Every arm that carries elastic numbers, minus the one already in the "fit"
+    column.  The candidates are the point: they were re-cut to reach the same
+    targets from a different cutoff, so seeing their C11 beside the published
+    one is the most direct statement of what the re-cut did.  */
+function elArms(d){
+  return [["MAU",d],["UG",d.ug],["tap",d.tap],["tap UG",d.tap_ug],
+          ["re-cut",d.rc],["re-cut UG",d.rc_ug]]
+    .filter(o=>o[1] && (o[1].Cij || Array.isArray(o[1].C11)))
+    .filter(o=>o[1] !== parSet(d))
+    .map(o=>[o[0]+(armBad(o[1])?" ✗":""), o[1]]);
+}
+
+function erow(label,pair,frozen,mpval,unc,key,arms){
   if(!pair) return "";
   const calc=Math.abs(pair[0]), exp=Math.abs(pair[1]);
   const err=exp?100*(calc-exp)/exp:null;
   const w=err===null?0:Math.min(Math.abs(err),40)*1.4;
   const fz=(frozen===undefined||frozen===null)?"&mdash;":Math.abs(frozen).toFixed(1);
   const mv=(mpval===undefined||mpval===null)?"&mdash;":Math.abs(mpval).toFixed(1);
+  const extra=(arms||[]).map(a=>{
+    const v=elVal(a[1],key);
+    return `<td class="mono" style="color:var(--ink-2)">${
+      v===null||v===undefined?"&mdash;":Math.abs(v).toFixed(1)}</td>`;}).join("");
   return `<tr><td>${label}</td>
-    <td class="mono"><strong>${calc.toFixed(1)}</strong></td>
+    <td class="mono"><strong>${calc.toFixed(1)}</strong></td>${extra}
     <td class="mono" style="color:var(--ink-3)">${fz}</td>
     <td class="mono" style="color:var(--phi3)">${mv}</td>
     <td class="mono">${exp.toFixed(unc?(unc>=1?1:unc>=0.1?2:3):1)}${unc?`<span
@@ -1894,14 +2738,36 @@ function paramText(d,el,fmtSel,u){
 function render(){
   const d=DATA[cur], t=tier(d.rms), g=d.ld||{}, fz=d.frozen||{};
   const mp=d.mp||{}, me=mp.elastic||{}, mpph=mp.phonon;
-  const dyn=d.dyn||{}, mech=d.mech, rch=d.reach;
-  /*  The UG mechanics come from the same producer as the MAU ones, so the two
-      are the same quantity computed from two elastic tensors and belong in one
-      table rather than in a second one further down the page.  Absent for the
-      elements with no angular fit, and the columns simply do not appear. */
-  const umech=(d.ug&&d.ug.comparable)?d.ug.mech:null;
   const fcbad=(d.fc_check||[]).length>0;
   const P=parSet(d), isUG=(P!==d);
+  /*  Mechanics, dynamics and reach all belong to the set on screen.  They
+      were read from the root record whatever was selected, so choosing UG or
+      a re-cut candidate left the elastic anisotropy, the Poisson range and
+      the stability verdict describing MAU while the parameters above them
+      described something else - the same "verdict measured from something
+      other than what is shown" defect the table cell already fixed once.  */
+  const dyn=(P.dyn||d.dyn||{}), mech=(P.mech||d.mech), rch=(P.reach||d.reach);
+  /*  The comparison column is the OTHER set: whichever arm is not on screen
+      and has mechanics of its own.  It used to be UG unconditionally, which
+      put UG beside UG.  */
+  const other=(()=>{
+    const alt=setsOf(d).filter(o=>o[0]!==PAR_SET
+                                  && o[2] && o[2].mech
+                                  && (o[0]!=="ug" || d.ug.comparable));
+    return alt.length?alt[0]:null;})();
+  const umech=other?other[2].mech:null;
+  const uname=other?other[1]:"UG";
+  /*  Which set is on screen, by key, so the panel can name it instead of
+      saying "UG" for anything that is not the root record.  */
+  const SETNAME={mau:"MAU",ug:"UG",rc:"re-cut",rc_ug:"re-cut UG"};
+  const selName=SETNAME[PAR_SET]||"MAU";
+  const isAng = P.lam2!==undefined || P.lam4!==undefined;
+  /*  The stability warning has to describe the arm whose parameters are on
+      screen.  It read d.dyn whatever was selected, so choosing UG showed the
+      MAU record's verdict and the angular arm never got a warning of its own.
+      Aluminium and sodium are the cases: unstable on the symmetry path in UG,
+      stable in MAU.  */
+  const dynSel=(isUG && P && P.dyn) ? P.dyn : (d.dyn||{});
   /*  The bound flags belong to the parameter set actually on screen.  Reading
       them from the root record put MAU's flags under UG's numbers, and hid
       UG's own: eight hard-truncated and seven switched angular records sit at
@@ -1913,12 +2779,18 @@ function render(){
     <span class="meta">${d.name} &middot; ${d.struct} &middot; a<sub>0</sub> =
       ${d.a0} &Aring;${d.c_over_a?` &middot; c/a = ${d.c_over_a}`:""}
       &middot; d<sub>nn</sub> = ${fmt(d.dnn,3)} &Aring;</span>
-    <span class="rms ${t}">elastic RMS ${d.rms.toFixed(0)}%</span>
+    <span class="rms ${tier(P.rms)}" title="root-mean-square residual of the
+      fit against the elastic constants it was given - three numbers for a
+      cubic element, five for a hexagonal one. It says nothing about anything
+      else on this page.">elastic RMS ${P.rms.toFixed(0)}%</span>
   </div>
 
-  <h3>Fitted parameters${d.ug?` <select id="parset" class="inlinesel">
-      <option value="mau"${PAR_UG?"":" selected"}>MAU &mdash; ${d.rms.toFixed(2)}%</option>
-      <option value="ug"${PAR_UG?" selected":""}>UG &mdash; ${d.ug.rms.toFixed(2)}%</option>
+  <h3>Fitted parameters${setsOf(d).length>1?` <select id="parset" class="inlinesel">
+      ${setsOf(d)
+        .filter(o=>o[2]).map(o=>`<option value="${o[0]}"${
+          PAR_SET===o[0]?" selected":""}>${o[1]} &mdash; ${
+          o[2].rms.toFixed(2)}%${armBad(o[2])?" — REJECTED":""}</option>`)
+        .join("")}
     </select>`:""}</h3>
   <div class="pars">
     <div class="par p2"><span class="k">m</span>
@@ -1938,23 +2810,42 @@ function render(){
       <span class="v mono">${fmt(P.alpha3)}</span></div>
     <div class="par p3"><span class="k">s<sub>3</sub></span>
       <span class="v mono">${fmt(P.s3,3)}</span></div>
-    ${isUG?`<div class="par p3"><span class="k">&lambda;<sub>2</sub></span>
+    ${isAng?`<div class="par p3"><span class="k">&lambda;<sub>2</sub></span>
       <span class="v mono">${fmt(P.lam2,3)}</span></div>
     <div class="par p3"><span class="k">&lambda;<sub>4</sub></span>
       <span class="v mono">${fmt(P.lam4,3)}</span></div>`:""}
     <div class="par p3"><span class="k">triplets / atom</span>
       <span class="v mono">${P.ntrip||d.ntrip||"&mdash;"}</span></div>
   </div>
-  ${isUG?`<p class="note">These are the <strong>UG</strong> parameters &mdash;
-  a separate fit, not MAU plus two extra numbers. Every one of them differs:
-  for this element D is ${fmt(d.D,3)} eV under MAU against ${fmt(d.ug.D,3)}
-  here. Setting &lambda;<sub>2</sub> = &lambda;<sub>4</sub> = 0 recovers the MAU
-  <em>form</em> exactly, but not these values.</p>`:""}
-  ${dyn.stable===false?`<div class="warn">
-    <strong>Dynamically unstable.</strong> ${(dyn.imag_frac*100).toFixed(1)}% of
-    modes on the ${String(dyn.nq).split("+").map(n=>n+"&sup3;").join(" and ")}
-    meshes are imaginary, down to
-    ${(dyn.most_neg_cm1/CM1_PER_THZ).toFixed(2)} THz. The fit only ever sees elastic
+  ${P.rms<0.005?`<p class="note"><strong>An elastic RMS of 0.00 % is real and
+  it is narrow.</strong> The residual here is ${P.rms.toExponential(1)} %:
+  the fit reproduced the ${d.struct==="hcp"?"five":"three"} elastic constants
+  it was handed, to machine precision. ${
+    [["MAU",d],["UG",d.ug],["re-cut",d.rc],["re-cut UG",d.rc_ug]]
+      .filter(o=>o[1]&&typeof o[1].rms==="number"&&o[1].rms>=0.005)
+      .map(o=>`${o[0]} reaches ${o[1].rms.toFixed(1)} %`).join(", ")
+    || "Every set for this element does the same"}. It does not mean the
+  potential is right about anything it was not fitted to &mdash; the phonons,
+  surfaces, stacking faults and thermal expansion further down are all
+  predictions, and several of them are not close.</p>`:""}
+  ${isUG?`<p class="note">These are the <strong>${selName}</strong>
+  parameters &mdash; a separate fit, not MAU with something added. Every one of
+  them differs: for this element D is ${fmt(d.D,3)} eV under MAU against
+  ${fmt(P.D,3)} here.${isAng?` Setting &lambda;<sub>2</sub> =
+  &lambda;<sub>4</sub> = 0 recovers the MAU <em>form</em> exactly, but not
+  these values.`:""}${PAR_SET.startsWith("rc")?` The re-cut candidates are
+  <strong>not part of the published library</strong>: they are the shell-gap
+  re-cut, which passes every cold screen and is a per-element decision at
+  finite temperature.`:""}</p>`:""}
+  ${dynSel.stable===false?`<div class="warn">
+    <strong>Dynamically unstable.</strong> ${(dynSel.imag_frac*100).toFixed(1)}% of
+    modes on the ${String(dynSel.nq).split("+").map(n=>n+"&sup3;").join(" and ")}
+    meshes${dynSel.path?" and the standard path":""} are imaginary, down to
+    ${(dynSel.most_neg_cm1/CM1_PER_THZ).toFixed(2)} THz${
+      dynSel.min_path_cm1!==undefined&&dynSel.min_path_cm1<dynSel.min_mesh_cm1
+      ?" &mdash; and the mesh alone does not find it, which is why the "
+       +"dispersion above dips below zero where a mesh check said it did not"
+      :""}. The fit only ever sees elastic
     constants, which are the q&rarr;0 limit, so nothing in it prevents this:
     Born stability and dynamical stability are separate criteria. Usable for
     elasticity, not for lattice dynamics or molecular dynamics.</div>`:""}
@@ -2003,16 +2894,29 @@ function render(){
     </div>
     <div>
       <h3>Elastic constants (GPa)</h3>
-      <table><thead><tr><th></th><th>fit</th><th>frozen ion</th>
+      ${(()=>{const arms=elArms(d);
+        /*  "fit" is the set selected above, and every other arm that has
+            elastic numbers gets its own column beside it.  The error column
+            belongs to the fit column only - the extras are there to be
+            compared with it, not each scored separately.  */
+        const epair=k=>{const root=d[k];
+          if(!Array.isArray(root)) return null;
+          const v=elVal(P,k);
+          return [(v===null||v===undefined)?root[0]:v, root[1]];};
+        return `<table><thead><tr><th></th><th>fit (${selName})</th>${
+          arms.map(a=>`<th style="font-weight:400">${a[0]}</th>`).join("")
+        }<th>frozen ion</th>
         <th>MP (DFT)</th><th>exp</th><th>error</th></tr></thead><tbody>
-        ${erow("E_coh (eV)",d.Ecoh,null,null,d.Ecoh_unc)}
-        ${erow("B",d.B,null,me.K)}
-        ${erow("C11",d.C11,fz.C11,me.C11,(d.Cij_unc||{}).C11)}
-        ${erow("C12",d.C12,fz.C12,me.C12,(d.Cij_unc||{}).C12)}
-        ${d.struct==="hcp"?erow("C13",d.C13,fz.C13,me.C13):""}
-        ${d.struct==="hcp"?erow("C33",d.C33,fz.C33,me.C33):""}
-        ${erow("C44",d.C44,fz.C44,me.C44,(d.Cij_unc||{}).C44)}
-      </tbody></table>
+        ${erow("E_coh (eV)",epair("Ecoh"),null,null,d.Ecoh_unc,"Ecoh",arms)}
+        ${erow("B",epair("B"),null,me.K,null,"B",arms)}
+        ${erow("C11",epair("C11"),fz.C11,me.C11,(d.Cij_unc||{}).C11,"C11",arms)}
+        ${erow("C12",epair("C12"),fz.C12,me.C12,(d.Cij_unc||{}).C12,"C12",arms)}
+        ${d.struct==="hcp"?erow("C13",epair("C13"),fz.C13,me.C13,null,"C13",arms):""}
+        ${d.struct==="hcp"?erow("C33",epair("C33"),fz.C33,me.C33,null,"C33",arms):""}
+        ${erow("C44",epair("C44"),fz.C44,me.C44,(d.Cij_unc||{}).C44,"C44",arms)}
+      </tbody></table>${arms.some(a=>armBad(a[1]))?`<p class="plotnote">
+        &#10007; marks an arm that failed selection: it reaches these elastic
+        constants and has imaginary modes on the symmetry path.</p>`:""}`;})()}
       ${mp.mp_id?`<p class="plotnote" style="margin-top:9px">
         Materials Project <strong>${mp.mp_id}</strong>, space group
         ${mp.spacegroup}${mp.matches_structure?"":
@@ -2193,8 +3097,9 @@ function render(){
   <div class="grid2">
     <div>
       <table><thead>
-        ${umech?`<tr><th></th><th colspan="3"><span class="tag mau">MAU</span></th>
-          <th colspan="3"><span class="tag ug">UG</span></th></tr>`:""}
+        ${umech?`<tr><th></th><th colspan="3"><span class="tag mau">${selName
+          }</span></th>
+          <th colspan="3"><span class="tag ug">${uname}</span></th></tr>`:""}
         <tr><th></th><th>Voigt</th><th>Reuss</th><th>Hill</th>
         ${umech?`<th>Voigt</th><th>Reuss</th><th>Hill</th>`:""}</tr>
         </thead><tbody>
@@ -2211,21 +3116,21 @@ function render(){
       </tbody></table>
       <div class="cols3" style="margin-top:12px">
         ${cell3("Young E (Hill)",mech.E_H.toFixed(1)+" GPa",
-                umech?umech.E_H.toFixed(1):null,"UG")}
+                umech?umech.E_H.toFixed(1):null,uname)}
         ${cell3("Poisson (Hill)",mech.nu_H.toFixed(3),
-                umech?umech.nu_H.toFixed(3):null,"UG")}
+                umech?umech.nu_H.toFixed(3):null,uname)}
         ${cell3("anisotropy A<sup>U</sup>",mech.A_U.toFixed(3),
-                umech?umech.A_U.toFixed(3):null,"UG")}
+                umech?umech.A_U.toFixed(3):null,uname)}
         ${cell3("Pugh B/G",mech.pugh.toFixed(2),
-                umech?umech.pugh.toFixed(2):null,"UG")}
+                umech?umech.pugh.toFixed(2):null,uname)}
         ${cell3("Cauchy C12-C44",mech.cauchy.toFixed(1)+" GPa",
-                umech?umech.cauchy.toFixed(1):null,"UG")}
+                umech?umech.cauchy.toFixed(1):null,uname)}
         ${mech.debye?cell3("Debye temperature",mech.debye.toFixed(0)+" K",
-                umech&&umech.debye?umech.debye.toFixed(0):null,"UG"):""}
+                umech&&umech.debye?umech.debye.toFixed(0):null,uname):""}
         ${mech.v_l?cell3("v longitudinal",(mech.v_l/1000).toFixed(2)+" km/s",
-                umech&&umech.v_l?(umech.v_l/1000).toFixed(2):null,"UG"):""}
+                umech&&umech.v_l?(umech.v_l/1000).toFixed(2):null,uname):""}
         ${mech.v_t?cell3("v transverse",(mech.v_t/1000).toFixed(2)+" km/s",
-                umech&&umech.v_t?(umech.v_t/1000).toFixed(2):null,"UG"):""}
+                umech&&umech.v_t?(umech.v_t/1000).toFixed(2):null,uname):""}
       </div>
       <p class="plotnote">A<sup>U</sup> = 5G<sub>V</sub>/G<sub>R</sub> +
       B<sub>V</sub>/B<sub>R</sub> &minus; 6 vanishes only for an isotropic
@@ -2242,13 +3147,28 @@ function render(){
           <option value="G">shear modulus G</option>
           <option value="nu">Poisson's ratio</option>
         </select>
+        ${(()=>{const o=marmOpts(d).filter(x=>x[0]!==PAR_SET);
+          return o.length>1?`<select id="marm" style="margin-left:6px">${
+            o.map(x=>`<option value="${x[0]}">beside ${x[1]}</option>`)
+             .join("")}</select>`:"";})()}
       </div>
       <canvas id="polar"></canvas>
       <p class="plotnote">Radius is the value in that direction, so a circle
       means isotropy in the plane.<i class="swatch"
       style="background:var(--phi3);margin-left:8px"></i>dashed: the upper
       envelope over the transverse direction, for the two quantities that need
-      one. Dotted circle marks zero where the range crosses it.</p>
+      one. Dotted circle marks zero where the range crosses it.
+      ${(d.mech_planes&&d.mech_planes.d)?`<br><b>The fourth panel is not a
+      coordinate plane.</b> Between them x&ndash;y, x&ndash;z and y&ndash;z
+      contain [100], [110] and [101] and <b>no member of
+      &lang;111&rang;</b>&nbsp;&mdash; which for a cubic crystal is where
+      Young's modulus is extremal, so three panels understate the stiffest
+      direction badly and with nothing about them looking wrong. The
+      (11&#772;0) plane is spanned by [110] and [001] and &lang;111&rang; sits
+      inside it at 35.26&deg;.${d.struct==="hcp"?` Hexagonal elasticity is
+      transversely isotropic, so for this element it adds no direction the
+      x&ndash;z panel did not already have; it is drawn for consistency across
+      the page.`:""}`:""}</p>
       <div class="cols3" style="margin-top:10px">
         ${cell3("E range",mech.E_min.toFixed(1)+" &ndash; "
            +mech.E_max.toFixed(1)+" GPa","&times;"+mech.E_aniso.toFixed(2))}
@@ -2285,9 +3205,28 @@ function render(){
           <option value="std">this potential only</option>
           ${d.ug&&d.ug.comparable?`<option value="ug">MAU and UG together
             (this potential only)</option>`:""}
+          ${(d.rc&&d.rc.ld&&d.rc.ld.std)?`<option value="recut">MAU and the
+            re-cut candidate together (this potential only)${
+              armBad(d.rc)?" — REJECTED":""}</option>`:""}
+          ${(d.rc_ug&&d.rc_ug.ld&&d.rc_ug.ld.std)?`<option value="recut_ug">MAU
+            and the angular re-cut candidate together (this potential only)${
+              armBad(d.rc_ug)?" — REJECTED":""}</option>`:""}
         </select>
       </div>`:""}
       <canvas id="disp"></canvas>
+      <p class="plotnote"><strong>Which record this curve is.</strong> The
+        parameter-set selector offers the HARD-TRUNCATED sets &mdash; its
+        &ldquo;MAU&rdquo; is the root record shipped as
+        <code>${d.name}.ugur</code> and its &ldquo;UG&rdquo; is
+        <code>${d.name}.ugur.ang</code>. The switched-cutoff sets
+        (<code>${d.name}_taper.ugur</code>) carry no stored dispersion and are
+        reachable only from the download table below. That distinction is not
+        cosmetic: measured against neutron data over the 29 elements that have
+        it, the hard-truncated sets average 9.5&nbsp;% and the switched ones
+        12.6&nbsp;%, and the hard one is closer in 24 of the 29. The switched
+        sets are what molecular dynamics has to use, because a hard cut leaves
+        the pair energy discontinuous, and that is the arm any
+        finite-temperature number quoted elsewhere belongs to.</p>
       ${d.exp_phonon?`<p class="plotnote"><span style="display:inline-block;
         width:9px;height:9px;border:1.4px solid currentColor;border-radius:50%;
         margin-right:5px"></span><strong>Open circles: measured
@@ -2296,17 +3235,87 @@ function render(){
         error <strong>${d.exp_phonon.mae}%</strong>. Nothing at finite q enters
         the fit, so these are out of sample.<br>Source: ${d.exp_phonon.ref}.
         </p>`:""}
+      ${d.model_curve?`<p class="plotnote"><strong>The dashed lines are a
+        model, not a measurement.</strong> ${d.model_curve.why}. What the
+        source tabulates is the force constants of a ${d.model_curve.kind}
+        model${d.model_curve.shells?` &mdash; ${d.model_curve.shells} shells,
+        reaching ${d.model_curve.neighbours} neighbours &mdash;`:", "} and
+        this is those constants evaluated along the path at
+        ${d.model_curve.T_K} K, which
+        is why it is drawn as a line and not as the circles used everywhere
+        else here for individually measured frequencies. Reconstructing a
+        tensor from a published index can go wrong quietly, giving a
+        plausible curve rather than an error, so it was checked against
+        ${d.model_curve.gate}.${d.model_curve.check?` For the record the
+        model returns c<sub>11</sub> ${d.model_curve.check.c11},
+        c<sub>44</sub> ${d.model_curve.check.c44} and c&prime;
+        ${d.model_curve.check.cp} GPa, against ${d.model_curve.check.src}
+        values of ${d.model_curve.check.published_c11},
+        ${d.model_curve.check.published_c44} and
+        ${d.model_curve.check.published_cp}.`:""}<br>Source:
+        ${d.model_curve.ref}.</p>`:""}
+      ${d.exp_curve?`<p class="plotnote">${d.exp_curve.points_only
+        ?`The circles are <strong>${Object.values(d.exp_curve.segs).reduce(
+        (a,v)=>a+v.length,0)} measured frequencies, not a dispersion</strong>.
+        This element's was published as a figure with a list of points beside
+        it &mdash; the symmetry points, or a handful the authors singled out
+        &mdash; so there is no measured curve between them and none is drawn`
+        :`The circles along the branches are the <strong>whole measured
+        dispersion</strong>, ${Object.values(d.exp_curve.segs).reduce(
+        (a,v)=>a+v.length,0)} points with their quoted errors`}, at
+        <strong>${d.exp_curve.T_K} K</strong>. The temperature is
+        part of the datum rather than a footnote: frequencies soften measurably
+        with it${d.exp_curve.T_K<200?`, and this set is well below room
+        temperature &mdash; the full dispersion of this element has not been
+        measured at 300 K, which is why the density-functional literature
+        compares against ${d.exp_curve.T_K} K as well`:""}.${d.struct==="hcp"
+        ?` The [&zeta;&zeta;0] branch runs past K and on to M; the points
+        beyond K belong on M&ndash;K and are drawn there, not folded back
+        onto &Gamma;&ndash;K`
+        :` Points on the part of &Sigma; beyond K are measured but not drawn:
+        this path does not go there`}.${d.exp_curve.a_meas?`<br><b>Scored at
+        the measured crystal's own lattice constant</b>,
+        a&nbsp;=&nbsp;${d.exp_curve.a_meas.toFixed(4)}&nbsp;&#8491;${
+          d.exp_curve.c_meas?`, c&nbsp;=&nbsp;${d.exp_curve.c_meas.toFixed(4)}`
+          :""}, not at the fitted a<sub>0</sub> of
+        ${d.a0.toFixed(4)}&nbsp;&#8491;. The fit targets a room-temperature
+        lattice (a 5&nbsp;K one for the alkalis) and this curve was taken at
+        ${d.exp_curve.T_K}&nbsp;K, so comparing at a<sub>0</sub> would charge
+        the potential for a bookkeeping mismatch rather than for physics.`:""}
+        <br>Source: ${d.exp_curve.ref}.</p>`:""}
       <p class="plotnote">${g.std[0].branches.length} branches. From the
       dynamical matrix &mdash; phonons are not fit targets, so this is a
       prediction. The dashed curve is whichever reference the selector shows,
       with our dispersion re-evaluated at that reference's own q-points, so the
       residual is physics rather than interpolation.
+      <b>Each reference brings its own symmetry path</b>, so the horizontal
+      axis and the labels on it change with the selector. The two curves in
+      any one panel are always on the same path as each other; the paths
+      across panels are not.
+      ${(()=>{const nm=t=>t==="G"?"&Gamma;":t;
+        const walk=r=>r&&r.marks?r.marks.map(m=>nm(m[1])).join("&ndash;"):"";
+        return [["Materials Project",mpph],["MC3D",d.mc3d],
+                ["JARVIS",d.jarvis&&d.jarvis.trusted?d.jarvis:null]]
+          .filter(r=>walk(r[1])).map(r=>`<br>${r[0]}: ${walk(r[1])}`).join("");
+      })()}
+      <br>A reference need not sample the point a label names, so the labels
+      sit at fractional positions between samples, and a curve can cross a
+      &Gamma; line without having reached zero AT any sample there.
+      ${PAR_SET!=="mau"?`<br><b>"This potential only" follows the parameter
+      set selected above; the DFT comparisons do not.</b> Their residual was
+      computed by re-evaluating our dispersion at the reference's own
+      q-points, and that was done for MAU alone &mdash; no such resampling
+      exists for the other arms, so those three views stay MAU whatever is
+      selected.`:""}
       ${[["Materials Project ("+(mpph&&mpph.method||"")+")",mpph],
-         ["Materials Cloud MC3D (PBEsol)",d.mc3d]]
+         ["Materials Cloud MC3D (PBEsol)",d.mc3d],
+         ["JARVIS-DFT (NIST)", d.jarvis&&d.jarvis.trusted?d.jarvis:null]]
         .filter(r=>r[1]&&r[1].stats).map(r=>`<br>
         <i class="swatch" style="background:var(--phi3)"></i>vs <strong>${r[0]}
         </strong>: RMS ${(r[1].stats.rms_cm1/CM1_PER_THZ).toFixed(2)} THz
-        (${r[1].stats.rel_pct}% of their highest branch), top frequency
+        (${r[1].stats.rel_pct!==undefined?r[1].stats.rel_pct
+          :(100*r[1].stats.rms_cm1/r[1].stats.ref_max).toFixed(1)}% of their
+        highest branch), top frequency
         ${(r[1].stats.ours_max/CM1_PER_THZ).toFixed(2)} vs
         ${((r[1].stats.mp_max||r[1].stats.ref_max)/CM1_PER_THZ).toFixed(2)}
         THz.`).join("")}</p>
@@ -2350,23 +3359,26 @@ function render(){
   1-2 J/(mol K), so a slightly lower C<sub>v</sub> is expected. No thermal
   quantity enters the fit.</p>`:""}
 
+  ${finiteTBlock(d)}
+
   ${d.elasticT?`<h3>Elastic constants against temperature
     <select id="etq" class="inlinesel">${ET_QS.map(a=>
       `<option value="${a[0]}"${a[0]===ET_Q?" selected":""}>${a[1]}</option>`
       ).join("")}</select></h3>
   <canvas id="elasT"></canvas>
   <p class="plotnote">
-    <i class="swatch" style="background:var(--phi2)"></i>MAU (solid)
-    &nbsp;&middot;&nbsp;
-    <i class="swatch" style="background:var(--phi3)"></i>UG (dashed)
+    <strong>Every curve is named at its right-hand end</strong>, in its own
+    colour &mdash; there are ${Object.keys(d.elasticT).length} of them here and
+    no swatch list would carry that. Ours are drawn heavier; the
+    published potentials are the thin dotted ones.
     ${Object.values(d.elasticT).some(r=>r.kind==="base")?`
-      &nbsp;&middot;&nbsp;<i class="swatch" style="background:var(--ref)"></i>
-      published potentials shipped with LAMMPS (dotted)
-      (${Object.values(d.elasticT).filter(r=>r.kind==="base")
-         .map(r=>r.label+" &mdash; <code>"+r.file+"</code>").join("; ")}),
-      run through the identical cell, recipe
+      Those are
+      ${Object.values(d.elasticT).filter(r=>r.kind==="base")
+         .map(r=>r.label+" &mdash; <code>"+r.file+"</code>").join("; ")},
+      shipped with LAMMPS and run through the identical cell, recipe
       and post-processing &mdash; without them these curves would have nothing
       to be measured against.`:""}
+    The dashed vertical is the melting point.
     <strong>Molecular dynamics</strong>, unlike everything above it on this
     page: a thermostatted trajectory at each temperature, with the tensor from
     the Born stress-fluctuation method &mdash; the recipe of LAMMPS's own
@@ -2434,9 +3446,7 @@ function render(){
 
   <canvas id="bain"></canvas>
   <p class="plotnote">
-    <i class="swatch" style="background:var(--phi2)"></i>MAU (solid)
-    ${d.tap_ug&&d.tap_ug.bain?`&nbsp;&middot;&nbsp;
-      <i class="swatch" style="background:var(--phi3)"></i>UG (dashed)`:""}
+    ${armKey(armRecs(d,r=>r.bain&&r.bain.E&&r.bain.E.length))}
     &mdash; energy along the volume-conserving tetragonal strain
     (1+&delta;, 1+&delta;, 1/(1+&delta;)<sup>2</sup>), whose curvature at
     &delta; = 0 is C&prime; = (C<sub>11</sub>&minus;C<sub>12</sub>)/2.
@@ -2458,22 +3468,22 @@ function render(){
 
   ${(d.tap&&d.tap.surface)?`<h3>Surface energy</h3>
   <div style="overflow-x:auto">
-  <table><thead><tr><th>facet</th><th>MAU</th>
-    ${d.tap_ug&&d.tap_ug.surface?"<th>UG</th>":""}
+  <table><thead><tr><th>facet</th>
+    ${armRecs(d,r=>r.surface&&r.surface.gamma).map(o=>
+      `<th>${o[2]}</th>`).join("")}
     <th>DFT</th>${d.surface_ref&&d.surface_ref.tyson?"<th>experiment</th>":""}
     ${d.baseline_surface&&Object.keys(d.baseline_surface).length
       ?`<th>published${Object.keys(d.baseline_surface).length>1
         ?" (lowest&ndash;highest)":""}</th>`:""}</tr></thead><tbody>
   ${d.tap.surface.order_want.map(f=>{
-    const ours=d.tap.surface.gamma[f];
-    const ug=d.tap_ug&&d.tap_ug.surface?d.tap_ug.surface.gamma[f]:null;
+    const cells=armRecs(d,r=>r.surface&&r.surface.gamma)
+      .map(o=>o[1].surface.gamma[f]);
     const dft=(d.surface_ref&&d.surface_ref.facets)?d.surface_ref.facets[f]:null;
     const bs=Object.values(d.baseline_surface||{})
       .map(s=>s.gamma[f]).filter(v=>v!==undefined&&v!==null);
     return `<tr><td>(${f})</td>
-      <td>${ours!==undefined&&ours!==null?ours.toFixed(3):"&mdash;"}</td>
-      ${d.tap_ug&&d.tap_ug.surface
-        ?`<td>${ug!==undefined&&ug!==null?ug.toFixed(3):"&mdash;"}</td>`:""}
+      ${cells.map(v=>`<td>${v!==undefined&&v!==null
+        ?v.toFixed(3):"&mdash;"}</td>`).join("")}
       <td>${dft?dft.toFixed(3):"&mdash;"}</td>
       ${d.surface_ref&&d.surface_ref.tyson
         ?`<td>${d.surface_ref.tyson.toFixed(2)}</td>`:""}
@@ -2546,7 +3556,8 @@ function render(){
            + " against experiment" : null)}
     ${cell3("facet ordering",
        d.tap.surface.order.map(f=>"("+f+")").join(" &lt; "),
-       "should be " + d.tap.surface.order_want.map(f=>"("+f+")").join(" < "))}
+       "should be " + d.tap.surface.order_want.map(f=>"("+f+")").join(" < ")
+       + (d.tap.surface.order_basis==="rule" ? " (rule)" : ""))}
     ${cell3("anisotropy",
        (100*d.tap.surface.spread).toFixed(1) + " %",
        (d.surface_ref&&d.surface_ref.anisotropy!==undefined
@@ -2554,22 +3565,40 @@ function render(){
          ? "DFT " + (100*d.surface_ref.anisotropy).toFixed(1) + " %" : null)}
   </div>
 
-  <p class="note">${d.tap.surface.order_ok?`The ordering is right: the
-    close-packed face is the cheapest, as it is in the metal.`:`<strong
-    style="color:var(--bad)">The ordering is wrong.</strong> In a real metal the
-    close-packed face is the cheapest, and every published potential tested here
-    reproduces that; this record does not.`}
+  <p class="note">${d.tap.surface.order_ok===null?`The three reference facets
+    fall within ${(100*d.tap.surface.order_margin).toFixed(1)} % of one another,
+    which is finer than this potential &mdash; or the calculation the reference
+    comes from &mdash; can resolve, so the ordering is not scored for this
+    element.`:d.tap.surface.order_ok?`The ordering is right: the facets come out
+    in the order ${d.tap.surface.order_basis==="rule"
+    ?`close packing predicts. That is the target here only because the
+    reference does not cover all three facets of this element; where it does,
+    it is the reference and not the rule that is scored against`
+    :`the reference calculation gives for this element`}.`:`<strong
+    style="color:var(--bad)">The ordering is wrong.</strong> ${
+    d.tap.surface.order_basis==="rule"
+    ?`The reference does not cover all three facets of this element, so the
+    target fell back to close packing &mdash; which is a weaker test than the
+    rest of this column, because the rule itself is unreliable: the reference
+    contradicts it for 17 of the 35 elements it does cover.`
+    :`The reference calculation puts these facets in a different order. Close
+    packing is the usual rule but not a reliable one &mdash; the reference
+    contradicts it for 17 of the 35 elements it covers &mdash; so the target
+    here is that element&rsquo;s own calculated ordering, and on the records
+    where it is resolved most published potentials reproduce it; this record
+    does not.`}`}
   It is the same shortage the vacancy energy exposes, and the usual account of
   it &mdash; that the energy of a bond in this form cannot depend on how many
   other bonds an atom has &mdash; is <em>too strong</em>. A three-body term
   counts neighbour pairs, so it does carry a coordination dependence, and a
   two- plus three-body potential with free radial shapes fitted to
-  density-functional energies and forces reproduces tungsten&rsquo;s surface
-  energies to within 4 % (Xie, Rupp and Hennig, npj Comput. Mater. <strong>9
-  </strong>, 162 (2023)).
+  density-functional energies and forces reproduces coordination-sensitive
+  energies to within a few per cent (Xie, Rupp and Hennig, npj Comput. Mater.
+  <strong>9</strong>, 162 (2023)).
   So what these numbers measure is this parameterisation
   &mdash; parameters fitted to bulk elastic data, which never saw a surface
-  &mdash; rather than the functional form.</p>`:""}
+  &mdash; rather than the functional form.
+  ${uf3Note(DATA.Nb, d.name==="Niobium")}</p>`:""}
 
   ${(d.tap&&d.tap.stacking)?`<h3>Stacking fault, and the prediction it tests</h3>
   ${(()=>{const hex=d.struct==="hcp";
@@ -2585,8 +3614,8 @@ function render(){
   to match, so exactly one fault exists rather than two.</p>`;})()}
 
   <div style="overflow-x:auto">
-  <table><thead><tr><th></th><th>MAU</th>
-    ${d.tap_ug&&d.tap_ug.stacking?"<th>UG</th>":""}
+  <table><thead><tr><th></th>
+    ${armRecs(d,r=>r.stacking).map(o=>`<th>${o[2]}</th>`).join("")}
     ${d.tap.stacking.exp?"<th>experiment</th>":""}
     ${Object.keys(d.baseline_stacking||{}).length
       ?`<th>published${Object.keys(d.baseline_stacking).length>1
@@ -2594,15 +3623,13 @@ function render(){
   ${[["intrinsic fault &gamma;<sub>isf</sub>","isf"],
      ["unstable fault &gamma;<sub>usf</sub>","usf"]].map(row=>{
     const key=row[1];
-    const ours=d.tap.stacking[key];
-    const ug=d.tap_ug&&d.tap_ug.stacking?d.tap_ug.stacking[key]:null;
+    const cells=armRecs(d,r=>r.stacking).map(o=>o[1].stacking[key]);
     const bs=Object.values(d.baseline_stacking||{})
       .map(s=>s[key]).filter(v=>v!==undefined&&v!==null);
     return `<tr><td>${row[0]}</td>
-      <td${key==="isf"&&ours<0?' style="color:var(--bad)"':""}>${
-        ours!==undefined&&ours!==null?ours.toFixed(1):"&mdash;"}</td>
-      ${d.tap_ug&&d.tap_ug.stacking
-        ?`<td>${ug!==undefined&&ug!==null?ug.toFixed(1):"&mdash;"}</td>`:""}
+      ${cells.map(v=>`<td${key==="isf"&&v<0
+        ?' style="color:var(--bad)"':""}>${v!==undefined&&v!==null
+        ?v.toFixed(1):"&mdash;"}</td>`).join("")}
       ${d.tap.stacking.exp
         ?`<td>${key==="isf"?d.tap.stacking.exp.toFixed(0):"&mdash;"}</td>`:""}
       ${Object.keys(d.baseline_stacking||{}).length
@@ -2623,9 +3650,8 @@ function render(){
 
   <canvas id="gamma"></canvas>
   <p class="plotnote">
-    <i class="swatch" style="background:var(--phi2)"></i>MAU (solid)
-    ${d.tap_ug&&d.tap_ug.stacking?`&nbsp;&middot;&nbsp;
-      <i class="swatch" style="background:var(--phi3)"></i>UG (dashed)`:""}
+    ${armKey(armRecs(d,r=>r.stacking&&r.stacking.gamma&&
+                             r.stacking.gamma.length))}
     ${Object.keys(d.baseline_stacking||{}).length?`&nbsp;&middot;&nbsp;
       published potentials in thin grey`:""}
     &mdash; energy against the shift, over one whole period. Two points on it
@@ -2691,7 +3717,8 @@ function render(){
     functional form itself: the same two- plus three-body expansion, fitted to
     density-functional energies and forces, reproduces coordination-sensitive
     energies to within a few per cent (Xie, Rupp and Hennig, npj Comput. Mater.
-    <strong>9</strong>, 162 (2023)).</p>`;})()}
+    <strong>9</strong>, 162 (2023)).
+    ${uf3Note(DATA.Nb, d.name==="Niobium")}</p>`;})()}
   `:""}
 
   ${(d.tap&&d.tap.expansion&&d.tap.expansion.failed)?`
@@ -2740,9 +3767,8 @@ function render(){
 
   <canvas id="expan"></canvas>
   <p class="plotnote">
-    <i class="swatch" style="background:var(--phi2)"></i>MAU (solid)
-    ${d.tap_ug&&d.tap_ug.expansion?`&nbsp;&middot;&nbsp;
-      <i class="swatch" style="background:var(--phi3)"></i>UG (dashed)`:""}
+    ${armKey(armRecs(d,r=>r.expansion&&r.expansion.T&&
+                             r.expansion.T.length>1))}
     ${Object.keys(d.baseline_expansion||{}).length?`&nbsp;&middot;&nbsp;
       published potentials in thin grey`:""}
     ${d.tap.expansion.alpha_exp_1e6?`&nbsp;&middot;&nbsp;
@@ -2840,9 +3866,12 @@ function render(){
 
   <h3>Parameters</h3>
   <div class="gen">
-    ${d.ug?`<select id="pot">
-      <option value="mau"${PAR_UG?"":" selected"}>MAU &mdash; ${d.rms.toFixed(2)}%</option>
-      <option value="ug"${PAR_UG?" selected":""}>UG (Ugur-Guler) &mdash; ${d.ug.rms.toFixed(2)}%</option>
+    ${setsOf(d).length>1?`<select id="pot">
+      ${setsOf(d).map(o=>`<option value="${o[0]}"${
+          PAR_SET===o[0]?" selected":""}>${
+          o[0]==="ug"?"UG (Ugur-Guler)":o[1]} &mdash; ${
+          o[2].rms.toFixed(2)}%${armBad(o[2])?" — REJECTED":""}</option>`)
+        .join("")}
     </select>`:""}
     <select id="fmt">
       <option value="text" selected>readable</option>
@@ -2859,11 +3888,14 @@ function render(){
       the chip row at the top and the export at the bottom can never end up
       describing different potentials.  They appear only for the fourteen
       elements that have a UG fit. */
-  const setPar=v=>{PAR_UG=(v==="ug"); render();};
+  const setPar=v=>{PAR_SET=v; buildTable(); render();};
   if(pot) pot.onchange=()=>setPar(pot.value);
   if(pset) pset.onchange=()=>setPar(pset.value);
   const upd=()=>{$("#out").textContent=
-    paramText(d,cur,$("#fmt").value, isUG?d.ug:null);};
+    /*  the exported text has to be the set on screen, whichever it is - it
+        used to be hard-wired to d.ug and would have handed out the angular
+        parameters while the panel showed a re-cut candidate  */
+    paramText(d,cur,$("#fmt").value, isUG?P:null);};
   $("#fmt").onchange=upd;
   upd();
   $("#copy").onclick=async()=>{
@@ -2874,6 +3906,9 @@ function render(){
   const mps=$("#mprop");
   if(mps){mps.value=MPROP_SEL;
     mps.onchange=()=>{MPROP_SEL=mps.value;drawPolar(d);};}
+  const mrm=$("#marm");
+  if(mrm){mrm.value=MARM;
+    mrm.onchange=()=>{MARM=mrm.value;drawPolar(d);};}
   const dm=$("#dmode");
   if(dm){dm.value=DISP_MODE;
     dm.onchange=()=>{DISP_MODE=dm.value;drawDisp(d);};}
@@ -3050,6 +4085,7 @@ out = (HTML
        #  or an older run still carries the key, and the page would
        #  republish it silently.  Stripped here as well so that the
        #  licence guarantee does not depend on which file was loaded.
+       .replace("__FT__", json.dumps(FT, separators=(",", ":")))
        .replace("__DATA__", json.dumps(
            {e: {k: v for k, v in r.items() if k != "aflow"}
             for e, r in DATA.items()}, separators=(",", ":")))
@@ -3058,10 +4094,46 @@ out = (HTML
        #  the UG count is the data's, not a number typed into the legend: it
        #  was still saying fourteen while the runs that take it to every
        #  element were on the cluster
-       .replace("__NUG__", str(sum(1 for v in DATA.values() if v.get("ug")))))
+       #  The dot used to mean "has a UG fit", which marked all 38 and so
+       #  marked nothing.  It marks the re-ranked candidates now, and the
+       #  legend has to say which - a marker whose caption describes the
+       #  previous meaning is worse than no marker.
+       .replace("__NUG__", str(sum(1 for v in DATA.values() if v.get("ug"))))
+       #  A visible build stamp.  Twice now a change has been reported as
+       #  missing when the file on disk already had it and the browser was
+       #  showing an older copy; the stamp settles that in one glance instead
+       #  of by reading the page's own JavaScript.
+       .replace("__BUILT__", _dt.datetime.now().strftime("%Y-%m-%d %H:%M"))
+       #  which tree wrote this file, from the path rather than from a
+       #  constant, so a copied script cannot mislabel its own output
+       .replace("__TREE__", "screen"
+                if "_screen" in HERE else "published")
+       .replace("__NSET__", str(sum(
+           1 for v in DATA.values()
+           if isinstance(v, dict) and "rms" in v
+           and sum(1 for k in ("ug", "rc", "rc_ug")
+                   if isinstance(v.get(k), dict) and "rms" in v[k]) >= 1))))
 path = os.path.join(HERE, "potential.html")
 open(path, "w", encoding="utf-8").write(out)
 print(f"wrote {path}  ({len(out)/1024:.0f} KB, {len(DATA)} elements)")
+
+#  Parse the page's own JavaScript before claiming it was written.  A syntax
+#  error here does not raise anything on this side - the file is just text -
+#  and the browser reports it to a console nobody has open, so the page comes
+#  up blank or half-drawn and looks like a data problem.  esprima is optional;
+#  if it is not installed the check says so rather than passing silently.
+try:
+    import re as _re
+    import esprima as _es
+    _js = chr(10).join(m.group(1) for m in
+                       _re.finditer(r"<script[^>]*>(.*?)</script>",
+                                    out, _re.S))
+    _es.parseScript(_js)
+    print(f"  javascript parses ({len(_js)/1024:.0f} KB)")
+except ImportError:
+    print("  javascript NOT checked - pip install esprima to enable")
+except Exception as _e:
+    raise SystemExit(f"  JAVASCRIPT SYNTAX ERROR in the page just written: {_e}")
 #  which elements failed is still worth knowing while building the page - it is
 #  simply not something the page argues about any more
 if FAILED:

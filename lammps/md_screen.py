@@ -55,7 +55,11 @@ SKIN = 2.0
 SETS = {"hard": (None, "ugur", "hard cutoff"),
         "tap": ("tap", "ugur", "tapered"),
         "ug": ("ug", "ugur/ang", "hard cutoff + angular"),
-        "tap_ug": ("tap_ug", "ugur/ang", "tapered + angular")}
+        "tap_ug": ("tap_ug", "ugur/ang", "tapered + angular"),
+        #  the re-ranked candidates (REFIT 8b).  Same taper, same pair
+        #  style; only the cutoff and the parameters behind it differ.
+        "rc": ("rc", "ugur", "re-ranked cutoff"),
+        "rc_ug": ("rc_ug", "ugur/ang", "re-ranked cutoff + angular")}
 
 POTFILE = """# {el}, written by md_screen.py
 {el} {el} {el} {m:.17g} {D:.17g} {alpha:.17g} {r0:.17g} {gamma:.17g} {C:.17g} {alpha3:.17g} {rcut2:.17g} {rcut3:.17g} {taper:.17g} {lam2:.17g} {lam4:.17g}

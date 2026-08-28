@@ -1,0 +1,22 @@
+# Tl - Ugur interatomic potential, CANDIDATE, re-cut, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Tl_recut.ugur.ang Tl
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (302 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Tl at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Tl Tl Tl 1.2020441518173113 0.16258581735552544 0.95041435715198019 3.9393767544296345 0.36252450896748334 -4.1105771050451132 2.1330115182223666 9.5085489182614236 5.110657652784913 0.84999999999999998 0.73470672105892132 0.71527715318269314

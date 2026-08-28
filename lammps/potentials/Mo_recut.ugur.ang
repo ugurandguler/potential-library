@@ -1,0 +1,29 @@
+# Mo - Ugur interatomic potential, CANDIDATE, re-cut, switched, with the angular factor
+#
+# pair_style ugur/ang
+# pair_coeff * * Mo_recut.ugur.ang Mo
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (302 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# LATTICE STABILITY: this set is NOT a harmonic minimum.
+# Along the Setyawan-Curtarolo path its frequencies reach -14.229 cm^-1,
+# with 0.23 % of the sampled modes imaginary.  That is a separate
+# failure from the 600 K screen above and is not covered by it.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# REJECTED: this record did NOT pass selection -
+# it carries a mode at -14.2 cm^-1 on the symmetry path; it puts fcc lowest, 273 meV/atom below bcc.
+# It is kept as the control the accepted records are read against,
+# not as a potential.  Do not use it.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mo at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mo Mo Mo 14.37681428392651 0.3408400000720152 0.22190810444025777 3.3821578582537777 0.96601812781822227 -1.4341748172208737 0.98635079274741844 9.1055010806158698 4.0880729185644427 0.84999999999999998 -0.71374719645473628 -0.23625269228988049

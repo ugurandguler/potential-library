@@ -1,0 +1,28 @@
+# Ni - Ugur interatomic potential, CANDIDATE, re-cut, switched
+#
+# pair_style ugur
+# pair_coeff * * Ni_recut.ugur Ni
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (300 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Measured dispersion: 12.1 % against 13.4 % for the published switched
+# arm - better.
+# On the 41 accepted candidate records the re-cut is close to break-even
+# overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10
+# worse; 300 K elastic constants 3.4 % -> 2.7 %, 7 better and 3 worse.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Ni at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ni Ni Ni 2.1182149991454482 0.32378552281483369 0.86213326143543001 3.143437322585855 1.1998375453629655 -0.44541645601699609 2.1077532411009305 8.4483489042144857 3.7377664453520905 0.84999999999999998 0 0

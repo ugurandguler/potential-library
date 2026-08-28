@@ -21,8 +21,14 @@ import json, os, sys
 import numpy as np
 import latdyn as L
 import refdata
+#  the SAME path build_library.py draws the dispersion panel on, so the badge
+#  and the picture cannot disagree
+from build_library import sc_segments, NQ_PATH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+#  a mode counts as imaginary below this, in cm^-1
+IMAG_TOL_CM1 = -1.0
 
 
 def main(meshes=(8, 9)):
@@ -42,14 +48,39 @@ def main(meshes=(8, 9)):
         #  9^3 finds modes at -37 and -67 cm^-1, near the bcc N point where the
         #  known anomalies of Nb, V, W and the alkalis live.  Take the union of
         #  an even and an odd mesh.
-        f = np.concatenate([L.spectrum(cry, pot, nq=n).ravel()
-                            for n in meshes])
-        neg = int((f < -1e-6).sum())
+        #  A Monkhorst-Pack mesh cannot see the symmetry lines.  L.mesh is
+        #  half-shifted - (arange(n)+0.5)/n - 0.5 - so it never lands on Gamma,
+        #  on a zone-boundary point, or on the line between two of them, and
+        #  refining it does not help because a shifted grid steps over the same
+        #  places however fine it gets.  An instability confined to a line is
+        #  invisible to it.  Iridium is the case that showed this: -8.1 cm^-1
+        #  half way along K-Gamma, called stable here for as long as only the
+        #  mesh was sampled - while the dispersion panel on the same record
+        #  drew the negative branch for anyone who looked.  Sample the path as
+        #  well, and the same one the panel uses.
+        qs = []
+        for (_, ka, __, kb) in sc_segments(refdata.ELEMENTS[el]["struct"]):
+            qs.extend(ka + np.linspace(0, 1, NQ_PATH)[:, None] * (kb - ka))
+        f = np.concatenate(
+            [L.spectrum(cry, pot, nq=n).ravel() for n in meshes]
+            + [L.frequencies_many(cry, pot, np.array(qs)).ravel()]) * L.CM1
+        #  The tolerance is PHYSICAL, not a floating-point epsilon.  The three
+        #  acoustic branches are exactly zero at Gamma and come back from the
+        #  diagonalisation a shade under it, so a cut at -1e-6 THz flags modes
+        #  at -1e-4 cm^-1 - four orders below anything real, on the 0.08 % of
+        #  modes that ARE the Gamma point.  refit/dynscreen.py hit exactly that
+        #  and called beryllium and chromium unstable.  Real instabilities in
+        #  this library run -6 to -63 cm^-1, so the range between is empty.
+        neg = int((f < IMAG_TOL_CM1).sum())
         frac = neg / f.size
-        most = float(f.min()*L.CM1) if neg else 0.0
+        most = float(f.min()) if neg else 0.0
         v["dyn"] = {"imag_frac": round(frac, 4),
                     "most_neg_cm1": round(most, 1),
-                    "stable": neg == 0, "nq": "+".join(map(str, meshes))}
+                    "stable": neg == 0,
+                    "nq": "+".join(map(str, meshes)),
+                    #  the viewer renders nq as "8^3 and 9^3", so the path
+                    #  travels as its own field rather than inside that string
+                    "path": "Setyawan-Curtarolo"}
         tag = "stable" if neg == 0 else "DYNAMICALLY UNSTABLE"
         if neg:
             bad.append((frac, el, most))

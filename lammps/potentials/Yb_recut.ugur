@@ -1,0 +1,32 @@
+# Yb - Ugur interatomic potential, CANDIDATE, re-cut, switched
+#
+# pair_style ugur
+# pair_coeff * * Yb_recut.ugur Yb
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 8.3 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# MD: structure screened - holds its shape at 600 K (301 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Measured dispersion: 8.5 % against 8.6 % for the published switched
+# arm - the same.
+# On the 41 accepted candidate records the re-cut is close to break-even
+# overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10
+# worse; 300 K elastic constants 3.4 % -> 2.7 %, 7 better and 3 worse.
+#
+# FINITE TEMPERATURE: this candidate passes the screens above and fails
+# below room temperature - C11 RISES 8 % between 0 K and 658 K instead of softening.
+# Use it for static properties only, if at all.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Yb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Yb Yb Yb 3.7846536648135727 0.10739103368489251 0.47943218633238871 4.890134799617015 0.6831470049704067 2.0440196815859939 1.5660294509606738 13.137614073523093 5.8124177413534213 0.84999999999999998 0 0

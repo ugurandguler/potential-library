@@ -49,7 +49,7 @@ import latdyn as L      # noqa: E402
 import refdata          # noqa: E402
 import cellfile         # noqa: E402
 
-LOCAL = not os.path.exists("/arf")      # windows+wsl here, plain shell on TRUBA
+LOCAL = os.environ.get("NUDGE_LOCAL", "1") != "0"   # 0 on the cluster
 #  Ask WSL where home is only where WSL exists.  This ran unconditionally at
 #  import, so on the cluster the module died on its first line - after the fit
 #  had already spent thirty-seven minutes.  The launcher resubmits whenever

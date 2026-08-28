@@ -126,7 +126,7 @@ def fitted_starts(el):
     an existence proof, so feed them all in.
     """
     #  every run directory, not a name pattern.  Matching only "angular_*" quietly
-    #  skipped the cluster results in runs/truba_ang_on/, and the search then
+    #  skipped the cluster results in runs/cluster_ang_on/, and the search then
     #  reported rhodium out of reach at 1.720 while a fit sitting in that very
     #  directory had already hit 1.680 exactly.
     out = []

@@ -3,7 +3,7 @@
 Rebuild everything downstream of the fits, in the one order that works.
 
     python refresh.py                       # rebuild from the current fit.json
-    python refresh.py runs/2026-08-01_truba # merge that run in first
+    python refresh.py runs/2026-08-01_cluster # merge that run in first
 
 Everything the viewer shows is derived from fit.json, so a new search only has
 to be merged and then this run: elastic constants, the mechanical analysis,
@@ -33,7 +33,36 @@ The order is not arbitrary:
                   cprime_region.json, which change only if the form does
   fix_mp_path     MP labels and discontinuities - AFTER add_mp_overlay, which
                   rewrites the phonon record
+  add_phonon_curves the measured dispersion curves; add_bvk_curve the
+                  reconstructed ones.  Both read refdata_phonon_curves.py and
+                  need nothing fetched
+  add_dynstab_ug  the same stability screen on the angular arm
+  add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
+                  contain no member of <111>, which for a cubic crystal is
+                  where the extremum sits
+  fix_mark_x      the fractional index of each high-symmetry label - AFTER the
+                  overlays, whose q-lists it corrects
   make_gui        the page
+
+WHAT A FRESH CLONE CANNOT REBUILD, and why.  None of these is a fault; each is
+data that is not ours to redistribute or is too large to carry, and each step
+says so and continues rather than failing:
+
+  the DFT overlays        Materials Project, Materials Cloud MC3D and
+                          JARVIS-DFT are fetched data.  Set MP_API_KEY for the
+                          first; the other two need their own downloads
+  the tapered arm         `tap` and `tap_ug` come from add_taper_overlay.py,
+                          which reads the `dense_*.json` search output.  That
+                          is gigabytes and is gitignored
+  the re-cut candidates   add_candidates.py reads `refit/`, which is not
+                          published
+  the finite-temperature  make_finiteT.py needs the tapered arm above.  The
+  panel                   finished table ships as finiteT.json and the page
+                          carries it, so nothing is missing from the page -
+                          only from a rebuild
+
+The shipped `docs/index.html` is the complete page; a rebuilt one is smaller
+and says which comparisons it could not make.
 
 A step that fails stops the run, because a later step reading half-written data
 is worse than no rebuild.
@@ -63,7 +92,18 @@ CHAIN = [
     ("add_jarvis_overlay.py", "JARVIS-DFT comparison, conflicting entries flagged", True),
     ("add_ug_overlay.py", "UG (angular) results beside MAU, if any exist", True),
     ("add_reachability.py", "is this metal inside the form's reach", False),
+    #  Everything below was added after 1.0.0 and was being run by hand, which
+    #  meant this script stopped rebuilding what it says it rebuilds: a clean
+    #  clone came out with no measured dispersion curves at all.  These five
+    #  need nothing but library.json, so they belong in the chain.
+    ("add_phonon_curves.py", "measured dispersion curves along the path", False),
+    ("add_bvk_curve.py", "the reconstructed curves, from published force "
+     "constants", False),
+    ("add_dynstab_ug.py", "the stability screen on the angular arm", True),
+    ("add_plane_d.py", "the (1 -1 0) polar section, which the three "
+     "coordinate planes miss", False),
     ("fix_mp_path.py", "MP high-symmetry labels and path discontinuities", True),
+    ("fix_mark_x.py", "the fractional index of each high-symmetry label", True),
     ("make_gui.py", "potential.html", False),
 ]
 

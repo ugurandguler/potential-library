@@ -42,6 +42,10 @@ SETS = {
     "tap": ("tap", "ugur", "_taper.ugur"),
     "ug": ("ug", "ugur/ang", ".ugur.ang"),
     "tap_ug": ("tap_ug", "ugur/ang", "_taper.ugur.ang"),
+    #  the re-ranked candidates; the file stem carries `_rc` so a reader who
+    #  copies one out cannot confuse it with a shipped set
+    "rc": ("rc", "ugur", "_rc.ugur"),
+    "rc_ug": ("rc_ug", "ugur/ang", "_rc.ugur.ang"),
 }
 #  the angular sets need the angular tree's latdyn, which cannot be imported
 #  here - the two trees define incompatible versions.  angular/dynstab_ug.py

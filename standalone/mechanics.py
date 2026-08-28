@@ -170,17 +170,29 @@ def analyse(C, mass_amu=None, volume_A3=None, natoms=1, nu=4000):
 
 def plane_curves(C, plane, n=120):
     """
-    E, beta and the shear / Poisson envelopes around one coordinate plane.
-    plane is 'xy', 'xz' or 'yz'.  The angles are a plain linspace over the full
-    turn, so they are not stored - the viewer regenerates them and only the
+    E, beta and the shear / Poisson envelopes around one plane.
+    plane is 'xy', 'xz', 'yz' or 'd'.  The angles are a plain linspace over the
+    full turn, so they are not stored - the viewer regenerates them and only the
     curves travel.
+
+    'd' is the (1 -1 0) plane, spanned by [110] and [001].  The three
+    coordinate planes contain [100], [110] and [101] and NO member of <111>,
+    which for a cubic crystal is exactly where the extremum sits: copper's
+    sections span 66.7 to 130.3 GPa while E along [111] is 191.1, and sodium's
+    span 1.9 to 5.0 against 10.6.  So the three panels were not merely
+    incomplete, they missed the stiffest direction of every cubic metal here.
+    A hexagonal cell needs no such plane - its surface is a body of revolution
+    about c, and the x-z and y-z sections already agree to 0.0000 GPa - but it
+    is harmless there and is computed for both.
     """
     s, _ = compliance_tensor(C)
     t = np.linspace(0, 2 * np.pi, n, endpoint=False)
     z = np.zeros_like(t)
+    r2 = np.cos(t) / np.sqrt(2.0)
     u = {"xy": np.stack([np.cos(t), np.sin(t), z], 1),
          "xz": np.stack([np.cos(t), z, np.sin(t)], 1),
-         "yz": np.stack([z, np.cos(t), np.sin(t)], 1)}[plane]
+         "yz": np.stack([z, np.cos(t), np.sin(t)], 1),
+         "d":  np.stack([r2, r2, np.sin(t)], 1)}[plane]
     gmin, gmax, nmin, nmax = shear_and_poisson(s, u)
     return dict(E=[round(float(x), 2) for x in young(s, u)],
                 beta=[round(float(x), 6) for x in compressibility(s, u)],
