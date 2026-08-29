@@ -239,7 +239,11 @@ PHONON_CURVE = {
     }},
 
     #  ---- platinum, 90 K.  Table 1 for eight branches, Table 2 for T1 ---
-    "Pt": {"T_K": 90, "ref": PT_REF, "branches": {
+    #  Measured at 90 K and, until 2026-08-29, scored at refdata's ~293 K
+    #  a0.  a(90 K) from the Debye-shaped expansion integral under the CRC's
+    #  alpha(25 C) with Stewart's theta_D; the integral runs ~12 % high for
+    #  the softest metals and platinum is not one of them.
+    "Pt": {"T_K": 90, "a_meas": 3.9177, "a_meas_from": "expansion integral", "ref": PT_REF, "branches": {
         "T[00z]": [[0.10, 0.50, 0.03], [0.15, 0.75, 0.02], [0.20, 1.00, 0.02],
                    [0.25, 1.23, 0.02], [0.30, 1.48, 0.03], [0.35, 1.71, 0.02],
                    [0.40, 1.98, 0.02], [0.45, 2.22, 0.02], [0.50, 2.45, 0.05],
@@ -553,7 +557,12 @@ PHONON_CURVE = {
         "L": [(19.04, 0.04, "L1+"), (15.07, 0.03, "L1-"), (14.23, 0.03, "L2")],
         "H": [(19.10, 0.04, "H1"), (17.30, 0.04, "H3+"), (12.30, 0.03, "H3-")],
     }},
-    "Cs": {"T_K": 280, "struct": "bcc", "ref": CS_REF, "branches": {
+    #  The worst of the five, and it runs the other way: measured at 280 K
+    #  and scored at refdata's a0, which for caesium is Kittel's **5 K**
+    #  value - a crystal 7.5 % of volume too small.  a(280 K) from the same
+    #  expansion integral, carried UP rather than down.
+    "Cs": {"T_K": 280, "a_meas": 6.1962, "a_meas_from": "expansion integral", "struct": "bcc", "ref": CS_REF,
+           "branches": {
         "L[z00]": [[0.2, 0.29, 0.03], [0.3, 0.49, 0.04], [0.4, 0.65, 0.04],
                    [0.5, 0.73, 0.04], [0.6, 0.88, 0.04], [0.8, 0.93, 0.04]],
         "T[z00]": [[0.1, 0.16, 0.01], [0.15, 0.18, 0.01], [0.2, 0.26, 0.03],
@@ -756,7 +765,10 @@ PHONON_CURVE = {
     #  The error bars are large - 0.36 THz on 1.28, twenty-eight per cent -
     #  and they are the source's own.  Read this element's agreement with
     #  that in mind rather than as a tight test.
-    "Tl": {"T_K": 77, "struct": "hcp", "ref": TL_REF,
+    #  Measured at 77 K, scored at a ~293 K a0 until 2026-08-29.  Only a is
+    #  corrected: the expansion integral has one polycrystalline alpha and
+    #  cannot say how c/a moves, so the axial ratio is left alone.
+    "Tl": {"T_K": 77, "a_meas": 3.4385, "a_meas_from": "expansion integral", "struct": "hcp", "ref": TL_REF,
            "seg_override": {"[z00]": [("G", "M", 0.0, 1.0)],
                             "[00z]": [("G", "A", 0.0, 1.0)]},
            "branches": {
@@ -1150,7 +1162,11 @@ PHONON_CURVE = {
     #  "a continuation of the Lambda branch", so Lambda_1 below zeta = 1/2 and
     #  F_1 above it are one branch through P - which is how this file already
     #  treats [zzz] for tantalum and caesium.
-    "K": {"T_K": 9, "struct": "bcc", "ref": K_REF,
+    #  This one is a MEASUREMENT, not a model: 5.225 is Kittel's own stamped
+    #  5 K value for potassium, and 5 K and 9 K are the same volume to well
+    #  inside anything here can resolve.  It was being scored at refdata's
+    #  5.328, a room-temperature value, 5.8 % of volume too large.
+    "K": {"T_K": 9, "a_meas": 5.225, "a_meas_from": "Kittel 5 K row", "struct": "bcc", "ref": K_REF,
           "seg_override": {"[hhz]": [("N", "P", 0.0, 0.5)],
                            "[zz1]": [("H", "N", 0.0, 0.5)]},
           "branches": {
@@ -1224,7 +1240,12 @@ PHONON_CURVE = {
     #  abscissa - the same number to within the quoted errors.  And all three
     #  folded branches meet at 2.88 at P, which is the L-T degeneracy the
     #  paper states for (1/2,1/2,1/2).
-    "Na": {"T_K": 90, "struct": "bcc", "ref": NA_REF,
+    #  Measured at 90 K, scored at refdata's ~293 K a0 until 2026-08-29.
+    #  a(90 K) from the expansion integral, whose prediction for sodium was
+    #  checked against Kittel's 5 K value: measured 1.529 % against predicted
+    #  1.714 %, so this carries about 12 % slack in the direction of too
+    #  large a correction.
+    "Na": {"T_K": 90, "a_meas": 4.2337, "a_meas_from": "expansion integral", "struct": "bcc", "ref": NA_REF,
            "seg_override": {"[hhz]": [("N", "P", 0.0, 0.5)],
                             "[zz1]": [("H", "N", 0.0, 0.5)]},
            "branches": {

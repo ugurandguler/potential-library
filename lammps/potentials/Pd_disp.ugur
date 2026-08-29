@@ -1,0 +1,19 @@
+# Pd - Ugur interatomic potential, CANDIDATE, dispersion-selected, hard truncation
+#
+# pair_style ugur
+# pair_coeff * * Pd_disp.ugur Pd
+#
+# Truncation: hard - phi2 does not vanish at rcut2, it stops at -2.37 meV (0.0929 of k_B T at 296 K).  USE for static properties and for lattice dynamics: measured against neutron dispersion the hard sets average 9.5 % over the 29 elements that have one, against 12.7 % for the switched sets, and are closer in 23 of them.  DO NOT use for molecular dynamics: copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in NVE and climbs from 296 K to over 1100 K in 200 ps.  CANDIDATE, not part of the published library: the same targets and the same elastic residual as the reference set, chosen among the solutions that residual cannot tell apart by which describes the measured dispersion better.  It also satisfies the E3/E2 and compression constraints the fitter enforces today and the reference record does not.  Read the section on the page before using it
+# MD: structure screened - holds its shape at 600 K (307 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Nudge test: not run.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Pd at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Pd Pd Pd 15.439798509365135 0.42672232254142178 0.33060740677020778 2.867421001123418 2.2714730081213483 -6.0167535979582727 1.2796416234100669 10.115819999999999 4.1267105303437503 -1 0 0

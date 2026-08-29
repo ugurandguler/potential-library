@@ -83,6 +83,45 @@ C_MAX = 60.0
 #  it is a numerical solution of the fitting equations, and it is exactly the
 #  three elements whose vacancy formation energy comes out NEGATIVE and whose
 #  crystals come apart in molecular dynamics.
+#
+#  IT WAS TIGHTENED AFTER THE LIBRARY WAS FITTED, AND MOST OF THE LIBRARY IS
+#  ABOVE IT.  Measured 2026-08-29: re-evaluating a shipped record through this
+#  file returns nothing for 22 of the 36 hard-cut fits, and this is the
+#  constraint they fail.  Copper sits at 0.531 - phi2 supplies -7.43 eV/atom
+#  and phi3 gives +3.94 back.
+#
+#      violate: Ir .871  Rh .856  Ru .747  Cr .711  Fe .686  Pb .676
+#               Tl .629  Yb .621  Pt .570  Cu .531  Mg .519  Y  .502
+#               Pd .496  Ag .487  Au .417  Hf .393  Al .388  Ni .372
+#               Be .362  Ba .361  Ti .328  Sc .320
+#      within:  Li Sr W Mo Ca Ta Re Rb Co V Cs Na K Nb
+#
+#  The justification above comes from the TAPERED sets, and the constraint was
+#  never applied back to the hard-cut library that had already been fitted.
+#  Nothing about those records changed; the acceptance test in front of them
+#  did.  What follows from that is narrow and worth stating exactly: re-running
+#  this file today will not return the shipped fits for those 22 elements, so
+#  a reader reproducing the library gets a different answer, and without this
+#  note has no way to tell a version difference from a defect.  That is the
+#  reason the note exists.
+#
+#  Refitting them was tried and is NOT the fix.  With the targets unchanged,
+#  ten violators with a measured dispersion were refitted under this
+#  constraint: four improved on dispersion, six got worse, median +0.30
+#  points, and nearly all paid elastic residual for it - iron buys 2.90 points
+#  of dispersion for 6.36 of residual, titanium pays 8.93 and buys nothing.
+#
+#  Four elements DO come out strictly better - same targets, same 0.000 %
+#  residual, lower dispersion error: Pb 18.30 -> 8.00, Cu 8.50 -> 6.30,
+#  Ag 13.10 -> 11.90, Pd 3.50 -> 3.20.  Those are candidates to carry beside
+#  the published records, in the slot add_structure.py already uses for the
+#  nudge-constrained refits, not to replace them.
+#
+#  And the association is NOT evidence that the constraint predicts collapse:
+#  9 of 22 violators collapse in the MD screen against 1 of 14 that comply,
+#  but controlled for structure the effect is entirely hcp - within hcp,
+#  violators are 7 of 8 and the complying sample is two elements.  The
+#  inconsistency is real; no physics should be read into it.
 E3_OVER_E2_MAX = 0.30
 
 #  In a metal the nearest neighbours carry most of the binding.  A fit that

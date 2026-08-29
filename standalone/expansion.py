@@ -34,6 +34,7 @@ sensible alpha with an absurd gamma would mean the two errors had cancelled.
     python expansion.py Cu Al Ag --nq 6
 """
 import json
+import math
 import os
 import sys
 
@@ -76,6 +77,78 @@ ALPHA_EXP = {
     "Y": 10.6, "Yb": 26.3, "Zn": 30.2, "Zr": 5.7,
 }
 
+
+
+#  ---------------------------------------------------------------------------
+#  THE WINDOW FACTOR, and why the ratio above needed one.
+#
+#  ALPHA_EXP is the CRC's coefficient of linear expansion AT 25 C.  The NPT
+#  measurement fits a straight line through a(T) on a grid that runs from
+#  about 175 K to 700 K.  Those are not the same quantity unless alpha is
+#  constant over the window, and it is not: in the quasi-harmonic picture
+#
+#      alpha(T) = gamma C_V(T) / (3 B V)
+#
+#  so alpha follows the Debye heat capacity, and the ratio the test reported
+#  carried a factor
+#
+#      <C_V>_grid / C_V(298)
+#
+#  that has nothing to do with any potential.  It is a unit conversion, and it
+#  needs no dynamics re-run: the factor is a property of the grid and theta_D.
+#
+#  Over the forty elements it is a wash - only six are more than 5 % off, and
+#  the median |alpha/alpha_exp - 1| across the 127 records moves 30.2 % to
+#  29.5 %.  Where it bites it bites hard, and always the elements whose grid
+#  sits worst against their own theta_D:
+#
+#      Be|tap    30.7 % -> 8.0 %      Be|tap_ug  39.4 % -> 1.9 %
+#      Li|base   41.2 % -> 25.2 %     Na|base    17.8 % -> 7.1 %
+#
+#  WHY IT IS BELIEVED.  A real conversion cannot tell our arms from the
+#  fifty-one published EAM and MEAM potentials run through the same code,
+#  because both were mis-compared the same way.  59 % of the published records
+#  improve against 45 % of ours - ours improve LESS, which is the strongest
+#  form the test can take.  A fudge would have gone the other way.
+#
+#  The related defect is left visible rather than fixed: npt_expansion.py says
+#  its grid must start above the Debye temperature and uses a blanket 200 K to
+#  do it.  Against THETA_D, 34 of 40 elements have at least one grid point
+#  below their own, and for lithium and beryllium NO valid window exists at
+#  all - their theta_D is above 0.6 T_melt, so the rule and the melting point
+#  cannot both be satisfied.  Raising the floor would shorten the fit window
+#  and add noise to the slope while fixing nothing for those two, which is why
+#  the comparison is converted instead.
+def _debye(x, power):
+    """Simpson on the Debye integrand; power 4 gives C_V/3R, 3 gives U/3RT"""
+    n, tot = 2000, 0.0
+    h = x / n
+    for i in range(n + 1):
+        t = i * h
+        if t == 0.0:
+            f = 1.0 if power == 4 else 0.0
+        elif t > 60:
+            f = t ** power * math.exp(-t)
+        elif power == 4:
+            e = math.exp(t)
+            f = t ** 4 * e / (e - 1.0) ** 2
+        else:
+            f = t ** 3 / (math.exp(t) - 1.0)
+        tot += (1 if i in (0, n) else (4 if i % 2 else 2)) * f
+    return 3.0 / x ** 3 * (h / 3.0) * tot
+
+
+def window_factor(el, temps, T_exp=298.0):
+    """<C_V> over the measurement grid, divided by C_V at the experiment's own
+    temperature.  Divide alpha_exp by nothing and MULTIPLY it by this before
+    comparing, or equivalently divide the measured alpha by it."""
+    th = refdata.THETA_D.get(el)
+    if not th or not temps:
+        return None
+    cv = [_debye(th / float(t), 4) for t in temps if t]
+    if not cv:
+        return None
+    return (sum(cv) / len(cv)) / _debye(th / T_exp, 4)
 
 def spectra(el, rec, xs, nq):
     """phonon spectrum and static energy at each scaled lattice parameter

@@ -59,7 +59,11 @@ SETS = {"hard": (None, "ugur", "hard cutoff"),
         #  the re-ranked candidates (REFIT 8b).  Same taper, same pair
         #  style; only the cutoff and the parameters behind it differ.
         "rc": ("rc", "ugur", "re-ranked cutoff"),
-        "rc_ug": ("rc_ug", "ugur/ang", "re-ranked cutoff + angular")}
+        "rc_ug": ("rc_ug", "ugur/ang", "re-ranked cutoff + angular"),
+        #  the two other candidate sets, which ship as files and therefore
+        #  need a verdict in their headers like everything else that ships
+        "hard_disp": ("hard_disp", "ugur", "dispersion-selected"),
+        "tap_nudge": ("tap_nudge", "ugur", "nudge-constrained")}
 
 POTFILE = """# {el}, written by md_screen.py
 {el} {el} {el} {m:.17g} {D:.17g} {alpha:.17g} {r0:.17g} {gamma:.17g} {C:.17g} {alpha3:.17g} {rcut2:.17g} {rcut3:.17g} {taper:.17g} {lam2:.17g} {lam4:.17g}

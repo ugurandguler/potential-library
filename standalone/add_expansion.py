@@ -34,6 +34,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import refdata                                        # noqa: E402
+import expansion as X                                # noqa: E402
 
 SRC = os.path.join(HERE, "..", "lammps", "npt_expansion.json")
 #  the harmonic Grueneisen still comes from the quasi-harmonic run; only the
@@ -86,6 +87,22 @@ def main():
         rec = {k: v[k] for k in ("T", "a", "alpha_1e6", "alpha_exp_1e6",
                                  "ratio", "Pavg", "dropped", "failed",
                                  "points", "of") if k in v}
+        #  The measured slope spans the whole grid; the experimental value is
+        #  at 25 C.  alpha follows C_V, so the two are not the same quantity
+        #  and the ratio carried a factor <C_V>_grid / C_V(298) belonging to
+        #  neither the potential nor the experiment.  See expansion.py's
+        #  window_factor for why, and for the test that says it is a
+        #  conversion rather than a fudge - it improves the published EAM and
+        #  MEAM baselines MORE than it improves ours.
+        #
+        #  The raw ratio is kept beside it: this changes a published number,
+        #  and a reader should be able to see what it was.
+        w = X.window_factor(el, v.get("T") or [])
+        if w and v.get("ratio") and not v.get("failed"):
+            rec["window"] = round(w, 4)
+            rec["ratio_raw"] = v["ratio"]
+            rec["ratio"] = v["ratio"] / w
+            v = dict(v, ratio=rec["ratio"])
         #  a run that died carries its reason and no numbers
         if v.get("failed"):
             rec.pop("alpha_1e6", None)

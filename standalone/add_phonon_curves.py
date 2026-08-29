@@ -90,6 +90,8 @@ def main():
                                 #  volume - see curve_mae.
                                 **({"a_meas": rec["a_meas"]}
                                    if "a_meas" in rec else {}),
+                                **({"a_meas_from": rec["a_meas_from"]}
+                                   if "a_meas_from" in rec else {}),
                                 **({"c_meas": rec["c_meas"]}
                                    if "c_meas" in rec else {}),
                                 #  true for a record published as a list of

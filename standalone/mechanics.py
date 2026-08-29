@@ -113,8 +113,79 @@ def averages(C):
                 pugh=B / G, cauchy=float(C[0, 1] - C[3, 3]))
 
 
+VOIGT = [(0, 0), (1, 1), (2, 2), (1, 2), (0, 2), (0, 1)]
+
+
+def full_tensor(C6):
+    """6x6 Voigt -> 3x3x3x3, with the symmetries put back"""
+    C = np.zeros((3, 3, 3, 3))
+    for a, (i, j) in enumerate(VOIGT):
+        for b, (k, l) in enumerate(VOIGT):
+            v = C6[a, b]
+            for ii, jj in ((i, j), (j, i)):
+                for kk, ll in ((k, l), (l, k)):
+                    C[ii, jj, kk, ll] = v
+                    C[kk, ll, ii, jj] = v
+    return C
+
+
+def _sphere_fib(n):
+    """equal-area directions, so a plain mean is the right average"""
+    i = np.arange(n) + 0.5
+    phi = np.arccos(1 - 2 * i / n)
+    th = np.pi * (1 + 5 ** 0.5) * i
+    return np.stack([np.cos(th) * np.sin(phi),
+                     np.sin(th) * np.sin(phi), np.cos(phi)], axis=1)
+
+
+def debye_speed(C6, rho, ndir=800):
+    """The Debye-averaged sound speed over the REAL slowness surface.
+
+    For each direction n the Christoffel matrix Gamma_ik = C_ijkl n_j n_l has
+    three eigenvalues rho v^2, one per branch, and the Debye model asks for
+
+        3 / v_m^3 = < sum_i 1/v_i^3 >   over the unit sphere
+
+    WHY NOT THE ISOTROPIC ONE.  Until 2026-08-29 this was computed from the
+    Voigt-Reuss-Hill averages B and G - one longitudinal and one transverse
+    speed, then averaged.  That discards the anisotropy BEFORE the average,
+    and the average is dominated by the SLOW directions, which is exactly what
+    an isotropic average has just smoothed away.  It came out systematically
+    high: against Stewart's measured theta_D over the forty library elements,
+    1.023 with a 0.050 spread, against 0.999 here.  The error tracked the
+    anisotropy - Na +14 %, K +12 %, Li +11 %, Ba +7 %, and near zero for
+    aluminium and tungsten - which is the signature of an averaging mistake
+    rather than a data one.
+
+    The published check is Tari, "The Specific Heat of Matter at Low
+    Temperatures" (Imperial College Press, 2003), Table 2.4, which puts
+    theta_D from calorimetry beside theta_El from elastic constants at T -> 0
+    for Ag, Al, Cu, Pd and Pt.  Four of the five agree to 0.55 % or better -
+    Cu 0.12, Pt 0.34, Ag 0.40, Al 0.55 - and palladium is the outlier at
+    1.7 %.  So a systematic two per cent across forty elements was arithmetic
+    and not physics.
+
+    `sound` below still returns the isotropic pair, because v_l and v_t ARE
+    the aggregate speeds a polycrystal has; it is only the Debye average that
+    needed the directions kept.
+    """
+    C = full_tensor(np.asarray(C6, dtype=float) * 1e9)      # GPa -> Pa
+    n = _sphere_fib(ndir)
+    G = np.einsum("ijkl,nj,nl->nik", C, n, n)
+    ev = np.linalg.eigvalsh(G)
+    if ev.min() <= 0:
+        return None                                         # not Born stable
+    v = np.sqrt(ev / rho)
+    return float((3.0 / np.mean(np.sum(1.0 / v ** 3, axis=1))) ** (1.0 / 3.0))
+
+
 def sound(B, G, rho):
-    """longitudinal, transverse and Debye-averaged speeds, m/s; rho in kg/m^3"""
+    """longitudinal and transverse aggregate speeds, m/s; rho in kg/m^3
+
+    The third value is the isotropic Debye average, kept for continuity and
+    reported as `v_m_iso`.  The Debye temperature is NOT built from it - see
+    `debye_speed`.
+    """
     vt = np.sqrt(G * 1e9 / rho)
     vl = np.sqrt((B + 4 * G / 3) * 1e9 / rho)
     vm = (1.0 / 3.0 * (2.0 / vt ** 3 + 1.0 / vl ** 3)) ** (-1.0 / 3.0)
@@ -161,10 +232,14 @@ def analyse(C, mass_amu=None, volume_A3=None, natoms=1, nu=4000):
 
     if mass_amu and volume_A3:
         rho = mass_amu * AMU / (volume_A3 * 1e-30)          # kg/m^3
-        vl, vt, vm = sound(out["B_H"], out["G_H"], rho)
+        vl, vt, vm_iso = sound(out["B_H"], out["G_H"], rho)
         n = natoms / (volume_A3 * 1e-30)                     # atoms / m^3
-        out.update(rho=rho, v_l=vl, v_t=vt, v_m=vm,
-                   debye=float(HBAR / KB * (6 * np.pi ** 2 * n) ** (1 / 3) * vm))
+        vm = debye_speed(C, rho)
+        pre = float(HBAR / KB * (6 * np.pi ** 2 * n) ** (1 / 3))
+        out.update(rho=rho, v_l=vl, v_t=vt, v_m=vm if vm else vm_iso,
+                   v_m_iso=vm_iso,
+                   debye=pre * (vm if vm else vm_iso),
+                   debye_iso=pre * vm_iso)
     return out
 
 

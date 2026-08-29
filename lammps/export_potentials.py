@@ -85,6 +85,21 @@ SETS = (
      "CANDIDATE, re-cut, switched"),
     ("rc_ug", "rc_ug", "ugur/ang", "_recut.ugur.ang",
      "CANDIDATE, re-cut, switched, with the angular factor"),
+    #  The dispersion-selected records.  Same targets and the same 0.000 %
+    #  elastic residual as the reference set above, chosen among the solutions
+    #  that residual cannot distinguish by which one describes the measured
+    #  phonons better.  They ship for the reason the re-cut candidates do: a
+    #  reader who wants to check the comparison on the page needs the file it
+    #  was made with.  Hard truncation, so the same MD warning applies.
+    ("disp", "hard_disp", "ugur", "_disp.ugur",
+     "CANDIDATE, dispersion-selected, hard truncation"),
+    #  The nudge-constrained refits.  Carried in library.json since the
+    #  nudge filter ran and quoted on the page ever since, but never written
+    #  out - so one candidate set was downloadable and the other was not,
+    #  which is the inconsistency rather than the export.  None is withdrawn
+    #  and all five pass the displacement test.
+    ("nudge", "tap_nudge", "ugur", "_nudge_taper.ugur",
+     "CANDIDATE, nudge-constrained, switched"),
 )
 
 HEADER = """\
@@ -152,7 +167,7 @@ def main():
             #
             #  The hard sets reproduce the MEASURED dispersion better - 9.5 %
             #  mean over the 29 elements that carry a neutron curve against
-            #  12.6 % for the switched ones, and better in 24 of the 29 - and
+            #  12.7 % for the switched ones, and better in 23 of the 29 - and
             #  they cannot be run at temperature.  Both halves are measured
             #  and neither is a preference.  The discontinuity is what does
             #  it, so each file carries its own rather than an average: it
@@ -168,16 +183,36 @@ def main():
                     "296 K).  USE for static properties and for lattice "
                     "dynamics: measured against neutron dispersion the hard "
                     "sets average 9.5 % over the 29 elements that have one, "
-                    "against 12.6 % for the switched sets, and are closer in "
-                    "24 of them.  DO NOT use for molecular dynamics: "
+                    "against 12.7 % for the switched sets, and are closer in "
+                    "23 of them.  DO NOT use for molecular dynamics: "
                     "copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in "
                     "NVE and climbs from 296 K to over 1100 K in 200 ps")
+                if name == "disp":
+                    trunc += (
+                        ".  CANDIDATE, not part of the published library: the "
+                        "same targets and the same elastic residual as the "
+                        "reference set, chosen among the solutions that "
+                        "residual cannot tell apart by which describes the "
+                        "measured dispersion better.  It also satisfies the "
+                        "E3/E2 and compression constraints the fitter "
+                        "enforces today and the reference record does not.  "
+                        "Read the section on the page before using it")
+            elif name == "nudge":
+                trunc = (
+                    f"switched from {taper:g} of each cutoff to the cutoff, "
+                    "quintic, C2 - energy is conserved in MD.  CANDIDATE, not "
+                    "part of the published library.  This is the best "
+                    "solution in the same pool as the shipped switched record "
+                    "that survives a 1e-5 A displacement, which the shipped "
+                    "one does not; it costs elastic accuracy to get there and "
+                    "the page carries both errors side by side.  Read them "
+                    "before using this")
             elif name in ("rc", "rc_ug"):
-                #  A different cutoff, so the 12.6 % measured on the shipped
+                #  A different cutoff, so the 12.7 % measured on the shipped
                 #  switched sets is not theirs.  Measured on the 17 elements
                 #  that have both a re-cut record and a neutron curve, the
-                #  re-cut arm reaches 8.8 % against 11.6 % for the shipped
-                #  switched arm on the same 17, and is closer in 12 of them.
+                #  re-cut arm reaches 8.5 % against 11.6 % for the shipped
+                #  switched arm on the same 17, and is closer in 13 of them.
                 #
                 #  That is not a recommendation, and the reason is the whole
                 #  point of these files.  The biggest gains are the alkalis -
@@ -192,7 +227,7 @@ def main():
                     f"switched from {taper:g} of each cutoff to the cutoff, "
                     "quintic, C2 - energy is conserved in MD.  CANDIDATE, not "
                     "part of the published library.  Against measured neutron "
-                    "dispersion this arm reaches 8.3 % over the 16 elements "
+                    "dispersion this arm reaches 7.9 % over the 16 elements "
                     "that have both a candidate record and a neutron curve "
                     "and were not rejected outright, against 11.2 % for the "
                     "published switched arm on the same 16.  That gap is "
@@ -208,7 +243,7 @@ def main():
                     "0.4 meV/atom/ns for copper, 876x less than its hard "
                     "twin.  USE for molecular dynamics, which no hard set "
                     "can do.  It pays for that on the dispersion: the "
-                    "switched sets average 12.6 % against the hard sets' "
+                    "switched sets average 12.7 % against the hard sets' "
                     "9.5 %, because switching the pair term off over the "
                     "outer 15 % moves the force constants at the largest "
                     "separations, which is the short-wavelength end, and "
@@ -222,7 +257,7 @@ def main():
             #  rather than in md_screen_all.json, so they are looked up there.
             #  The four shipped sets keep the old path untouched - reading
             #  rec first for those would change what they report.
-            if name in ("rc", "rc_ug"):
+            if name in ("rc", "rc_ug", "disp", "nudge"):
                 md = rec.get("md_screen")
             else:
                 md = scr.get((el, {"mau": "hard", "mau_taper": "tap",
@@ -261,7 +296,7 @@ def main():
             #  interface calculation would meet it immediately.
             #  same split as the screen above: the candidates carry their
             #  own jiggle result, the shipped four keep the old lookup
-            if name in ("rc", "rc_ug"):
+            if name in ("rc", "rc_ug", "disp", "nudge"):
                 jg = rec.get("jiggle")
             else:
                 jg = jig.get((el, {"mau": "hard", "mau_taper": "tap",
@@ -315,9 +350,9 @@ def main():
             #  What the measured dispersion says about this candidate,
             #  which is NOT a second copy of the finite-temperature warning
             #  further down - it is the other half of the same fact.  The
-            #  re-cut reaches 8.8 % over the 17 elements that have both a
+            #  re-cut reaches 8.5 % over the 17 elements that have both a
             #  candidate record and a neutron curve, against 11.6 % for the
-            #  published switched arm on the same 17, closer in 12 of them.
+            #  published switched arm on the same 17, closer in 13 of them.
             #  Its largest gains are the alkalis, and the alkalis are exactly
             #  what it breaks warm: a 0 K dispersion and an elastic constant
             #  are both properties of the curvature AT the minimum, so an arm
@@ -431,6 +466,30 @@ Ugur interatomic potential - LAMMPS parameter files
     <El>_taper.ugur        {written['mau_taper']} elements, pair_style ugur
     <El>.ugur.ang          {written['ug']} elements, pair_style ugur/ang
     <El>_taper.ugur.ang    {written['ug_taper']} elements, pair_style ugur/ang
+
+and the CANDIDATE sets, which are not part of the published library:
+
+    <El>_recut.ugur        {written['rc']} elements, pair_style ugur
+    <El>_recut.ugur.ang    {written['rc_ug']} elements, pair_style ugur/ang
+    <El>_disp.ugur         {written['disp']} elements, pair_style ugur
+    <El>_nudge_taper.ugur  {written['nudge']} elements, pair_style ugur
+
+They are here because the page compares them with the published sets and a
+reader who wants to check that comparison needs the files it was made with.
+Every one of them carries, in its own header, what it is and what is known
+against it.  Read that before using one.  In one line each:
+
+  _recut        a different pair cutoff.  Repairs molybdenum and tungsten and
+                BREAKS the alkalis once the crystal is warm - their elastic
+                constants come out three times too stiff at 300 K and their
+                thermal expansion negative.
+  _disp         the same targets and the same elastic residual as the plain
+                set, chosen among the solutions that residual cannot tell
+                apart by which describes the measured phonon dispersion
+                better.  Hard truncation, so the MD prohibition below applies.
+  _nudge_taper  the best solution in the same pool as the plain _taper set
+                that survives a 1e-5 A displacement, which the shipped one
+                does not.  It pays for that in elastic accuracy.
 
 The extension says which pair style the file needs, the way .eam / .eam.alloy /
 .eam.fs do.  The stem says which parameter set it is: a plain name is

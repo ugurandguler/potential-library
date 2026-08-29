@@ -1,0 +1,19 @@
+# Nb - Ugur interatomic potential, CANDIDATE, nudge-constrained, switched
+#
+# pair_style ugur
+# pair_coeff * * Nb_nudge_taper.ugur Nb
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  This is the best solution in the same pool as the shipped switched record that survives a 1e-5 A displacement, which the shipped one does not; it costs elastic accuracy to get there and the page carries both errors side by side.  Read them before using this
+# MD: structure screened - holds its shape at 600 K (303 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Nb at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Nb Nb Nb 3.0728493836546029 0.3783500075188545 0.46804154284372301 4.0741498706811097 0.66066542416038998 -1.093343219319258 2.0117410826539808 8.5820800000000013 4.2878649792175132 0.84999999999999998 0 0

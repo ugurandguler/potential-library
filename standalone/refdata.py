@@ -74,8 +74,9 @@ Cij keys: cubic -> C11, C12, C44 ; hcp -> C11, C12, C13, C33, C44
 #                than the rest of this table; Kittel's Table 4 gives the
 #                nearest-neighbour distance independently and agrees with every
 #                row, so they are right to the precision printed and no better.
-#                Rubidium and caesium are its 5 K values, as Li, Na and K
-#                already are.
+#                Rubidium and caesium are its 5 K values.  So is nothing
+#                else: see the correction below - lithium is at 78 K and
+#                sodium and potassium are at room temperature.
 #      B         Kittel Table 3 of chapter 3, in 10^12 dyn/cm^2 = 100 GPa - the
 #                same table the rest of the B column comes from.  Substituted
 #                below by the value the elastic constants imply, as for every
@@ -97,8 +98,9 @@ Cij keys: cubic -> C11, C12, C44 ; hcp -> C11, C12, C13, C33, C44
 #  itself; what was wrong is that none of it was written down.
 #
 #      Ecoh      0 K          Brewer LBL-3720 Rev. (1977)
-#      a0        ~293 K       Kittel Table 3, ICSD - EXCEPT Li, Na, K, Rb, Cs,
-#                             which are its 5 K values
+#      a0        ~293 K       Kittel Table 3, ICSD - EXCEPT Li at 78 K and
+#                             Rb, Cs at 5 K.  Na and K are ~293 K like the
+#                             rest; see the correction below.
 #      Cij       ~300 K       III/29a section 1.1.9, in the volume's own words:
 #                             "Unless otherwise stated, all elastic constants
 #                             are given at room temperature, RT, (= 300 K)."
@@ -132,15 +134,37 @@ Cij keys: cubic -> C11, C12, C44 ; hcp -> C11, C12, C13, C33, C44
 #  Rb and Cs were NOT chosen for their temperature; they were chosen because
 #  their bulk modulus matched Kittel's, and Kittel's alkali entries are
 #  themselves low-temperature.  The reasoning was accidental and the outcome
-#  is defensible: with a0 already at 5 K for all five alkalis, a low-
-#  temperature Cij is MORE consistent with a static fit than the room-
-#  temperature row would be.  Rubidium and caesium are, by accident, the two
-#  most internally consistent records in this table.
+#  is defensible: their a0 IS Kittel's 5 K value, so a low-temperature Cij is
+#  more consistent with a static fit than the room-temperature row would be.
+#  Rubidium and caesium are, by accident, the two most internally consistent
+#  records in this table.
 #
-#  Lithium, sodium and potassium are the inconsistent ones: a 5 K lattice
-#  constant with 300 K elastic constants.  For sodium that pairs a 5 K volume
-#  with a C44 that is 40 % below its 5 K value, and sodium is one of the two
-#  elements whose fitted lattice sits on a ledge above a bottomless basin.
+#  CORRECTED 2026-08-29, and the correction is not cosmetic.  The note above
+#  used to say all five alkalis carried Kittel's 5 K lattice constant.  Three
+#  of the five do not.  Kittel's Table 3 is a periodic-table graphic that
+#  nothing extracts, so it was read off a rendering; it states its own
+#  convention - "The data given are at room temperature for the most common
+#  form, or at the stated temperature in deg K", crediting the Inorganic
+#  Crystal Structure Database - and stamps Li 78 K, Na 5 K,
+#  K 5 K, Rb 5 K, Cs 5 K.  Against the values actually in this file:
+#
+#      Li  3.491  = Kittel's 78 K value        -> 78 K, not 5 K
+#      Rb  5.585  = Kittel's 5 K value         -> 5 K, as claimed
+#      Cs  6.045  = Kittel's 5 K value         -> 5 K, as claimed
+#      Na  4.2906 against Kittel's 4.225       -> NOT Kittel's; ~293 K
+#      K   5.328  against Kittel's 5.225       -> NOT Kittel's; ~293 K
+#
+#  So SODIUM AND POTASSIUM ARE NOT THE INCONSISTENT RECORDS this header used
+#  to name.  They are the opposite: lattice constant and elastic constants
+#  both at room temperature, consistent with each other and both simply in
+#  the wrong place, which is the ordinary case rather than the pathological
+#  one.  Lithium is genuinely inconsistent, by 78 K rather than by 5 K.
+#
+#  The earlier claim came from Kittel's CHAPTER 6 Table 1, free electron
+#  Fermi surface parameters, whose header does say "except for Na, K, Rb, Cs
+#  at 5 K and Li at 78 K".  That is a different table about a different
+#  quantity.  The note below already flagged that it proved nothing about a0;
+#  it understated the problem.
 #
 #  ZERO-POINT ENERGY, which is a separate systematic and larger than the
 #  temperature one for the light elements.
@@ -157,11 +181,12 @@ Cij keys: cubic -> C11, C12, C44 ; hcp -> C11, C12, C13, C33, C44
 #      Al   1.2 %     Fe 1.1 %    Ni 1.0 %    W  0.44 %   Au 0.42 %
 #      Pt   0.40 %    Nb 0.35 %   Ta 0.29 %
 #
-#  CAVEAT, and it is the reason these are quoted as per cent rather than as
-#  numbers to subtract: the Debye temperatures behind them are NOT in this
-#  file.  They were entered by hand to get the size of the effect, not to be
-#  used.  Before any of this is applied, theta_D needs a named source in the
-#  same way every other column here has one.
+#  CAVEAT, NOW CLOSED (2026-08-29).  These per cents were quoted rather than
+#  subtracted because the Debye temperatures behind them were entered by hand
+#  and were in no file.  They are now in THETA_D below, from Stewart, Rev.
+#  Sci. Instrum. 54, 1 (1983), Table I, and they reproduce every figure here
+#  to within 0.13 points.  The hand values were right; they are now sourced.
+#  What has NOT changed is that nothing is subtracted: see the closing note.
 #
 #  Looked for, 2026-08-12, and not found in a usable form:
 #
@@ -196,6 +221,62 @@ Cij keys: cubic -> C11, C12, C44 ; hcp -> C11, C12, C13, C33, C44
 #  and refitting on this account means refitting the library; that is a
 #  decision about scope, not a correction, and it is recorded here in this
 #  header rather than made silently in the data below.
+#
+#  ---------------------------------------------------------------------------
+#  AND THE DECISION WAS TAKEN, 2026-08-29: THE TARGETS STAY WHERE THEY ARE.
+#  Not for want of doing the work.  All three anchors were carried to 0 K and
+#  the fit was tried against them, and it does not help.
+#
+#  WHAT WAS MEASURED.  The elastic anchor moved with the temperature
+#  coefficients of Landolt-Boernstein III/29a - Table 28 for the cubic
+#  elements, Table 35 for the hexagonal ones - which cover 37 of the 40.
+#  Cobalt, scandium and ytterbium have no coefficient anywhere in the volume.
+#  The lattice constant moved by the Debye-shaped expansion integral under the
+#  CRC's alpha(25 C) with THETA_D below, from each element's OWN reference
+#  temperature (78 K for Li, 5 K for Rb and Cs, ~293 K for the rest).  The
+#  cohesive energy moved by (9/8) k_B theta_D.  How far:
+#
+#      volume            Cs +0.0 %    ...   Na +5.1 %,  K +6.5 %
+#      bulk modulus      Ba -2.0 %    ...   Na +19.3 %, Cr +27.5 %
+#      cohesive energy   Ta +0.3 %    ...   Mg +2.6 %,  Be +4.3 %
+#
+#  Every corrected tensor is still positive definite; caesium is closest, with
+#  a smallest eigenvalue of 0.29 GPa against a C' target that falls from 0.2 to
+#  0.1 GPa.  So the corrected set is reachable in principle.
+#
+#  WHAT IT COST TO CHECK, AND WHAT CAME BACK.  Four elements - copper as the
+#  control, lead, silver, and sodium as a labelled probe - were fitted twice,
+#  to the old targets and the new, at the same search budget and seed, with and
+#  without the cutoff taper, and scored against the measured dispersion, which
+#  never enters the fit.  Two improved, six got worse, and THE CONTROL GOT
+#  WORSE IN BOTH CUTOFFS.  Sodium is the instructive one: its targets are not
+#  reachable at all (the published tapered sodium sits at 31 % residual after
+#  400 restarts) and the corrected targets halve that to 16 % - better
+#  reachability, worse dispersion.  Fitting those targets more closely is
+#  fitting the wrong thing more closely.
+#
+#  SO THE CORRECTION IS REAL AND IT IS NOT A LEVER.  The shift clears the
+#  published uncertainty on the target it corrects for 37 of 40 elements, so
+#  "it is inside the noise" is not available as a reason to ignore it.  It is
+#  simply not what stands between this library and a better one.  That is a
+#  result about the objective, not a failure of the measurement, and it is the
+#  question the whole exercise was opened to answer.
+#
+#  READ THE FIGURES ABOVE AS ERROR BARS, NOT AS CORRECTIONS.  They say how far
+#  each target sits from the 0 K quantity the static fit actually computes,
+#  which is worth knowing when a residual is being interpreted - sodium's C44
+#  target is sixty per cent of its zero-kelvin value and no fit can be judged
+#  against it as if it were exact.  They are not a better place to aim.
+#
+#  Two cautions that came out of the same work, for anyone who does apply them:
+#    * C' is a DIFFERENCE, and six elements have a coefficient for one of c11
+#      and c12 and not the other (Nb, Pt, Re, Ti, Tl, Zr).  Correcting one and
+#      not the other moves the anisotropy for a reason that is not physics -
+#      thallium's C' falls 41 % on that account alone.  Both or neither.
+#    * chromium's three coefficients are all bracketed in the volume, its
+#      Tc12 = (-15) is the largest magnitude in the cubic table, it alone moves
+#      chromium's bulk modulus by 28 %, and chromium's Neel transition at 311 K
+#      sits just above the range they were measured over.
 #  ---------------------------------------------------------------------------
 #  Technetium and osmium were looked at and left out; see candidates.py.
 
@@ -447,6 +528,53 @@ for _el, _e in ELEMENTS.items():
 #  compression-escape constraint compares its barrier against.  A potential
 #  whose lattice is only metastable at half its own melting point is not usable
 #  for dynamics however well it reproduces the elastic tensor.
+
+#  Debye temperatures at 0 K, in K.
+#
+#  Source: G. R. Stewart, "Measurement of low-temperature specific heat",
+#  Rev. Sci. Instrum. 54, 1 (1983), TABLE I - specific heat parameters gamma
+#  and theta_D for the elements, laid out as a periodic table.  Its own
+#  footnote settles the one thing that matters for a zero-point energy: "The
+#  Debye temperatures quoted are the low-temperature values, T << theta_D."
+#  That is the T -> 0 quantity, stated by the source rather than assumed.
+#  All forty were read off the paper's page at 4x.
+#
+#  THIS CLOSES THE CAVEAT IN THE HEADER ABOVE, which recorded that the Debye
+#  temperatures behind its per-cent figures were entered by hand and were in
+#  no file.  They are here now, and they reproduce those figures: across a
+#  fifteen-fold range the largest disagreement is 0.13 points - Mg 2.60
+#  against 2.60, Nb 0.35 against 0.35, Ta 0.29 against 0.29, Be 4.20 against
+#  4.33.  The hand values were right.
+#
+#  Checked two ways.  The CRC's superconductive-elements table agrees on the
+#  fifteen elements it covers, and its rare-earth table agrees on Y, Lu and
+#  Yb - but it MISSES Be, Li, Mg, Na and K, which are the five where the
+#  correction is largest, and it prints theta_D = 4.5 K for rhenium, which a
+#  4x rendering confirms is the printed page and not the OCR (rhenium is
+#  416 K, as Stewart has it).  A source can be wrong in the shape of data.
+#  Independently, an elastic Debye temperature computed from the Cij above,
+#  carried to 0 K and averaged over the Christoffel slowness surface, runs at
+#  1.00 of these values with a 5 % spread.
+#
+#  STEWART STARS THE VALUES HE DERIVED FROM ELASTIC CONSTANTS rather than
+#  from a specific heat.  Fe (477*) and Yb (118*) are the two here, so for
+#  those two an elastic calculation is not an independent check of this
+#  column - it is the same method twice.
+#
+#  These are NOT fit targets.  Nothing in the fit uses them.
+THETA_D = {
+    "Ag": 227.3, "Al": 433.0, "Au": 162.3, "Ba": 111.0, "Be": 1481.0,
+    "Ca": 229.0, "Cd": 210.0, "Co": 460.0, "Cr": 606.0, "Cs": 40.5,
+    "Cu": 347.0, "Fe": 477.0, "Hf": 252.0, "Ir": 420.0, "K": 91.1,
+    "Li": 344.0, "Lu": 183.0, "Mg": 403.0, "Mo": 423.0, "Na": 156.5,
+    "Nb": 276.0, "Ni": 477.0, "Pb": 105.0, "Pd": 271.0, "Pt": 237.0,
+    "Rb": 56.5, "Re": 416.0, "Rh": 512.0, "Ru": 555.0, "Sc": 346.0,
+    "Sr": 147.0, "Ta": 245.0, "Ti": 420.0, "Tl": 78.5, "V": 399.0,
+    "W": 383.0, "Y": 248.0, "Yb": 118.0, "Zn": 329.0, "Zr": 290.0,
+}
+#  derived from elastic constants in Stewart's own table, not calorimetry
+THETA_D_FROM_ELASTIC = {"Fe", "Yb"}
+
 MELTING = {
     "Li": 453.7, "Na": 371.0, "K": 336.7, "Rb": 312.5, "Cs": 301.6,
     "Be": 1560.0, "Mg": 923.0, "Ca": 1115.0, "Sr": 1050.0, "Ba": 1000.0,

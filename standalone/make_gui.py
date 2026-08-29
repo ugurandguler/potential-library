@@ -575,7 +575,14 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
   <strong>Brewer</strong>, LBL-3720 Rev. (1977); measured phonon frequencies
   from <strong>Landolt-B&ouml;rnstein III/13a</strong> (Schober and Dederichs,
   Springer 1981); standard entropies and heat capacities at 298.15 K from the
-  <strong>CRC Handbook of Chemistry and Physics</strong> thermodynamic tables. The calculated dispersions drawn for comparison come from the
+  <strong>CRC Handbook of Chemistry and Physics</strong> thermodynamic tables;
+  Debye temperatures from <strong>G. R. Stewart</strong>,
+  <i>Rev. Sci. Instrum.</i> <strong>54</strong>, 1 (1983), Table I, whose own
+  footnote states they are the low-temperature values,
+  T&nbsp;&Lt;&nbsp;&theta;<sub>D</sub>; linear thermal expansion at 25&nbsp;&deg;C
+  from the same CRC Handbook, whose expansion column is
+  <strong>Touloukian</strong>, <i>Thermophysical Properties of Matter</i>,
+  vol. 12. The calculated dispersions drawn for comparison come from the
   <strong>Materials Project</strong> (Jain <i>et al.</i>, <i>APL Materials</i>
   <strong>1</strong>, 011002 (2013); the phonon entries are computed with
   <i>pheasy</i> and are labelled with that method in the plot selector), the
@@ -620,8 +627,10 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
 
   <br><br><strong>The three anchors are not at one temperature, and the fit
   that uses them is static.</strong> Cohesive energies are 0 K; lattice
-  constants are room temperature (except the five alkali metals, which are 5 K
-  values); and III/29a states its own convention plainly &mdash; <i>&ldquo;unless
+  constants are room temperature (except <b>lithium at 78 K and rubidium and
+  caesium at 5 K</b> &mdash; sodium and potassium are room temperature like the
+  rest, which this page said otherwise until 2026-08-29); and III/29a states
+  its own convention plainly &mdash; <i>&ldquo;unless
   otherwise stated, all elastic constants are given at room temperature, RT,
   (= 300 K)&rdquo;</i>. So a zero-kelvin lattice sum is being matched to
   room-temperature stiffnesses at a room-temperature volume. The library is
@@ -633,10 +642,19 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
   anisotropy the fit is asked to reach is distorted as well as the magnitude.
   Three elements carry an explicit temperature in Table 3: lithium's
   room-temperature row is the one used, while rubidium's &asymp;80 K and
-  caesium's 78 K rows are &mdash; which, with their lattice constants already at
-  5 K, makes them by accident the two most internally consistent records here.
-  Nothing has been changed on this account: changing a target means refitting
-  the element, and refitting on this account means refitting the library.
+  caesium's 78 K rows are &mdash; which, with their lattice constants genuinely
+  at 5 K, makes them by accident the two most internally consistent records
+  here.
+  <br><br><strong>And the fit was tried against the corrected anchors, in
+  2026.</strong> All three were carried to 0 K &mdash; the elastic constants by
+  III/29a's Tables 28 and 35, the lattice constant by a Debye-shaped expansion
+  integral, the cohesive energy by (9/8)&nbsp;k<sub>B</sub>&theta;<sub>D</sub>
+  &mdash; and four elements were refitted to them and scored against the
+  measured dispersion, which never enters the fit. Two improved, six got worse,
+  and the control got worse in both cutoff treatments. <b>So the correction is
+  real and it is not a lever</b>: read the percentages above as error bars on
+  how far each target sits from the 0 K quantity the static fit computes, not
+  as a better place to aim. Nothing has been changed on this account.
 
   <br><br><strong>A second systematic sits beside it and is larger for the
   light elements.</strong> A measured cohesive energy is the work to take the
@@ -2056,7 +2074,7 @@ function uf3Note(nb, here){
 }
 
 /*  What to make of the re-cut candidate for THIS element, which is not the
-    same answer twice.  The arm looks strong in aggregate - 8.3 % against the
+    same answer twice.  The arm looks strong in aggregate - 7.9 % against the
     published switched arm's 11.2 % over the 16 elements that have both and
     were not rejected - and that number is misleading on its own: almost all
     of the gap is sodium, potassium, rubidium and caesium, which are exactly
@@ -2069,9 +2087,9 @@ function uf3Note(nb, here){
     frequency; the warm classes come from three independent screens - thermal
     expansion, 300 K elastic constants, and the sign of dC11/dT.  */
 const RC_DISP = {Ag:[13.0,12.7], Au:[4.2,4.4], Ba:[8.3,9.6], Ca:[8.6,8.3],
-                 Cs:[3.9,16.7], Cu:[9.3,10.0], K:[16.6,11.4], Li:[5.8,25.2],
-                 Mg:[8.3,6.6], Na:[9.4,15.4], Ni:[12.1,13.4], Pb:[10.6,15.9],
-                 Pd:[3.5,3.6], Pt:[4.8,4.7], Rb:[5.4,13.5], W:[17.2,17.8],
+                 Cs:[6.4,12.9], Cu:[9.3,10.0], K:[11.8,13.9], Li:[5.8,25.2],
+                 Mg:[8.3,6.6], Na:[5.8,16.2], Ni:[12.1,13.4], Pb:[10.6,15.9],
+                 Pd:[3.5,3.6], Pt:[5.0,4.8], Rb:[5.4,13.5], W:[17.2,17.8],
                  Yb:[8.5,8.6]};
 const RC_BROKEN = ["Na","K","Rb","Cs"];      /* warm screens: catastrophic  */
 const RC_SUSPECT = ["Yb"];                   /* the same failure, milder    */
@@ -2412,7 +2430,7 @@ function lammpsBlock(d){
       a reader wants is not a matter of taste and the two answers point
       opposite ways: measured against neutron dispersion the hard sets average
       9.5 % over the 29 elements that have a curve and the switched ones
-      12.6 %, hard being closer in 24 of the 29 - and no hard set can be run
+      12.7 %, hard being closer in 23 of the 29 - and no hard set can be run
       at temperature, because phi2 does not vanish at the cutoff.  Copper
       drifts 350 meV per atom per nanosecond in NVE with the hard set and 0.4
       with the switched one, a factor of 876.  Each file's own header carries
@@ -2439,7 +2457,17 @@ function lammpsBlock(d){
      "re-cut candidate, not published" + (armBad(d.rc)?" — REJECTED":"")],
     ["rc_ug", d.rc_ug, d.sym+"_recut.ugur.ang", "ugur/ang",
      "re-cut + angular, not published"
-     + (armBad(d.rc_ug)?" — REJECTED":"")]
+     + (armBad(d.rc_ug)?" — REJECTED":"")],
+    /*  The two other candidate sets ship for the same reason the re-cut ones
+        do: a reader who wants to check a comparison made on this page needs
+        the file it was made with.  Neither is part of the published library
+        and both rows say so.  */
+    ["hard_disp", d.hard_disp, d.sym+"_disp.ugur", "ugur",
+     "dispersion-selected candidate, not published &mdash; hard truncation, "
+     + "<strong>not molecular dynamics</strong>"],
+    ["tap_nudge", d.tap_nudge, d.sym+"_nudge_taper.ugur", "ugur",
+     "nudge-constrained candidate, not published &mdash; switched, holds its "
+     + "lattice where the shipped one does not"]
   ].filter(r=>r[1]);
   if(!SETS.length) return "";
   const V = r => (r[1] && r[1].md_screen) || null;
@@ -3127,6 +3155,8 @@ function render(){
                 umech?umech.cauchy.toFixed(1):null,uname)}
         ${mech.debye?cell3("Debye temperature",mech.debye.toFixed(0)+" K",
                 umech&&umech.debye?umech.debye.toFixed(0):null,uname):""}
+        ${(d.theta_D_exp?cell3("&theta;<sub>D</sub> measured",
+                d.theta_D_exp.toFixed(0)+" K","Stewart 1983, at 0 K"):"")}
         ${mech.v_l?cell3("v longitudinal",(mech.v_l/1000).toFixed(2)+" km/s",
                 umech&&umech.v_l?(umech.v_l/1000).toFixed(2):null,uname):""}
         ${mech.v_t?cell3("v transverse",(mech.v_t/1000).toFixed(2)+" km/s",
@@ -3136,8 +3166,34 @@ function render(){
       B<sub>V</sub>/B<sub>R</sub> &minus; 6 vanishes only for an isotropic
       solid. B/G above ~1.75 is the usual ductility indicator, and a positive
       Cauchy pressure points the same way. The Debye temperature comes from the
-      Hill averages and the density, not from the phonon spectrum &mdash; the
-      two are independent estimates.</p>
+      elastic constants and the density, not from the phonon spectrum &mdash;
+      the two are independent estimates.
+      ${mech.debye_iso?`<br><br><b>It is averaged over the real slowness
+      surface.</b> For each direction the Christoffel problem gives three
+      speeds, and the Debye model asks for
+      3/v<sub>m</sub><sup>3</sup>&nbsp;=&nbsp;&lang;&sum;<sub>i</sub>
+      1/v<sub>i</sub><sup>3</sup>&rang; over the sphere. Until 2026 this page
+      built it from the Voigt&ndash;Reuss&ndash;Hill averages instead &mdash;
+      one longitudinal and one transverse speed &mdash; which throws the
+      anisotropy away <em>before</em> an average that the slow directions
+      dominate, and came out high. For ${d.name} that old value was
+      ${mech.debye_iso.toFixed(0)}&nbsp;K against
+      ${mech.debye.toFixed(0)}&nbsp;K here; across the library the median move
+      is &minus;1.5&nbsp;% and lithium's is &minus;8&nbsp;%.
+      ${d.theta_D_exp?`<br><br>Do not expect the number beside it to match the
+      measured &theta;<sub>D</sub>: that is a T&nbsp;&rarr;&nbsp;0 quantity and
+      this one is built from elastic constants at ~300&nbsp;K and a
+      room-temperature volume, which is the anchor mismatch described in the
+      reference-data notes. Carried to 0&nbsp;K with III/29a's temperature
+      coefficients the close-packed metals land on it to within half a per
+      cent &mdash; copper 1.004, silver 0.999, gold 1.004, palladium 0.999
+      &mdash; and that agreement is what says this averaging is the right
+      one. The published comparison behind it is <b>A. Tari</b>,
+      <i>The Specific Heat of Matter at Low Temperatures</i> (Imperial College
+      Press, 2003), Table 2.4, which puts the calorimetric and elastic
+      &theta;<sub>D</sub> side by side at T&nbsp;&rarr;&nbsp;0 for five metals:
+      four agree to 0.55&nbsp;% or better and palladium is the outlier at
+      1.7&nbsp;%.`:""}`:""}</p>
     </div>
     <div>
       <div class="gen" style="margin-bottom:8px">
@@ -3223,7 +3279,7 @@ function render(){
         reachable only from the download table below. That distinction is not
         cosmetic: measured against neutron data over the 29 elements that have
         it, the hard-truncated sets average 9.5&nbsp;% and the switched ones
-        12.6&nbsp;%, and the hard one is closer in 24 of the 29. The switched
+        12.7&nbsp;%, and the hard one is closer in 23 of the 29. The switched
         sets are what molecular dynamics has to use, because a hard cut leaves
         the pair energy discontinuous, and that is the arm any
         finite-temperature number quoted elsewhere belongs to.</p>
@@ -3273,15 +3329,25 @@ function render(){
         beyond K belong on M&ndash;K and are drawn there, not folded back
         onto &Gamma;&ndash;K`
         :` Points on the part of &Sigma; beyond K are measured but not drawn:
-        this path does not go there`}.${d.exp_curve.a_meas?`<br><b>Scored at
-        the measured crystal's own lattice constant</b>,
+        this path does not go there`}.${d.exp_curve.a_meas?`<br><b>Scored at the
+        crystal's lattice constant at the measurement temperature</b>,
         a&nbsp;=&nbsp;${d.exp_curve.a_meas.toFixed(4)}&nbsp;&#8491;${
           d.exp_curve.c_meas?`, c&nbsp;=&nbsp;${d.exp_curve.c_meas.toFixed(4)}`
           :""}, not at the fitted a<sub>0</sub> of
         ${d.a0.toFixed(4)}&nbsp;&#8491;. The fit targets a room-temperature
-        lattice (a 5&nbsp;K one for the alkalis) and this curve was taken at
-        ${d.exp_curve.T_K}&nbsp;K, so comparing at a<sub>0</sub> would charge
-        the potential for a bookkeeping mismatch rather than for physics.`:""}
+        lattice (a 5&nbsp;K one for rubidium and caesium, 78&nbsp;K for
+        lithium) and this curve was taken at ${d.exp_curve.T_K}&nbsp;K, so
+        comparing at a<sub>0</sub> would charge the potential for a bookkeeping
+        mismatch rather than for physics.${d.exp_curve.a_meas_from?`
+        ${d.exp_curve.a_meas_from==="expansion integral"
+          ? `This volume is <b>not measured</b>: no second lattice constant is
+             published for this crystal at this temperature, so it is carried
+             from a<sub>0</sub> by the thermal expansion integral &mdash; the
+             Debye heat capacity under the CRC's &alpha;(25&nbsp;&deg;C) with
+             the Debye temperature above. Checked against sodium and potassium,
+             where Kittel does publish both ends, it runs about 12&nbsp;% high,
+             so read it as carrying that much slack.`
+          : `This one is a measurement: ${d.exp_curve.a_meas_from}.`}`:""}`:""}
         <br>Source: ${d.exp_curve.ref}.</p>`:""}
       <p class="plotnote">${g.std[0].branches.length} branches. From the
       dynamical matrix &mdash; phonons are not fit targets, so this is a
@@ -3784,7 +3850,25 @@ function render(){
       move between editions, and for the alkalis the spread between
       compilations is several per cent &mdash; for the refractory metals about
       one. It is a different edition from the melting points used elsewhere
-      here, which are the 97th (2016).`:""}</p>
+      here, which are the 97th (2016).`:""}
+    ${d.tap.expansion.window?`<br><br><b>The comparison is converted before it
+      is made.</b> The slope above is fitted over the whole temperature grid,
+      ${d.tap.expansion.T?d.tap.expansion.T[0].toFixed(0)+"&ndash;"
+        +d.tap.expansion.T[d.tap.expansion.T.length-1].toFixed(0)+"&nbsp;K":""},
+      and the experimental figure is at 25&nbsp;&deg;C. Those are not the same
+      quantity: &alpha; follows the heat capacity, so the raw ratio carries a
+      factor &lang;C<sub>V</sub>&rang;<sub>grid</sub>&nbsp;/&nbsp;C<sub>V</sub>(298)
+      that belongs to neither the potential nor the experiment. Here that
+      factor is <b>${d.tap.expansion.window.toFixed(3)}</b>, so the raw ratio of
+      ${d.tap.expansion.ratio_raw!==undefined
+        ? "&times;"+d.tap.expansion.ratio_raw.toFixed(2) : "&mdash;"}
+      becomes &times;${d.tap.expansion.ratio.toFixed(2)}. It is applied
+      identically to every published potential drawn beside ours, and that is
+      the reason to believe it: a real conversion cannot tell the two apart,
+      and in fact it improves the published sets more than it improves ours.
+      For most elements it is within a per cent or two and changes nothing;
+      for beryllium, lithium and sodium, whose grids sit worst against their
+      own Debye temperature, it is decisive.`:""}</p>
 
   ${(()=>{const a=d.tap.expansion.alpha_1e6, r=d.tap.expansion.ratio;
     const b=Object.values(d.baseline_expansion||{}).map(x=>x.ratio)
@@ -3860,7 +3944,69 @@ function render(){
   D = ${d.tap_nudge.D.toFixed(4)},
   &alpha; = ${d.tap_nudge.alpha.toFixed(4)},
   r&#8320; = ${d.tap_nudge.r0.toFixed(4)},
-  C = ${d.tap_nudge.C.toFixed(4)}.</p>`:""}
+  C = ${d.tap_nudge.C.toFixed(4)},
+  &alpha;&#8323; = ${d.tap_nudge.alpha3.toFixed(4)},
+  r<sub>cut2</sub> = ${d.tap_nudge.rcut2.toFixed(4)}&nbsp;&#8491;,
+  r<sub>cut3</sub> = ${d.tap_nudge.rcut3.toFixed(4)}&nbsp;&#8491;,
+  taper = ${d.tap_nudge.taper?d.tap_nudge.taper.toFixed(2):"off"}
+  &mdash; all ten, so this is enough to rebuild it without reading the
+  file.</p>`:""}
+
+  ${d.hard_disp?`<h3>An alternative fit that describes the phonons better</h3>
+  <p class="note">Carried beside the shipped hard-cutoff record rather than
+  instead of it, for the same reason as the section above: the objective cannot
+  tell the two apart, so choosing one silently would hide the only interesting
+  thing about it. Both reach the elastic targets at
+  ${d.hard_disp.rms.toFixed(3)}&nbsp;% residual &mdash; the same targets, the
+  same <code>refdata.py</code>, nothing reweighted. What separates them is the
+  measured dispersion, which never enters the fit.</p>
+  <div class="cols3">
+    ${cell3("shipped fit, dispersion",
+       d.hard_disp.evidence.dispersion_published.toFixed(2)+" %",
+       "of the top measured frequency")}
+    ${cell3("this fit, dispersion",
+       d.hard_disp.evidence.dispersion_here.toFixed(2)+" %",
+       ((d.hard_disp.evidence.dispersion_here
+         -d.hard_disp.evidence.dispersion_published)>=0?"+":"")
+       +(d.hard_disp.evidence.dispersion_here
+         -d.hard_disp.evidence.dispersion_published).toFixed(2)+" points")}
+    ${cell3("elastic error", d.hard_disp.rms.toFixed(3)+" %",
+       "the shipped record is the same")}
+  </div>
+  <p class="note"><strong>It also brings two constraints back inside the
+  line.</strong> <code>fit.py</code> enforces
+  E<sub>3</sub>/E<sub>2</sub>&nbsp;&le;&nbsp;0.30 &mdash; the three-body term
+  may correct the pair term but may not cancel it &mdash; and a compression
+  guard. Both were tightened for the tapered sets and never applied back to
+  the hard-cutoff library, so 22 of its 36 records are above the first and the
+  shipped record here fails both. This one is at
+  ${d.hard_disp.evidence.E3_over_E2_here.toFixed(3)} against the shipped
+  ${d.hard_disp.evidence.E3_over_E2_published.toFixed(3)}, and passes the
+  compression guard.
+  ${d.hard_disp.evidence.md_pe_minus_lattice_here!==undefined?`Under the MD
+    screen both survive, but this one sits
+    ${d.hard_disp.evidence.md_pe_minus_lattice_here.toFixed(3)}&nbsp;eV/atom
+    above its own static lattice against the shipped record's
+    ${d.hard_disp.evidence.md_pe_minus_lattice_published.toFixed(3)}, at
+    ${d.hard_disp.evidence.md_T_here}&nbsp;K against
+    ${d.hard_disp.evidence.md_T_published}&nbsp;K.`:""}</p>
+  <p class="note">What has <em>not</em> been checked, and it is not an
+  omission: the vacancy, surface and stacking-fault energies. This is a
+  hard-cutoff record, &phi;<sub>2</sub> does not vanish at the cutoff, and a
+  relaxation walks straight into the discontinuity &mdash; which is why the
+  library carries those tests for the switched arms only.
+  Parameters: m = ${d.hard_disp.m.toFixed(3)},
+  &gamma; = ${d.hard_disp.gamma.toFixed(4)},
+  D = ${d.hard_disp.D.toFixed(4)},
+  &alpha; = ${d.hard_disp.alpha.toFixed(4)},
+  r&#8320; = ${d.hard_disp.r0.toFixed(4)},
+  C = ${d.hard_disp.C.toFixed(4)},
+  &alpha;&#8323; = ${d.hard_disp.alpha3.toFixed(4)},
+  r<sub>cut2</sub> = ${d.hard_disp.rcut2.toFixed(4)}&nbsp;&#8491;,
+  r<sub>cut3</sub> = ${d.hard_disp.rcut3.toFixed(4)}&nbsp;&#8491;,
+  taper = off &mdash; all ten, so this is enough to rebuild it without
+  reading the file. It also ships as
+  <code>${d.sym}_disp.ugur</code>.</p>`:""}
 
   ${lammpsBlock(d)}
 

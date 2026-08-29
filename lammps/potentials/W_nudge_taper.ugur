@@ -1,0 +1,19 @@
+# W - Ugur interatomic potential, CANDIDATE, nudge-constrained, switched
+#
+# pair_style ugur
+# pair_coeff * * W_nudge_taper.ugur W
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  This is the best solution in the same pool as the shipped switched record that survives a 1e-5 A displacement, which the shipped one does not; it costs elastic accuracy to get there and the page carries both errors side by side.  Read them before using this
+# MD: structure screened - holds its shape at 600 K (306 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of W at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+W W W 5.0804584657021881 0.44491506787538171 0.37535571822549463 3.8139082700213787 1.0953983975194665 -13.156230701447406 3.7328533988234898 8.2295200000000008 4.1117154120877579 0.84999999999999998 0 0

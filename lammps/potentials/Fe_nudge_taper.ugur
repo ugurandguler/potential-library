@@ -1,0 +1,19 @@
+# Fe - Ugur interatomic potential, CANDIDATE, nudge-constrained, switched
+#
+# pair_style ugur
+# pair_coeff * * Fe_nudge_taper.ugur Fe
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  This is the best solution in the same pool as the shipped switched record that survives a 1e-5 A displacement, which the shipped one does not; it costs elastic accuracy to get there and the page carries both errors side by side.  Read them before using this
+# MD: structure screened - holds its shape at 600 K (295 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Fe at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Fe Fe Fe 5.1642059981065938 0.23877037211863442 0.63323420252110496 3.1233548404298395 0.00049336939999887301 -3.8353841307127539 3.5321746650575552 7.4528999999999996 3.7236927299221398 0.84999999999999998 0 0

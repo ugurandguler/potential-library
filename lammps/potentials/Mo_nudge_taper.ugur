@@ -1,0 +1,19 @@
+# Mo - Ugur interatomic potential, CANDIDATE, nudge-constrained, switched
+#
+# pair_style ugur
+# pair_coeff * * Mo_nudge_taper.ugur Mo
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  This is the best solution in the same pool as the shipped switched record that survives a 1e-5 A displacement, which the shipped one does not; it costs elastic accuracy to get there and the page carries both errors side by side.  Read them before using this
+# MD: structure screened - holds its shape at 600 K (293 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+#
+# Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
+#
+# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
+# constants of Mo at its experimental lattice constant.  Nothing else.
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Mo Mo Mo 6.1924740120320596 0.38106650466310399 0.42054542444975235 3.3575104703239771 0.71718746776335307 -12.641674921385363 2.547998282470636 8.1821999999999999 4.0880729185644427 0.84999999999999998 0 0

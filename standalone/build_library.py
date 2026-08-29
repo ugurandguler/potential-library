@@ -160,6 +160,12 @@ def main(only=None):
             d["mech"] = mechanics.analyse(
                 C, mass_amu=refdata.MASSES[el]*nat, volume_A3=cry.vol,
                 natoms=nat)
+                #  the measured value, so the page can put it beside the
+            #  computed one.  They are not the same quantity: this is a
+            #  T -> 0 figure and the computed one is built from ~300 K
+            #  elastic constants at a room-temperature volume.
+            if el in refdata.THETA_D:
+                d["theta_D_exp"] = refdata.THETA_D[el]
             d["mech_planes"] = {pl: mechanics.plane_curves(C, pl)
                                 for pl in ("xy", "xz", "yz")}
         except np.linalg.LinAlgError:
