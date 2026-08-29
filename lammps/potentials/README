@@ -1,0 +1,66 @@
+Ugur interatomic potential - LAMMPS parameter files
+===================================================
+
+    <El>.ugur              38 elements, pair_style ugur
+    <El>_taper.ugur        38 elements, pair_style ugur
+    <El>.ugur.ang          38 elements, pair_style ugur/ang
+    <El>_taper.ugur.ang    38 elements, pair_style ugur/ang
+
+and the CANDIDATE sets, which are not part of the published library:
+
+    <El>_recut.ugur        23 elements, pair_style ugur
+    <El>_recut.ugur.ang    22 elements, pair_style ugur/ang
+    <El>_disp.ugur         4 elements, pair_style ugur
+    <El>_nudge_taper.ugur  5 elements, pair_style ugur
+
+They are here because the page compares them with the published sets and a
+reader who wants to check that comparison needs the files it was made with.
+Every one of them carries, in its own header, what it is and what is known
+against it.  Read that before using one.  In one line each:
+
+  _recut        a different pair cutoff.  Repairs molybdenum and tungsten and
+                BREAKS the alkalis once the crystal is warm - their elastic
+                constants come out three times too stiff at 300 K and their
+                thermal expansion negative.
+  _disp         the same targets and the same elastic residual as the plain
+                set, chosen among the solutions that residual cannot tell
+                apart by which describes the measured phonon dispersion
+                better.  Hard truncation, so the MD prohibition below applies.
+  _nudge_taper  the best solution in the same pool as the plain _taper set
+                that survives a 1e-5 A displacement, which the shipped one
+                does not.  It pays for that in elastic accuracy.
+
+The extension says which pair style the file needs, the way .eam / .eam.alloy /
+.eam.fs do.  The stem says which parameter set it is: a plain name is
+hard-truncated, _taper is switched.  Those two are different potentials, fitted
+under different truncations, and must not be swapped - each file states which
+it is in its own header.
+
+Which one to use
+----------------
+For molecular dynamics, use a *_taper set.  The hard-truncated potentials do
+not conserve energy: phi2 does not vanish at the cutoff, so a neighbour
+crossing it changes the energy in one step.  Measured, that is a drift of 5 to
+7256 meV/atom/ps against 0.03 to 0.28 for the switched sets, and on three of
+the hexagonal metals the crystal does not merely drift but comes apart.
+
+For static elastic constants and phonons the hard-truncated sets are the
+reference and are better for the hexagonal metals and the alkalis.  Both are
+provided for that reason.
+
+The angular sets (ug/) add h(cos theta) = 1 + lam2 P2 + lam4 P4 to the
+three-body term.  They need pair_style ugur/ang; pair_style ugur refuses a file
+with nonzero weights rather than ignoring the term.
+
+What these were fitted to
+-------------------------
+Cohesive energy, lattice constant, bulk modulus and elastic constants, at the
+experimental lattice constant.  Nothing else - no defect energies, no surface
+energies, no melting behaviour, no liquid structure.  Do not assume
+transferability to any of those.
+
+Alloys
+------
+See ALLOYS.md.  A multi-element file can be generated with make_alloy_file.py,
+but the unlike-pair and unlike-triple entries it writes come from conventional
+mixing rules that have not been tested against alloy data.
