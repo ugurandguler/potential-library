@@ -67,11 +67,22 @@ def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
     ground = {}
+    #  THE GROUND-STATE VERDICT IS OPTIONAL AND NOW SAYS SO WHEN IT IS ABSENT.
+    #  `dyn_candidates.json` is in NEITHER tree - it was never carried over
+    #  from the screening work - so this used to skip in silence and every
+    #  candidate came out with an empty `ground` column.  The verdicts already
+    #  in library.json are untouched; only a REBUILD loses them, and a rebuild
+    #  that drops a column without saying so is the failure this project keeps
+    #  finding.  Checked 2026-09-08.
     gp = os.path.join(CAND, "dyn_candidates.json")
     if os.path.exists(gp):
         for k, v in json.load(open(gp)).items():
             el, arm = k.split("|")
             ground[(el, arm.lower())] = v["verdict"]
+    else:
+        print("UYARI: %s yok - 'ground' sutunu BOS kalacak. Kayitlardaki "
+              "mevcut hukumler etkilenmez; yalnizca bu yeniden kurulum "
+              "onlari uretemiyor." % os.path.relpath(gp, ROOT), flush=True)
 
     print(f"{'el':4s}{'set':7s}{'rms':>8s}{'shipped':>9s}{'min cm-1':>10s}"
           f"{'ground':>9s}  stable")

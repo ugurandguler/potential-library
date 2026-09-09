@@ -1,0 +1,24 @@
+# Nb - Ugur interatomic potential, CANDIDATE, force-matched, switched
+#
+# pair_style ugur
+# pair_coeff * * Nb_force_taper.ugur Nb
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.7 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# MD: not screened.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# Nudge test: not run.
+#
+# Fitted to: DFT FORCES on displaced supercells of Nb, from the
+# database cited here, with the cohesive energy, lattice constant and
+# elastic constants kept as anchors.
+# Source: Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020).
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Nb Nb Nb 2.699475472385767 0.77268030959017975 0.75467754245744378 2.9889877434564025 5.9255235768690166e-10 -1.4917176900038833 1.3474850038719692 7.3488962915613065 4.7454247552790347 0.84999999999999998 0 0

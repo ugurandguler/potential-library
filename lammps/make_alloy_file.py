@@ -20,6 +20,16 @@ unlike entries written straight back into the same file.
 
 `--set tap` uses the tapered parameters, which is what anything going into MD
 should use; the default is the hard-truncated reference set.
+
+    python make_alloy_file.py --correct --set tap Cu Ni
+    python make_alloy_file.py --chi-d 1.03 --chi-r0 0.99 --set tap Cu Ni
+
+`--correct` applies the measured cross correction for the system where one
+exists; `--chi-d` and `--chi-r0` give it explicitly.  Both are off by default.
+Off is the honest default and also the dangerous one: with no correction the
+mixing rule puts the formation energy on the wrong side of zero for every
+compound measured so far, so an uncorrected file will not reproduce that the
+alloy forms at all.  CORRECTIONS below carries what is known.
 """
 import json
 import os
@@ -44,13 +54,40 @@ def arithmetic(vals):
     return sum(vals) / len(vals)
 
 
-def mix_pair(a, b):
+#  Measured cross corrections, refit/alloy_chi3.py.  chi_D multiplies the
+#  cross well depth and chi_r0 the cross bond length; 1.0 for both is the
+#  uncorrected rule below.  Each was solved compound by compound against the
+#  DFT formation energy AND the excess volume, then taken at the median, and
+#  the spread over the compounds is quoted because it is what says whether one
+#  pair of numbers is a description or a curve fit:
+#
+#    system   chi_D   spread   chi_r0   spread   compounds
+#    Cu-Ni    1.029    0.4 %   0.993     2.4 %   3
+#    Au-Cu    1.180    8.2 %   0.925     9.2 %   5
+#    Al-Ni    1.324   23.9 %   0.926     5.0 %   9
+#
+#  Cu-Ni is the one that is really described by two numbers - 0.4 per cent over
+#  its compounds - and its chi_r0 is 1 to within 0.7 per cent, so it is a
+#  one-parameter correction.  Al-Ni is NOT: a 24 per cent spread in chi_D means
+#  no single depth serves its nine compounds and the cross terms have to be
+#  fitted properly.  Applying the Al-Ni entry buys mechanical stability - AlNi
+#  B2 goes from C11 = 84.2 below C12 = 118.5, which is Born-unstable, to
+#  299/180/121 - while overshooting DFT's 204/134/113 badly.  Stability, not
+#  accuracy.  Read ALLOYS.md before using any of them.
+CORRECTIONS = {
+    frozenset(("Cu", "Ni")): (1.029, 0.993),
+    frozenset(("Au", "Cu")): (1.180, 0.925),
+    frozenset(("Al", "Ni")): (1.324, 0.926),
+}
+
+
+def mix_pair(a, b, chi_d=1.0, chi_r0=1.0):
     """parameters for the A-B bond from the two pure elements"""
     out = {}
     #  a well depth multiplies, a length adds: the Lorentz-Berthelot split,
     #  which is a convention and not a derivation
-    out["D"] = geometric([a["D"], b["D"]])
-    out["r0"] = arithmetic([a["r0"], b["r0"]])
+    out["D"] = chi_d * geometric([a["D"], b["D"]])
+    out["r0"] = chi_r0 * arithmetic([a["r0"], b["r0"]])
     out["alpha"] = arithmetic([a["alpha"], b["alpha"]])
     #  m and gamma are exponents with no dimensional argument either way
     out["m"] = arithmetic([a["m"], b["m"]])
@@ -115,6 +152,25 @@ def main():
         i = args.index("--set")
         which = "tapered" if args[i + 1] == "tap" else args[i + 1]
         del args[i:i + 2]
+    #  The correction is OFF unless asked for, and it is off by default on
+    #  purpose: the uncorrected file is what the mixing rules say, and a
+    #  generator that silently applied a fitted number would make the two
+    #  impossible to tell apart afterwards.
+    chi_d = chi_r0 = 1.0
+    chi_src = "none"
+    for flag, name in (("--chi-d", "d"), ("--chi-r0", "r")):
+        if flag in args:
+            i = args.index(flag)
+            val = float(args[i + 1])
+            if name == "d":
+                chi_d = val
+            else:
+                chi_r0 = val
+            chi_src = "given on the command line"
+            del args[i:i + 2]
+    auto = "--correct" in args
+    if auto:
+        args.remove("--correct")
     if len(args) < 2:
         raise SystemExit("two or more elements are required, for example: "
                          "python make_alloy_file.py Cu Ni")
@@ -135,10 +191,38 @@ def main():
                          "pencere modelin parcasi, bag basina parametre degil")
     taper = tapers.pop()
 
+    if auto:
+        key = frozenset(args)
+        if key not in CORRECTIONS:
+            raise SystemExit(
+                "--correct: no measured correction for %s; the ones that "
+                "exist are %s.  Give --chi-d/--chi-r0 explicitly, or leave "
+                "them off and treat the file as the starting point it is."
+                % (" ".join(args),
+                   ", ".join("-".join(sorted(k)) for k in CORRECTIONS)))
+        chi_d, chi_r0 = CORRECTIONS[key]
+        chi_src = "--correct, the measured median for this system"
+
     out = [HEADER.format(n=len(args), els=" ".join(args), which=which)]
+    if chi_d != 1.0 or chi_r0 != 1.0:
+        out.append(
+            "# CROSS CORRECTION APPLIED: chi_D = %g on the cross well depth,\n"
+            "# chi_r0 = %g on the cross bond length (%s).  The unlike-pair D\n"
+            "# and r0 columns below are therefore NOT what the mixing rules\n"
+            "# in this header give; multiply them out to recover those.  See\n"
+            "# ALLOYS.md for what these numbers were measured against and,\n"
+            "# more importantly, for what they were not.\n#"
+            % (chi_d, chi_r0, chi_src))
+    else:
+        out.append(
+            "# No cross correction: this is the uncorrected mixing rule, and\n"
+            "# for every system measured so far that rule puts the formation\n"
+            "# energy on the WRONG SIDE OF ZERO.  --correct applies the\n"
+            "# measured one where it exists.  ALLOYS.md has the numbers.\n#")
     for a in args:
         for b in args:
-            pb = mix_pair(recs[a], recs[b]) if a != b else dict(recs[a])
+            pb = (mix_pair(recs[a], recs[b], chi_d, chi_r0)
+                  if a != b else dict(recs[a]))
             for c in args:
                 tri = (mix_triple([recs[a], recs[b], recs[c]])
                        if not (a == b == c) else

@@ -467,6 +467,23 @@ def _flat(Phi):
 _FLAT_CACHE = {}
 
 
+def reciprocal(cry):
+    """rows are the reciprocal basis vectors, so q_cart = q_frac @ reciprocal
+
+    Copied verbatim from standalone/latdyn.py, where it has always been.  It
+    was missing here, so `curve_mae.py --ug` - which requires the angular
+    latdyn on the path and asserts as much - died with an AttributeError and
+    the UG arm has never been scored against a measured dispersion at all.
+
+    Copying is exactly right rather than merely convenient: the reciprocal
+    lattice is a property of the CELL and knows nothing about the potential,
+    so the angular and non-angular modules cannot legitimately disagree about
+    it.  Both Crystal classes build `self.lat` identically (angular line 185,
+    standalone line 224), which is the check that they are the same object.
+    """
+    return 2.0 * np.pi * np.linalg.inv(cry.lat).T
+
+
 def frequencies_many(cry, pot, qs, Phi=None):
     """
     Frequencies at many q at once, shape (len(qs), 3N).  Same numbers as
@@ -495,6 +512,57 @@ def frequencies_many(cry, pot, qs, Phi=None):
     D = 0.5 * (D + np.conj(np.transpose(D, (0, 2, 1))))
     w2 = np.linalg.eigvalsh(D)
     return np.sign(w2) * np.sqrt(np.abs(w2)) * THZ
+
+
+def modes_many(cry, pot, qs, Phi=None):
+    """
+    (frequencies, polarisations) at many q, shapes (Q, 3N) and (Q, 3N, 3N).
+
+    Identical to frequencies_many above except for the last two lines - eigh
+    instead of eigvalsh, and the vectors returned.  It exists for the reason
+    standalone/latdyn.py's version does: identifying a measured branch as
+    longitudinal or transverse needs the eigenVECTOR, and sorted position
+    will not do it.  Along <111> past P and along <110> past K the
+    longitudinal branch stops being the highest one.
+
+    Missing here until 2026-09-02, which with reciprocal() is why
+    `curve_mae.py --ug` has never run and the UG arm has therefore never
+    been scored against a measured dispersion at all.
+
+    **MAKING --ug RUN DOES NOT MAKE UG AND MAU COMPARABLE.  READ THIS
+    BEFORE PUTTING THE TWO IN ONE TABLE.**  The two modules do not agree
+    with each other even when the angular term is switched OFF.  Measured
+    on copper's tapered record with lam2 = lam4 = 0 and identical C,
+    alpha3 and rcut3, at q = (0.3, 0, 0):
+
+        standalone  2.833787  2.833787  7.775408 THz
+        angular     2.566576  2.566576  7.694274 THz
+
+    0.267 THz, a third of copper's whole MAU dispersion error.  The control
+    that establishes it is `frequencies_many`, which predates the additions
+    made here on 2026-09-02 and exists in BOTH modules: it shows the same
+    gap, so the difference is in the force constants and not in anything
+    added here.  fitug.py already says as much - UG_ANG is off by default so
+    that MAU numbers come from the same code path "rather than by a branch
+    that happens to set lam = 0".  This is that sentence, measured.
+
+    So a UG-minus-MAU difference read off these two arms carries a 0.267 THz
+    code offset before the angular term does anything, and no conclusion
+    about what the angular term is worth survives it.
+    """
+    Phi = force_constants(cry, pot) if Phi is None else Phi
+    B, I, J, R = _flat(Phi)
+    qs = np.atleast_2d(np.asarray(qs, float))
+    n = len(cry.frac)
+    ph = np.exp(2j * np.pi * (qs @ R.T))
+    D = np.zeros((len(qs), 3 * n, 3 * n), complex)
+    for b in range(len(B)):
+        D[:, 3*I[b]:3*I[b]+3, 3*J[b]:3*J[b]+3] += ph[:, b, None, None] * B[b]
+    M = np.repeat(cry.mass, 3)
+    D /= np.sqrt(np.outer(M, M))
+    D = 0.5 * (D + np.conj(np.transpose(D, (0, 2, 1))))
+    w2, vecs = np.linalg.eigh(D)
+    return np.sign(w2) * np.sqrt(np.abs(w2)) * THZ, vecs
 
 
 # --------------------------------------------------------------------------

@@ -47,8 +47,23 @@ SOURCES = [
     #  the re-cut candidates, one cluster job - 399 runs, 45
     #  records, tags rc and rc_ug
     (os.path.join(ROOT, "lammps", "elastic_T_rc.json"), True),
+    #  the force-matched arm, TRUBA job 6337611: 63 runs, 7 elements
+    #  x 9 temperatures, 0 failed.  Its tag in the file is `pick` because it
+    #  reaches elastic_T.py through the PICKS hook, which is what joins a
+    #  candidate set into PACK - see RENAME below for why that does not stay.
+    (os.path.join(ROOT, "lammps", "elastic_T_tapforce.json"), True),
     (os.path.join(ROOT, "lammps", "hcp_born.json"), False),
 ]
+
+#  A CURVE MUST ARRIVE UNDER THE NAME THE REST OF THE LIBRARY USES.
+#  `elastic_T.py`'s PICKS hook names every candidate set `pick`, which is right
+#  for a sweep that measures one arm at a time and wrong for a library where
+#  the arm is already called `tap_force`.  Left alone, make_gui.py's ARMS list
+#  would look for `tap_force`, find `pick`, and draw the panel without the
+#  curve - no error, just a missing line.  That is the failure mode this
+#  project keeps finding, so the rename is done here, at the point of entry,
+#  and only for the file that needs it.
+RENAME = {"elastic_T_tapforce.json": {"pick": "tap_force"}}
 KS = ("C11", "C12", "C13", "C33", "C44", "C66")
 _lp = os.path.join(HERE, "baseline_labels.json")
 LABELS = json.load(open(_lp)) if os.path.exists(_lp) else {}
@@ -122,8 +137,10 @@ def main():
         if not os.path.exists(path):
             continue
         raw = json.load(open(path))
+        ren = RENAME.get(os.path.basename(path), {})
         for key, series in raw.items():
             el, tag = key.split("|", 1)
+            tag = ren.get(tag, tag)
             if el not in lib:
                 continue
             struct = refdata.ELEMENTS[el]["struct"]
@@ -169,7 +186,8 @@ def main():
             else:
                 rec["label"] = {"tap": "MAU", "tap_ug": "UG",
                                 "rc": "MAU re-cut",
-                                "rc_ug": "UG re-cut"}.get(tag, tag)
+                                "rc_ug": "UG re-cut",
+                                "tap_force": "force-matched"}.get(tag, tag)
                 rec["kind"] = "ours"
             #  a Tmelt-scaled run supersedes a fixed-grid one for the same
             #  series; the fixed grid only exists for the ruthenium comparison

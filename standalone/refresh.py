@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
 """
-Rebuild everything downstream of the fits, in the one order that works.
+Rebuild the 0 K analytic layer downstream of the fits, in the one order
+that works - and NOT the measured layer, which is the larger half.
 
     python refresh.py                       # rebuild from the current fit.json
     python refresh.py runs/2026-08-01_cluster # merge that run in first
 
-Everything the viewer shows is derived from fit.json, so a new search only has
-to be merged and then this run: elastic constants, the mechanical analysis,
-phonons, thermodynamics and the Materials Project overlay are all recomputed
-from the merged parameters.  Nothing is carried over except the fetched MP
-reference data, which is a property of the element and not of the fit.
+The elastic constants, the mechanical analysis, the phonons, the
+thermodynamics and the DFT overlays are recomputed from the merged parameters.
+Nothing is carried over except the fetched MP reference data, which is a
+property of the element and not of the fit.
+
+**WHAT THIS DOES NOT REBUILD, and it is more than what it does.** The tree
+holds twenty-eight producers and this chain runs eleven.  The switched arms
+`tap` and `tap_ug` - the two the library actually recommends for molecular
+dynamics - the re-cut and force-matched arms, the elastic constants against
+temperature, the surface, stacking, ground-state and expansion measurements,
+the MD screen, the nudge test and every published-potential baseline come from
+the other seventeen, and most of those read cluster output that the published
+tree does not carry.
+
+Since `build_library.py` builds its dictionary from scratch and keeps only
+`mp`, running this over a populated library DELETES all of that.  Measured:
+the published page is 7.0 MB and what this chain regenerates from `fit.json`
+alone is 3.2 MB.  So it now refuses when the library holds records it cannot
+put back, lists them, and needs `--force` to go ahead anyway.
 
 The order is not arbitrary:
 
@@ -55,7 +70,10 @@ says so and continues rather than failing:
                           which reads the `dense_*.json` search output.  That
                           is gigabytes and is gitignored
   the re-cut candidates   add_candidates.py reads `refit/`, which is not
-                          published
+                          published - and `refit/dyn_candidates.json` is in NO
+                          tree at all, so a rebuild also loses the ground-state
+                          column.  It says so now rather than skipping quietly.
+                          The verdicts already in library.json are unaffected
   the finite-temperature  make_finiteT.py needs the tapered arm above.  The
   panel                   finished table ships as finiteT.json and the page
                           carries it, so nothing is missing from the page -
@@ -139,7 +157,78 @@ def run(script, *args, optional=False):
                      f"page is not built from half-written data")
 
 
-def main(merge_dirs):
+
+#  Anahtarlar ki bu zincir onlari URETMEZ.  Elle yazilmis bir liste degil:
+#  build_library.py'nin uretttigi alanlar ile mevcut kutuphanede duranlar
+#  karsilastiriliyor, yani zincire bir adim eklendigi gun liste kendiliginden
+#  kisalir.  Sabit bir liste o gun yanlis alarm vermeye baslar.
+def would_lose(path):
+    """(kayip anahtar -> kac element) - zincirin geri getiremeyecegi her sey
+
+    `build_library.py` her calismada sozlugu sifirdan kurar ve oncekinden
+    yalnizca `mp` tasir, cunku geri kalan her sey fit'in bir ozelligi sayilir.
+    Bu dogruydu, zincir her seyi ureten tek yer oldugu surece.  Bugun agacta
+    yirmi sekiz uretici var ve zincir on birini kosuyor; gerisi kume ciktisi
+    ister ve o ciktilar yayimlanan agacta yoktur.  Yani zincir artik bir
+    yeniden kurulum degil, KISMI bir yeniden kurulum, ve farki bilmeyen biri
+    icin bu sessiz bir silme islemidir.
+    """
+    import json as _json
+    if not os.path.exists(path):
+        return {}
+    try:
+        lib = _json.load(open(path, encoding="utf-8"))
+    except ValueError:
+        return {}
+    #  zincirin yazdigi ust duzey alanlar (build_library + 11 adim)
+    #  MEASURED, not guessed from reading the code: this is exactly the key
+    #  set a from-scratch chain run produces, taken from one - the public tree
+    #  cloned into an empty directory with no library.json, `refresh.py`, and
+    #  the keys of what came out.  A hand-written list was wrong on the first
+    #  try (it cried wolf over C13, C33 and model_curve, all of which the chain
+    #  does make), and a gate that reports what it should not is a gate people
+    #  learn to pass.  Re-derive it the same way if the chain gains a step.
+    MADE = {"B", "C", "C11", "C12", "C13", "C33", "C44", "Cfull", "Cij_unc",
+            "Cp298", "D", "Ecoh", "Ecoh_unc", "P_resid", "S298", "a0",
+            "alpha", "alpha3", "at_bound", "c_over_a", "dnn", "dyn", "exp",
+            "exp_curve", "exp_phonon", "frozen", "gamma", "ld", "m", "mass",
+            "mech", "mech_planes", "model_curve", "ntrip", "r0", "rcut2",
+            "rcut3", "reach", "rms", "s3", "struct", "theta_D_exp", "ug",
+            #  fetched overlays: build_library keeps `mp`, and the chain's
+            #  own steps re-fetch or rewrite these three
+            "mp", "jarvis", "mc3d", "min_cm1", "stable", "fc_check"}
+    lost = {}
+    for el, d in lib.items():
+        if not isinstance(d, dict):
+            continue
+        for k, v in d.items():
+            if k in MADE or v is None or v == {} or v == []:
+                continue
+            lost[k] = lost.get(k, 0) + 1
+    return lost
+
+
+def main(merge_dirs, force=False):
+    lost = would_lose(os.path.join(HERE, "library.json"))
+    if lost and not force:
+        print("DUR.  Mevcut library.json'da bu zincirin GERI GETIREMEYECEGI")
+        print("kayitlar var.  build_library.py sozlugu sifirdan kurar ve")
+        print("oncekinden yalniz `mp` tasir, yani asagidakiler silinir:")
+        print()
+        for k, n in sorted(lost.items(), key=lambda x: -x[1]):
+            print("    %-22s %d element" % (k, n))
+        print()
+        print("Bunlari ureten ureticiler bu zincirde YOK - cogu kume ciktisi")
+        print("ister ve o ciktilar yayimlanan agacta bulunmaz.  Yayimlanan")
+        print("sayfayi bu zincirle yeniden uretemezsiniz; uretilen sayfa")
+        print("daha kucuk ve daha az sey soyleyen baska bir sayfadir.")
+        print()
+        print("Bunun bir de asagi akis sonucu var: kollar gidince")
+        print("export_potentials.py 213 yerine 76 dosya yazar.")
+        print()
+        print("Yalnizca 0 K analitik kismi istiyorsaniz:  refresh.py --force")
+        print("Yayimlanan sayfanin tamami zaten docs/index.html'dedir.")
+        raise SystemExit(1)
     if merge_dirs:
         print(f"[0/{len(CHAIN)}] merge_fits.py  <- {', '.join(merge_dirs)}")
         run("merge_fits.py", *merge_dirs)
@@ -151,4 +240,6 @@ def main(merge_dirs):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    _a = sys.argv[1:]
+    _f = "--force" in _a
+    main([x for x in _a if x != "--force"], force=_f)

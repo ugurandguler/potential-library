@@ -36,6 +36,23 @@ sys.path.insert(0, HERE)
 import refdata                                        # noqa: E402
 import expansion as X                                # noqa: E402
 
+#  An arm record is one that carries the potential's five parameters.  Nothing
+#  else in an element's record does - baseline_*, elasticT, dyn and mech carry
+#  none of them - so this separates arms from payloads without a name list.
+#  A NAME LIST IS THE BUG: every one of these files was written with
+#  ("tap", "tap_ug"), the re-cut arms arrived and were silently skipped, and
+#  `tap_force` arrived and was skipped again.  The next arm will not announce
+#  itself either.
+_PARAM = ("D", "r0", "alpha", "m", "gamma")
+
+
+def arms(d):
+    """the arm records inside one element's entry, by shape not by name"""
+    return [k for k, v in d.items()
+            if isinstance(v, dict) and all(p in v for p in _PARAM)]
+
+
+
 SRC = os.path.join(HERE, "..", "lammps", "npt_expansion.json")
 #  the harmonic Grueneisen still comes from the quasi-harmonic run; only the
 #  expansion coefficient itself was replaced
@@ -139,11 +156,26 @@ def main():
 
     #  and the gap that matters: parameters exist, no result came back
     #  the same question, over whichever arms this element actually has
+    #  TWO QUESTIONS, AND THE OLD LIST CONFLATED THEM.  "Parameters exist, no
+    #  result came back" is one thing for an arm this sweep covers - that is a
+    #  run that failed - and quite another for an arm the sweep has never
+    #  touched, which is simply not measured yet.  Reported together over every
+    #  arm in the library the second buries the first: the hard-cut `ug` record
+    #  alone contributes one line per element, 38 of them, and none is news.
+    #
+    #  So the covered set is read from the sweep's OWN OUTPUT - the arms that
+    #  appear in npt for at least one element - and everything else is counted
+    #  on one line instead of listed.  No name list either way.
+    covered = {k.split("|", 1)[1] for k in npt}
     gone = sorted(f"{el}|{t}" for el, d in lib.items()
                   if isinstance(d, dict)
-                  for t in ("tap", "tap_ug", "rc", "rc_ug")
-                  if isinstance(d.get(t), dict)
+                  for t in arms(d)
+                  if t in covered
                   and "expansion" not in d[t] and f"{el}|{t}" not in npt)
+    never = sorted({t for d in lib.values() if isinstance(d, dict)
+                    for t in arms(d) if t not in covered})
+    if never:
+        print(f"  bu taramanin hic olcmedigi kol: {' '.join(never)}")
     if gone:
         print(f"  SONUC DONMEYEN {len(gone)}: {' '.join(gone)}")
         print("   (the run collapsed or the guards rejected it - see the npt output)")
@@ -183,10 +215,14 @@ def main():
         print("   negatiflerin yapisi: "
               + ", ".join(f"{k} {sorted(set(v))}" for k, v in sorted(by.items())))
 
-    gs = sorted(v["gruneisen"] for el in lib for t in ("tap", "tap_ug")
-                if isinstance(lib[el].get(t), dict)
-                for v in [lib[el][t].get("expansion") or {}]
-                if v.get("gruneisen") is not None)
+    #  every arm with an expansion record, keyed on the payload - the two-name
+    #  list here omitted the re-cut arms whose expansion runs this same file
+    #  had just written, so the Gruneisen spread was quoted over a subset
+    gs = sorted(v["gruneisen"] for el in lib if isinstance(lib[el], dict)
+                for k, sub in lib[el].items()
+                if isinstance(sub, dict) and not k.startswith("baseline")
+                for v in [sub.get("expansion") or {}]
+                if isinstance(v, dict) and v.get("gruneisen") is not None)
     if gs:
         odd = [g for g in gs if not 0.5 < g < 4.0]
         print(f"\nGruneisen: median {gs[len(gs)//2]:.2f}, "

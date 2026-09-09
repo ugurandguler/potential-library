@@ -519,15 +519,6 @@ for _el, _e in ELEMENTS.items():
     _e["B"] = _bulk_from_cij(_e["Cij"], _e["struct"])
 
 
-# atomic masses (amu) - needed for the dynamical matrix
-#  Melting points, K.  CRC Handbook of Chemistry and Physics, 97th ed. (2016),
-#  section 4, "Physical Constants of Inorganic Compounds" / elemental table.
-#
-#  These are NOT fitting targets and never enter the objective.  They set the
-#  temperature a parameter set has to remain a crystal up to, which is what the
-#  compression-escape constraint compares its barrier against.  A potential
-#  whose lattice is only metastable at half its own melting point is not usable
-#  for dynamics however well it reproduces the elastic tensor.
 
 #  Debye temperatures at 0 K, in K.
 #
@@ -575,6 +566,33 @@ THETA_D = {
 #  derived from elastic constants in Stewart's own table, not calorimetry
 THETA_D_FROM_ELASTIC = {"Fe", "Yb"}
 
+#  Melting points, K.  CRC Handbook of Chemistry and Physics, 97th ed.
+#  (2016), section 4, "Physical Constants of Inorganic Compounds" /
+#  elemental table.
+#
+#  THE EDITION IS PART OF THE CITATION.  Checked 2026-09-07 against the CRC
+#  copy in this repository, which is the Internet Version 2005 - a DIFFERENT
+#  printing - and the two disagree:
+#      Cu  ours 1357.8 K   2005 ed. 1084.62 C = 1357.77 K    +0.03
+#      Mo  ours 2896.0 K   2005 ed. 2622    C = 2895.15 K    +0.85
+#      Ta  ours 3290.0 K   2005 ed. 3007    C = 3280.15 K    +9.85
+#      W   ours 3695.0 K   2005 ed. 3414    C = 3687.15 K    +7.85
+#  Copper agrees to 0.03 K and tantalum is ten kelvin out, so a reader who
+#  checks against the PDF on disk will find a mismatch and conclude the table
+#  is wrong.  It is not; it is the 97th.  The same edition drift is already
+#  recorded for CRC's expansion coefficients in expansion.py, where both
+#  printings are kept rather than reconciled.
+#
+#  These are NOT fitting targets and never enter the objective.  They set the
+#  temperature a parameter set has to remain a crystal up to, which is what
+#  the compression-escape constraint compares its barrier against.  A
+#  potential whose lattice is only metastable at half its own melting point is
+#  not usable for dynamics however well it reproduces the elastic tensor.
+#
+#  The finite-temperature melting work quotes tantalum's 3290 K as the
+#  benchmark its force-matched record misses by about thirty per cent, so this
+#  is the citation that number needs.  Ten kelvin of edition drift is nothing
+#  against a ~1000 K discrepancy.
 MELTING = {
     "Li": 453.7, "Na": 371.0, "K": 336.7, "Rb": 312.5, "Cs": 301.6,
     "Be": 1560.0, "Mg": 923.0, "Ca": 1115.0, "Sr": 1050.0, "Ba": 1000.0,
@@ -587,6 +605,15 @@ MELTING = {
 }
 
 
+#  Atomic masses, amu - needed for the dynamical matrix, where they set the
+#  frequency scale as sqrt(1/M).
+#
+#  IUPAC standard atomic weights (CIAAW 2021).  The attribution used to sit
+#  INSIDE the table, on the row of the ten added 2026-08-03, which is why an
+#  audit reading the lines above the table found nothing; it covers all forty.
+#  This is a later revision than the 2005 CRC printing on disk, which prints
+#  Mo 95.94(2) against our 95.95 - 1 part in 10^4, so 5 parts in 10^5 on a
+#  frequency, far under any error bar here.
 MASSES = {
     "Al": 26.9815, "Ni": 58.6934, "Cu": 63.546, "Pd": 106.42, "Ag": 107.868,
     "Pt": 195.084, "Au": 196.967, "Pb": 207.2, "Rh": 102.906, "Ir": 192.217,
@@ -594,7 +621,7 @@ MASSES = {
     "W": 183.84, "V": 50.9415, "Nb": 92.906, "Ta": 180.948, "Li": 6.94,
     "Na": 22.9898, "K": 39.098, "Ba": 137.327, "Mg": 24.305, "Ti": 47.867,
     "Zr": 91.224, "Co": 58.9332, "Be": 9.0122, "Zn": 65.38, "Cd": 112.414,
-    #  added 2026-08-03, IUPAC standard atomic weights (CIAAW 2021)
+    #  added 2026-08-03
     "Rb": 85.4678, "Cs": 132.90545, "Yb": 173.045, "Sc": 44.955908,
     "Y": 88.90584, "Lu": 174.9668, "Hf": 178.486, "Re": 186.207,
     "Ru": 101.07, "Tl": 204.38,

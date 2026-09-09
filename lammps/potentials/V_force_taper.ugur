@@ -1,0 +1,26 @@
+# V - Ugur interatomic potential, CANDIDATE, force-matched, switched
+#
+# pair_style ugur
+# pair_coeff * * V_force_taper.ugur V
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.7 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# MD: not screened.
+#
+# LATTICE STABILITY: this set is NOT a harmonic minimum.
+# Along the Setyawan-Curtarolo path its frequencies reach -158.694 cm^-1,
+# with 17.64 % of the sampled modes imaginary.  That is a separate
+# failure from the 600 K screen above and is not covered by it.
+#
+# Nudge test: not run.
+#
+# Fitted to: DFT FORCES on displaced supercells of V, from the
+# database cited here, with the cohesive energy, lattice constant and
+# elastic constants kept as anchors.
+# Source: Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020).
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+V V V 1.9000000000000001 0.65051324396420562 1.0726306889533515 2.7413307768729691 1.3413550109509635e-10 -0.1550316189773428 0.8954013415785097 5.8513842976761099 4.7964062787617934 0.84999999999999998 0 0

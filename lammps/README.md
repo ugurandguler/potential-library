@@ -9,6 +9,46 @@ phi2(r) = D / (2(m-1) r) * [ beta^m exp(-m*alpha*r) - m*beta*exp(-alpha*r) ],   
 
 ---
 
+## 0. Building the pair style
+
+Nothing in `potentials/` can be read by a stock LAMMPS: `pair_style ugur` is
+not a LAMMPS package, it is the three files here. Copy them into the source
+tree and rebuild.
+
+```
+cp pair_ugur.cpp pair_ugur.h ugurpot.h  <lammps>/src/
+cd <lammps>/src && make serial          # or: make mpi, or your usual target
+```
+
+CMake builds pick the new files up on the next configure:
+
+```
+cd <lammps>/build && cmake ../cmake && cmake --build .
+```
+
+No package needs to be enabled — `make yes-...` is not involved, because these
+are plain pair styles and not a package. Check it took:
+
+```
+<lammps>/src/lmp_serial -h | grep -i ugur
+```
+
+which must list `ugur` and `ugur/ang`. `ugur` is the two- plus three-body form;
+`ugur/ang` adds the angular factor and reads the `.ugur.ang` files. A file's
+extension says which style it needs, and the header of every file in
+`potentials/` repeats the two lines to paste into an input script.
+
+**Python side**, for the analysis and the page rather than for MD: Python 3
+and **numpy**. There is no scipy, matplotlib, pandas or requests anywhere in
+this distribution. Four packages are optional and none is needed to use the
+library: `esprima` (`make_gui.py` parses the page's JavaScript with it before
+writing, and says so rather than skipping silently if it is missing), `mp_api`
+and `jarvis` (only the `fetch_*.py` downloaders, whose output is already
+carried here), and `fitz` (only `provenance/`, for publisher PDFs that are
+deliberately not shipped).
+
+---
+
 ## 1. IMPORTANT: the D of Table III must be divided by 5
 
 The `D` values as printed, used with the stated unit (10⁻²⁹ J·m) and the

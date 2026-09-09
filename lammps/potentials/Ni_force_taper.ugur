@@ -1,0 +1,29 @@
+# Ni - Ugur interatomic potential, CANDIDATE, force-matched, switched
+#
+# pair_style ugur
+# pair_coeff * * Ni_force_taper.ugur Ni
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.7 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# MD: not screened.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# THREE-BODY CEILING: this set is OVER it.
+# E3/E2 = 0.3001 against the bound of 0.30, exceeding it by 0.0005.
+# standalone/fit.py applies that bound with no tolerance, so this solution
+# would not have been accepted by the fit that produced the shipped sets.
+#
+# Nudge test: not run.
+#
+# Fitted to: DFT FORCES on displaced supercells of Ni, from the
+# database cited here, with the cohesive energy, lattice constant and
+# elastic constants kept as anchors.
+# Source: Fellman, Byggmastar, Granberg, Nordlund, Djurabekova, Phys. Rev. Materials 9, 053807 (2025).
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Ni Ni Ni 2.590629196566538 0.5824947300818083 0.92504207664227445 2.7728198691422814 0.69268447816319156 -0.027981780709787449 0.43143554770769665 5.2033292183691886 5.1288501542427429 0.84999999999999998 0 0

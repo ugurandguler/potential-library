@@ -50,7 +50,30 @@ import numpy as np
 import latdyn as L
 import refdata
 
+#  An arm record is one that carries the potential's five parameters.  Nothing
+#  else in an element's record does - baseline_*, elasticT, dyn and mech carry
+#  none of them - so this separates arms from payloads without a name list.
+#  A NAME LIST IS THE BUG: every one of these files was written with
+#  ("tap", "tap_ug"), the re-cut arms arrived and were silently skipped, and
+#  `tap_force` arrived and was skipped again.  The next arm will not announce
+#  itself either.
+_PARAM = ("D", "r0", "alpha", "m", "gamma")
+
+
+def arms(d):
+    """the arm records inside one element's entry, by shape not by name"""
+    return [k for k, v in d.items()
+            if isinstance(v, dict) and all(p in v for p in _PARAM)]
+
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
+#  Display name -> library sub-key.  Only the ALIASES need to be here: "hard"
+#  is the element's top-level record, which carries the same five parameters as
+#  any arm and has no sub-key of its own, so shape detection cannot name it.
+#  Every other arm is looked up by its own name - see SETS.get(key, key) below,
+#  which is what lets an arm that did not exist when this file was written be
+#  screened without editing this table.
 SETS = {"hard": None, "tap": "tap", "ug": "ug", "tap_ug": "tap_ug"}
 #  The threshold the fit itself applies, so the diagnostic and the constraint
 #  can never drift apart - two places with two thresholds is how that starts.
@@ -101,12 +124,26 @@ def probe(el, rec, lo=0.55, step=0.005):
 
 def main():
     args = sys.argv[1:]
-    keys = ["tap", "tap_ug"]
+    keys = None                      # decided from the library, see below
     if "--set" in args:
         i = args.index("--set")
         keys = [args[i + 1]]
         del args[i:i + 2]
     lib = json.load(open(os.path.join(HERE, "library.json")))
+    if keys is None:
+        #  EVERY arm in the library, not ("tap", "tap_ug").  This is a SCREEN;
+        #  an arm it does not look at is an arm nobody screened, and the two
+        #  named here were the two that existed when the file was written.
+        #  Union over elements, in a stable order, so the table's columns do
+        #  not depend on which element happens to be first.
+        seen = []
+        for d in lib.values():
+            if not isinstance(d, dict):
+                continue
+            for k in arms(d):
+                if k not in seen:
+                    seen.append(k)
+        keys = sorted(seen)
     scr = {}
     sp = os.path.join(os.path.dirname(HERE), "lammps", "md_screen_all.json")
     if os.path.exists(sp):
@@ -135,7 +172,8 @@ def main():
         print("-" * 57)
         hit, bad = [], []
         for el in els:
-            rec = lib[el] if SETS[key] is None else lib[el].get(SETS[key])
+            sub = SETS.get(key, key)
+            rec = lib[el] if sub is None else lib[el].get(sub)
             if not rec or "m" not in rec:
                 continue
             x, b, d = probe(el, rec)

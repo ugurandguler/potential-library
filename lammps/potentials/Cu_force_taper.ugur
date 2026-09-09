@@ -1,0 +1,29 @@
+# Cu - Ugur interatomic potential, CANDIDATE, force-matched, switched
+#
+# pair_style ugur
+# pair_coeff * * Cu_force_taper.ugur Cu
+#
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.7 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# MD: not screened.
+#
+# Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
+# symmetry path; no imaginary modes.
+#
+# THREE-BODY CEILING: this set is OVER it.
+# E3/E2 = 0.3002 against the bound of 0.30, exceeding it by 0.0012.
+# standalone/fit.py applies that bound with no tolerance, so this solution
+# would not have been accepted by the fit that produced the shipped sets.
+#
+# Nudge test: not run.
+#
+# Fitted to: DFT FORCES on displaced supercells of Cu, from the
+# database cited here, with the cohesive energy, lattice constant and
+# elastic constants kept as anchors.
+# Source: Fellman, Byggmastar, Granberg, Nordlund, Djurabekova, Phys. Rev. Materials 9, 053807 (2025).
+#
+# Format is LAMMPS's Tersoff convention - one line per ordered triple
+# (centre, leg, leg) - so that this file and a multi-element one are read the
+# same way.  For a single element that is one line.
+#
+# el1 el2 el3  m D alpha r0 gamma C alpha3 rcut2 rcut3 taper lam2 lam4
+Cu Cu Cu 2.3514872126827475 0.31660489274991327 0.52516395434982821 3.3331804671353873 2.9999972832081117 -0.10559696698281947 0.33795344570675545 5.3736115227057466 5.337401318276271 0.84999999999999998 0 0

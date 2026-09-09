@@ -204,9 +204,16 @@ def main():
     print(f"ours {nours} records ({nbad} with the facet ordering wrong, "
           f"{ntie} where the reference facets are too close to call), "
           f"baseline {nbase} records, reference {nref} elements")
-    ours = [lib[el][t]["surface"] for el in lib
-            for t in ("tap", "tap_ug")
-            if isinstance(lib[el].get(t), dict) and lib[el][t].get("surface")]
+    #  EVERY arm that produced a surface record, not a list of two names.
+    #  Written as ("tap", "tap_ug") this summary silently omitted rc, rc_ug and
+    #  tap_force - so the "ratio to DFT" line quoted below has been describing
+    #  half the library while reading as though it described all of it.
+    #  Keyed on the payload, so an arm with no surface run simply does not
+    #  appear, which is what a statistic over results should do.
+    ours = [sub["surface"] for el in lib if isinstance(lib[el], dict)
+            for k, sub in lib[el].items()
+            if isinstance(sub, dict) and not k.startswith("baseline")
+            and isinstance(sub.get("surface"), dict)]
     rr = [s["ratio_dft_median"] for s in ours if s.get("ratio_dft_median")]
     if rr:
         rr.sort()

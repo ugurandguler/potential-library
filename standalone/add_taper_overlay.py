@@ -18,7 +18,7 @@ separates the two possible explanations: shortening the hard cutoff instead
 while the switch reaches 0.00.  So it is the discontinuity, not the range.
 
 This is not a free improvement and the page should not read like one.  The
-median over all 38 goes the wrong way, 5.83 -> 7.67 per cent: the hcp metals
+median over all 38 goes the wrong way, 6.11 -> 6.26 per cent: the hcp metals
 lose heavily (7.86 -> 19.81) and so do the alkalis.  Cadmium and zinc, which
 fail on axial anisotropy rather than on C44/C', are not rescued either.  The
 switch removes one specific limitation and costs accuracy elsewhere.

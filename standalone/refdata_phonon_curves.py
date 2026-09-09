@@ -98,6 +98,22 @@ TI_REF = ("C. Stassis, D. Arch and B. N. Harmon, "
           "paper also measured 773 K and 1054 K; only the room-temperature "
           "column is carried, to keep this set comparable")
 
+MO_REF = ("A. D. B. Woods and S. H. Chen, Solid State Commun. <b>2</b>, 233 "
+          "(1964), Table 1, 296 K.  The companion paper to the tungsten "
+          "record above - same spectrometer at Chalk River, same method, "
+          "same temperature - and like it, the dispersion is PLOTTED and "
+          "only eleven modes are tabulated, so this is a handful of "
+          "measurements rather than a curve.  Frequencies are in "
+          "10<sup>12</sup> c/s, which is THz.  Two caveats travel with it. "
+          "The paper reports a pronounced anomaly near H, which it argues is "
+          "a Kohn anomaly tied to the Fermi surface; a short-ranged "
+          "potential cannot produce one, so the error at H is not a fitting "
+          "failure and should not be read as one.  And between P and H the "
+          "TRANSVERSE branch runs ABOVE the longitudinal - 7.08 against 6.28 "
+          "- so a comparison that assigns branches by sorted position rather "
+          "than by the paper's own labels gets molybdenum backwards there.")
+
+
 W_REF = ("S. H. Chen and B. N. Brockhouse, Solid State Commun. <b>2</b>, 73 "
          "(1964), Table 1, room temperature.  The paper plots its dispersion "
          "and tabulates only eight specific points, so this is a handful of "
@@ -926,6 +942,29 @@ PHONON_CURVE = {
     #
     #  T1 and T2 cross between zeta = 0.4 and N: T1 rises 4.12 -> 4.40 while
     #  T2 falls 4.30 -> 4.15.  Transcribed as printed.
+    #  Woods and Chen's molybdenum, the companion to the tungsten record
+    #  below: same journal volume, same group, same 296 K.  Eleven tabulated
+    #  modes against tungsten's eight.
+    #
+    #  ZETA IS THE PAPER'S OWN and is not folded here.  Two of the [zzz]
+    #  points sit past P - 0.7 and 0.93 - and SEGMENT already sends that half
+    #  of Lambda to P -> H.  Folding them onto Gamma -> P by hand is exactly
+    #  what would have drawn barium's second half on top of its first.
+    #
+    #  The two degenerate modes are listed under BOTH labels, as tungsten's
+    #  are: the paper says "all polarizations degenerate" at (0,0,1) and at
+    #  (1/2,1/2,1/2), and filing each under one label only would make the
+    #  other branch look unmeasured there.
+    "Mo": {"T_K": 296, "struct": "bcc", "ref": MO_REF, "sparse": True,
+           "branches": {
+        "L[z00]": [[0.6, 7.61, 0.10], [1.0, 5.51, 0.08]],
+        "T[z00]": [[0.8, 5.97, 0.10], [1.0, 5.51, 0.08]],
+        "L[zz0]": [[0.5, 8.22, 0.10]],
+        "T1[zz0]": [[0.5, 5.75, 0.10]],
+        "T2[zz0]": [[0.4, 4.85, 0.08], [0.5, 4.59, 0.08]],
+        "L[zzz]": [[0.4, 7.26, 0.10], [0.5, 6.53, 0.10], [0.93, 6.28, 0.10]],
+        "T[zzz]": [[0.5, 6.53, 0.10], [0.7, 7.08, 0.10]],
+    }},
     "W": {"T_K": 296, "struct": "bcc", "ref": W_REF, "sparse": True,
           "branches": {
         "L[z00]": [[0.7, 6.30, 0.07], [1.0, 5.50, 0.1]],

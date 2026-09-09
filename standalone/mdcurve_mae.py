@@ -95,10 +95,31 @@ def lammps_frame(cry):
     return np.array([[ax, 0.0, 0.0], [bx, by, 0.0], [cx, cy, cz]])
 
 
+def reference(v, el):
+    """(kind, record) - the measured curve if there is one, else the model
+
+    `exp_curve` is preferred and `model_curve` is accepted, and the caller is
+    told which so the difference reaches the printed table.  A model reference
+    is a weaker test - the reference is itself a fit - and `curve_mae` already
+    says so in its own output.
+
+    Vanadium is why this exists rather than a refusal: it scatters neutrons
+    almost entirely incoherently, which is what makes it the standard neutron
+    calibrant and what makes a coherent measurement of it impossible, so its
+    only reference is Colella and Batterman's Born-von Karman model.  That
+    model is gated on the elastic constants it was NOT fitted to.
+    """
+    if "exp_curve" in v:
+        return "exp", v["exp_curve"]
+    if "model_curve" in v:
+        return "model", v["model_curve"]
+    raise AssertionError("%s: ne olculen ne model egrisi var" % el)
+
+
 def build(el, lib):
     """(q rows, index rows, n) for one element, in phana's fractional units"""
     v = lib[el]
-    ec = v["exp_curve"]
+    kind, ec = reference(v, el)
     segs = {(a, b): (ka, kb) for a, ka, b, kb in sc_segments(v["struct"])}
     #  The MD box was built at the library a0 and then let go under NPT, so
     #  the volume is the potential's own at this temperature; the a_meas
@@ -122,6 +143,29 @@ def build(el, lib):
         ka, kb = np.asarray(segs[(a, b)][0], float), \
             np.asarray(segs[(a, b)][1], float)
         for i, row in enumerate(pts):
+            #  A model row is [t, nu1, nu2, nu3] with no branch label; a
+            #  measured row is [t, nu, sigma, label].  The model side keeps
+            #  the whole sorted triple and is compared sorted, because
+            #  assigning a label it does not carry is how molybdenum's
+            #  transverse branch gets read as longitudinal between P and H.
+            if kind == "model":
+                nus = sorted(float(x) for x in row[1:4])
+                #  DROP THE GAMMA ENDPOINTS.  Three of vanadium's 240 model
+                #  rows are identically zero - the Gamma end of each segment
+                #  that touches it - and the acoustic modes are zero there by
+                #  construction on BOTH sides.  Scoring them adds three
+                #  perfect agreements nothing earned, and phana has nothing
+                #  useful to say at q = 0 either.
+                if max(nus) < 1e-6:
+                    continue
+                q = (np.asarray(segs[(a, b)][0], float)
+                     + row[0] * (np.asarray(segs[(a, b)][1], float)
+                                 - np.asarray(segs[(a, b)][0], float)))
+                qs.append(np.asarray(q, float))
+                idx.append({"seg": sk, "i": i, "label": None, "nu": nus[0],
+                            "nus": nus, "nrm": None, "hcp": hcp,
+                            "qc": (np.asarray(q, float) @ RL).tolist()})
+                continue
             nu, lab = row[1], row[3]
             q = ka + row[0] * (kb - ka)
             nrm = None
@@ -147,8 +191,19 @@ def build(el, lib):
     return qs, idx, n
 
 
-def parse_ev(path):
-    """[(frequencies, eigenvectors with modes as columns)] in file order"""
+def parse_ev(path, want=None):
+    """[(frequencies, eigenvectors with modes as columns)] in file order
+
+    `want` is the number of q blocks the caller asked phana for.  Give it and
+    a TRUNCATED file raises instead of being scored.
+
+    That is not hypothetical.  On 2026-09-08 an abandoned line-range download
+    left `ev_Cu_hard.dat` holding 308 of its 2,576 lines and `ev_Ni_hard.dat`
+    768 of 2,184 - files that parse perfectly, contain real numbers, and would
+    have produced a confident wrong answer from a fifth of the data.  Nothing
+    in the format says how long it should be, so the count has to come from
+    the caller, which knows: it wrote the q list.
+    """
     out, f, vecs, cur = [], [], [], None
     for ln in open(path, encoding="utf-8", errors="replace"):
         s = ln.strip()
@@ -166,13 +221,29 @@ def parse_ev(path):
             cur.extend(complex(g[k], g[k + 1]) for k in range(0, len(g), 2))
     if f:
         out.append((np.array(f), np.array(vecs).T))
+    if want is not None and len(out) != want:
+        raise AssertionError(
+            "%s KESILMIS ya da eksik: %d q blogu var, %d bekleniyor. "
+            "Puanlanmadi." % (os.path.basename(path), len(out), want))
     return out
 
 
-def score(el, lib):
+def score(el, lib, tag=None):
+    """tag lets several FITS of one element be scored without collision
+
+    The study had one run per element, so `ev_<El>.dat` was unambiguous.  This
+    batch has one per FIT - `Mo_lib` and `Mo_hard` are two different
+    potentials for molybdenum - and naming both `ev_Mo.dat` would mean the
+    second silently overwrote the first and the table reported one number
+    twice.  So the eigenvector file is `ev_<tag>.dat` when a tag is given.
+    """
     meta = json.load(open(os.path.join(HERE, "mdq_%s.json" % el)))
     rows, n = meta["idx"], meta["n"]
-    ev = parse_ev(os.path.join(HERE, "ev_%s.dat" % el))
+    #  the q list this element was emitted with says how many blocks phana
+    #  was asked for: n real points plus n rotated copies
+    with open(os.path.join(HERE, "mdq_%s.json" % el)) as fh:
+        want = 2 * int(json.load(fh)["n"])
+    ev = parse_ev(os.path.join(HERE, "ev_%s.dat" % (tag or el)), want)
     assert len(ev) == 2 * n, "%s: %d q blocks, %d expected" % (el, len(ev),
                                                                2 * n)
     err, nu_max, scatter = [], 0.0, []
@@ -180,6 +251,13 @@ def score(el, lib):
         f, vec = ev[k]
         fr = ev[k + n][0]
         scatter.append(float(np.abs(np.sort(f) - np.sort(fr)).max()))
+        if r.get("nus") is not None:
+            #  model reference: no labels on either side, so both are sorted
+            ours = sorted(float(x) for x in f)[:len(r["nus"])]
+            err.append(float(np.mean(np.abs(np.asarray(ours)
+                                            - np.asarray(r["nus"])))))
+            nu_max = max(nu_max, max(r["nus"]))
+            continue
         if r["hcp"] or r["nrm"] is None:
             got = float(min(f, key=lambda x: abs(x - r["nu"])))
         else:
@@ -187,7 +265,9 @@ def score(el, lib):
         err.append(abs(got - r["nu"]))
         nu_max = max(nu_max, r["nu"])
     mae = float(np.mean(err))
-    return {"el": el, "n": len(err), "T": lib[el]["exp_curve"]["T_K"],
+    kind, ec = reference(lib[el], el)
+    return {"el": el, "tag": tag or el, "n": len(err), "T": ec["T_K"],
+            "kind": kind,
             "mae": mae, "pct": 100.0 * mae / nu_max, "hcp": rows[0]["hcp"],
             "sc": float(np.mean(scatter)), "sc_max": float(max(scatter)),
             "sc_pct": 100.0 * float(np.mean(scatter)) / nu_max}
@@ -210,19 +290,21 @@ def main():
         return
 
     out = []
-    for el in els:
+    for spec in els:
+        el, _, tag = spec.partition(":")
         try:
-            out.append(score(el, lib))
+            out.append(score(el, lib, tag or None))
         except (OSError, AssertionError) as e:
-            print("%s: %s" % (el, e))
-    head = "%-5s%5s%5s%10s%7s%16s%6s" % ("el", "T", "pts", "MAE", "",
+            print("%s: %s" % (spec, e))
+    head = "%-10s%5s%5s%10s%7s%16s%6s" % ("kayit", "T", "pts", "MAE", "",
                                          "simetri sacilmasi", "")
     print()
     print(head)
     print("-" * 62)
     for r in out:
-        tag = r["el"] + ("*" if r["hcp"] else "")
-        print("%-5s%4dK%5d%10.3f%6.1f%%%12.3f%5.1f%%  (en buyuk %.2f)"
+        tag = (r["tag"] + ("*" if r["hcp"] else "")
+               + ("~" if r.get("kind") == "model" else ""))
+        print("%-10s%4dK%5d%10.3f%6.1f%%%12.3f%5.1f%%  (en buyuk %.2f)"
               % (tag, r["T"], r["n"], r["mae"], r["pct"], r["sc"],
                  r["sc_pct"], r["sc_max"]))
     print()
@@ -230,6 +312,11 @@ def main():
     print("element.  The scatter column is the same quantity evaluated between")
     print("q and a symmetry image of q: it is what this measurement cannot")
     print("resolve, and an error below it is not a result.")
+    if any(r.get("kind") == "model" for r in out):
+        print()
+        print("~ scored against a FITTED MODEL, not a measurement, and both")
+        print("  sides compared sorted because the model carries no branch")
+        print("  labels.  A weaker test: the reference is itself a fit.")
     if any(r["hcp"] for r in out):
         print()
         print("* hcp: distance to the NEAREST branch, a lower bound, as in "

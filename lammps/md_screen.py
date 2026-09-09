@@ -46,9 +46,34 @@ import latdyn as L      # noqa: E402
 import refdata          # noqa: E402
 import cellfile         # noqa: E402
 
-HOME = subprocess.run(["wsl", "-e", "bash", "-lc", "echo $HOME"],
-                      capture_output=True, text=True).stdout.strip()
+def _wsl_home():
+    """$HOME inside WSL, or ImportError - never a silently wrong string.
+
+    wsl.exe reports its own failures (a stopped distribution, a service
+    timeout) on STDOUT as UTF-16, so a plain capture_output read hands back
+    the error text where the path should be, and every LAMMPS call
+    downstream dies on "embedded null character" instead of on the real
+    cause.  That happened on 2026-09-07 and cost a whole nine-fit rerun.
+    All three are checked: the exit code, that the answer looks like an
+    absolute POSIX path, and that the binary is actually there.
+    """
+    r = subprocess.run(["wsl", "-e", "bash", "-lc", "echo $HOME"],
+                       capture_output=True, text=True)
+    h = r.stdout.strip()
+    if r.returncode != 0 or not h.startswith("/") or chr(0) in h:
+        raise ImportError(
+            "WSL yanit vermiyor - LAMMPS yolu bulunamadi.\n"
+            "  donus kodu %s\n  cikti %r\n"
+            "Cozum: `wsl --shutdown` sonra tekrar dene."
+            % (r.returncode, h[:120]))
+    return h
+
+
+HOME = _wsl_home()
 LMP = f"{HOME}/lammps/src/lmp_serial"
+if subprocess.run(["wsl", "-e", "test", "-x", LMP]).returncode != 0:
+    raise ImportError("LAMMPS ikilisi yok ya da calistirilabilir degil: %s"
+                      % LMP)
 SKIN = 2.0
 
 #  (library key, pair style, label)

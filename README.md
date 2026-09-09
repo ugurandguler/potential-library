@@ -27,6 +27,18 @@ was showing an older copy.
 
 ## Read this before using the parameters
 
+**Before anything else, if you want to run this in LAMMPS:** `pair_style ugur`
+is not a LAMMPS package. Copy `lammps/pair_ugur.cpp`, `lammps/pair_ugur.h` and
+`lammps/ugurpot.h` into your LAMMPS `src/` and rebuild — `lammps/README.md`
+section 0 has the two commands and the one-line check that it took. For the
+Python side you need Python 3 and **numpy**, and that is the whole requirement
+for the analysis and for rebuilding the page. Three optional packages appear
+and none is needed to use the library: `esprima`, which `make_gui.py` uses to
+parse the page's own JavaScript before writing it and skips with a message if
+absent; `mp_api` and `jarvis`, used only by the `fetch_*.py` scripts that
+download reference data already carried here; and `fitz`, only in
+`provenance/`, for publisher PDFs that are deliberately not shipped.
+
 The library reproduces **the elastic tensor at the experimental lattice
 constant** as well as tabulated EAM does, and that is what it was fitted to. It
 is a statement about the second derivative of the energy at fixed coordination.
@@ -37,8 +49,8 @@ identical code:
 
 | quantity | how it does |
 | --- | --- |
-| elastic constants C_ij | median RMS 1.45 % (UG), 5.83 % (MAU) |
-| vacancy formation energy | **2 to 3× too large**; negative for Cr, Mo, W |
+| elastic constants C_ij | median RMS 1.54 % (UG), 6.11 % (MAU) |
+| vacancy formation energy | **2.25× the published median** for the switched arms over the 21 elements that have a published value, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.06 MAU, 1.54 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
 | thermal expansion | 31 % low; 9 records contract on heating |
@@ -51,8 +63,12 @@ The surface row carries a criterion, not just a count. Most disagreements about
 facet ordering are near-ties: where the closest two faces differ by less than
 five per cent neither this potential nor the reference resolves them, so the
 verdict is three-way — right, wrong, **undecidable** — with the threshold in
-`standalone/add_surface.py`. Of our 76 records, 38 are decidable and 3 of those
-are right. The same change cost the published potentials more than it cost us,
+`standalone/add_surface.py`. Of the 76 records in the two shipped arms, 38 are
+decidable and 3 of those are right. **That is the count for `tap` and `tap_ug`;
+the producer now summarises every arm** and prints 121 records, 63 decidable
+and 9 right, because the re-cut arms carry surface runs too. The row above is
+the shipped library's figure and the producer's is the wider one — the same
+measurement over a larger set, not a disagreement. The same change cost the published potentials more than it cost us,
 because the close-packed-first rule had been flattering them too: they go from
 48 of 51 to 22 of 32. The conclusion survives the threshold — at two per cent
 it is 27/39 against 5/54, at ten per cent 6/7 against 3/14.
@@ -85,6 +101,124 @@ gives 100 < 111 < 110. The form reaches both the magnitude and the ordering and
 this parameterisation reaches neither. `Nb.uf3` carries an empty CITATION
 field, so its training set is unknown and this is not demonstrated
 extrapolation.
+
+## Force matching: what it repairs, and what it does not
+
+The rows above are properties of the **shipped** records, which are fitted to
+experimental anchors — the cohesive energy, the lattice constant, the bulk
+modulus and the elastic constants — and to nothing else. A separate line of
+work asks what happens if the same functional form is fitted to **DFT forces**
+while those anchors are held. Eleven such fits exist, all converged —
+the last two, tantalum and vanadium, landed on 2026-09-08. **They are
+not in the shipped library**; they are an experiment about the form, reported
+here because two of the caveats above turn out to be reachable.
+
+| fit | element | E_vac | E_int | stacking fault | dispersion |
+| --- | --- | --- | --- | --- | --- |
+| unconstrained | Nb | **−1.973** | **−2.808** | — | 21.2 % |
+| constrained | Nb | **+3.674** | **+2.012** | — | 12.6 % |
+| constrained | Cu | 1.847 | 3.137 | −83.4 | 5.4 % |
+| + stacking hinge | Cu | 1.859 | 3.153 | −15.0 | 5.3 % |
+| constrained | Ni | 2.299 | 3.798 | −239.5 | 7.7 % |
+| + stacking hinge | Ni | 2.368 | 3.939 | **+39.9** | 7.4 % |
+
+Three things are worth reading off it.
+
+**A negative vacancy energy travels with a negative interstitial energy, and
+one constraint repairs both.** Niobium's unconstrained fit prefers a hole *and*
+prefers an extra atom crammed in. Bounding the three-body term against the pair
+term — the same ceiling the shipped fitting script already rejects on — turns
+both positive at once. The interstitial had never been computed anywhere in
+this project, while the training data carries thirty-two interstitial
+configurations; the fit was being shown them and nothing was scoring the
+result.
+
+**The stacking fault can be given the right sign, and it is nearly free.** A
+fifth penalty asking for the hexagonal stacking to sit above the cubic one
+takes nickel's fault from −239.5 to +39.9 mJ/m² against a reference of +125 —
+the first record in this work with the right sign — while the cohesive energy,
+the elastic constants, the vacancy and the interstitial stay where they were
+and the dispersion gets slightly better. The sign survives at 300 K, which had
+to be checked separately: the molecular-dynamics screen runs a *perfect*
+crystal and so contains no fault to test.
+
+**The dispersion improves everywhere it can be checked**, from 21.2 to 12.6 per
+cent for niobium, 13.4 to 7.4 for nickel and 10.0 to 5.3 for copper, on curves
+that are in no objective. What does not improve is the facet ordering of the
+body-centred fits, which stays wrong.
+
+Two of the nine sit strictly inside every constraint; the other seven exceed
+the three-body ceiling by 0.0002 to 0.0013 eV/atom, which the shipped fitting
+script rejects on with no tolerance. That is a decision still to be taken, and
+the ceiling should not be moved to accommodate results produced under it.
+
+## The melting point, measured for the first time
+
+The caveat above says not to use these parameters for melting. That is now a
+number rather than a caution. Tantalum's force-matched record melts at
+**2250 ± 250 K against an experimental 3290** — about thirty per cent low.
+
+It was measured wrongly first, and the failure is worth recording because it
+produced a plausible number. A two-phase coexistence run returned 3438 K, which
+is void: there was never a solid phase in the cell. Velocities created at twice
+the target temperature melt everything before the two-phase construction
+begins, and the run's own solid-temperature diagnostic cannot see it because
+the group it measures is fixed by *initial position* — two halves of a uniform
+liquid report two indistinguishable temperatures. Every melting run here is now
+gated on the static structure factor per half-cell, printed beside a
+perfect-crystal control that must return 1.000.
+
+## The same improvement, twice — and it does not add up
+
+Two separate things reduce the error against a **measured** dispersion. Force
+matching moves the 0 K harmonic spectrum. Measuring the spectrum instead by
+displacement correlation during equilibrium molecular dynamics, at the
+temperature the neutron experiment was actually run at, gives the renormalised
+spectrum rather than the harmonic one.
+
+The natural expectation is that they add: one repairs the form, the other
+supplies the anharmonicity no harmonic form can carry. **They do not add. They
+substitute.**
+
+| | library 0 K | library at T | fit 0 K | fit at T | gain at T |
+| --- | --- | --- | --- | --- | --- |
+| V\* | 14.5 | 14.7 | 23.6 | **12.1** | **+11.5** |
+| Nb | 12.3 | 12.8 | 12.6 | **10.6** | +2.0 |
+| Ta | 14.8 | 12.9 | 12.2 | **9.7** | +2.5 |
+| Cu | 10.0 | 8.4 | 5.4 | **4.1** | +1.3 |
+| Mo | 14.8 | 9.2 | 9.6 | 12.4 | −2.8 |
+| Ni | 13.4 | 11.9 | 7.7 | 10.8 | −3.1 |
+| W | 17.8 | 10.3 | 8.9 | 14.6 | −5.7 |
+
+Per cent of the highest measured frequency, all against the same curves and
+the same q-points. \* vanadium is scored against a fitted model, not a
+measurement — see below.
+
+Ordered by how much force matching gained at 0 K, **the gain at temperature
+falls steadily and changes sign**, with a correlation of −0.96 over the seven.
+The crossover sits near five points. Copper is face-centred and falls between
+two body-centred elements in that ordering, so this is not a structure effect.
+Whichever lever is pulled first takes the improvement; the other moves back.
+
+Vanadium is the case that makes it plain, because it is the only one at the
+far end. Force matching made its 0 K dispersion **9.1 points worse**, and the
+thermal measurement recovered 11.5 — ending below the library's own figure. A
+fit that looks like a failure at zero kelvin is the best vanadium record here
+once it is measured at the temperature its reference was taken at. **A
+0 K-only reading would have discarded it.**
+
+What this does **not** say is what the shared content is. Anharmonic
+renormalisation and the effect of fitting to strained and defected
+configurations are both plausible, and this measurement does not separate
+them. It also gives no floor: four body-centred elements suggested a common
+limit near 9–10 per cent and copper's 4.1 removed it.
+
+Vanadium's reference is a Born–von Kármán model rather than neutron data,
+because none exists or will — vanadium scatters neutrons almost entirely
+incoherently, which is exactly what makes it the standard neutron calibrant.
+That model is nevertheless gated on the elastic constants it was *not* fitted
+to. Tungsten has twelve measured points and molybdenum fifteen against
+niobium's hundred and thirty-eight, so those two rows are thin.
 
 ## Three potentials, one hierarchy
 

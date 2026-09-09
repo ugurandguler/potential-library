@@ -46,6 +46,21 @@ SETS = {
     #  copies one out cannot confuse it with a shipped set
     "rc": ("rc", "ugur", "_rc.ugur"),
     "rc_ug": ("rc_ug", "ugur/ang", "_rc.ugur.ang"),
+    #  THE FORCE-MATCHED AND DISPERSION-SELECTED ARMS WERE MISSING, and the
+    #  consequence was not a blank column - it was a WRONG one.  This file is
+    #  what writes `stable`, and make_gui.py's `armBad` reads exactly that key
+    #  to decide whether an arm is drawn as REJECTED.  With no entry here
+    #  `stable` stayed absent, `armBad` compared undefined against false, and
+    #  vanadium's force-matched fit - 17.6 % of its q-points imaginary, the
+    #  most negative mode at -158.7 cm-1 - was displayed with no mark at all.
+    #  An arm wired into the page's six display points but into none of its
+    #  measurement points reads as measured and is not.
+    #
+    #  Both are switched or hard-cut as their own records say: tap_force
+    #  carries taper 0.85 like the shipped sets, hard_disp carries none, which
+    #  is why they take the two different suffixes.
+    "tap_force": ("tap_force", "ugur", "_force_taper.ugur"),
+    "disp": ("hard_disp", "ugur", "_disp.ugur"),
 }
 #  the angular sets need the angular tree's latdyn, which cannot be imported
 #  here - the two trees define incompatible versions.  angular/dynstab_ug.py
@@ -111,7 +126,27 @@ def main():
                 n["R"] += 1
 
             #  --- lowest phonon -------------------------------------------
-            if name in ("hard", "tap"):
+            #  WHICH ARMS' min_cm1 THIS FILE OWNS.  It is a list and it stays
+            #  one, because it encodes a real fact rather than an oversight:
+            #  `rc` and `rc_ug` get their min_cm1 from the candidate producer,
+            #  which samples the symmetry PATH as well as the mesh, and the two
+            #  are not the same number.  Measured: for `tap` this file's value
+            #  agrees with a fresh calculation on all 38 elements, and for `rc`
+            #  on 0 of 23 - because rc's column is the path value.  Filling one
+            #  column from two conventions is the bug, not the list.
+            #
+            #  tap_force and disp are here because nothing else wrote them:
+            #  vanadium's force-matched fit is dynamically unstable and the page
+            #  could not say so, since make_gui.py's `armBad` reads `stable`
+            #  and `stable` was absent.
+            #
+            #  UNRESOLVED, and deliberately not resolved here: for `tap` this
+            #  mesh says Mo and W are stable while their own `dyn` record - the
+            #  stronger mesh+path test - says they are not.  The page shows the
+            #  mesh verdict.  Unifying the column would mark two shipped
+            #  elements REJECTED, which is an editorial decision about the
+            #  published library and not a refactor.
+            if name in ("hard", "tap", "tap_force", "disp"):
                 try:
                     cry = L.Crystal(e["struct"], e["a0"], e.get("c_over_a"),
                                     mass=refdata.MASSES[el])

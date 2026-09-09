@@ -12,6 +12,7 @@ and the CANDIDATE sets, which are not part of the published library:
     <El>_recut.ugur.ang    22 elements, pair_style ugur/ang
     <El>_disp.ugur         4 elements, pair_style ugur
     <El>_nudge_taper.ugur  5 elements, pair_style ugur
+    <El>_force_taper.ugur  7 elements, pair_style ugur
 
 They are here because the page compares them with the published sets and a
 reader who wants to check that comparison needs the files it was made with.
@@ -29,6 +30,14 @@ against it.  Read that before using one.  In one line each:
   _nudge_taper  the best solution in the same pool as the plain _taper set
                 that survives a 1e-5 A displacement, which the shipped one
                 does not.  It pays for that in elastic accuracy.
+  _force_taper  fitted to DFT FORCES on displaced supercells, not to the
+                elastic constants alone.  That is what repairs the surfaces:
+                copper falls from 3.4x the DFT surface energy to 1.2x with
+                the elastic constants intact.  The price is stated per file -
+                four of the seven are over the three-body ceiling that the
+                fit enforces without tolerance, and vanadium is not a
+                harmonic minimum.  Seven elements only: Cu, Mo, Nb, Ni, Ta,
+                V, W.
 
 The extension says which pair style the file needs, the way .eam / .eam.alloy /
 .eam.fs do.  The stem says which parameter set it is: a plain name is

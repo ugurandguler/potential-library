@@ -100,7 +100,36 @@ SETS = (
     #  and all five pass the displacement test.
     ("nudge", "tap_nudge", "ugur", "_nudge_taper.ugur",
      "CANDIDATE, nudge-constrained, switched"),
+    #  The force-matched arm.  Fitted to DFT forces rather than to the
+    #  elastic constants alone, which is what repairs the surfaces - copper
+    #  goes from 3.4x the DFT surface energy to 1.2x with the elastic
+    #  constants intact.  Switched, taper 0.85, same pair style as the
+    #  shipped tapered set.
+    #
+    #  A CANDIDATE, and by the library's own gate rather than by caution:
+    #  four of the seven exceed the three-body ceiling that standalone/fit.py
+    #  enforces with no tolerance, so `fit.py` would not have kept them, and
+    #  vanadium is not a harmonic minimum at all.  Each file says which.
+    ("force", "tap_force", "ugur", "_force_taper.ugur",
+     "CANDIDATE, force-matched, switched"),
 )
+
+#  Which published force database each force-matched element was fitted to.
+#  Taken from refit/DATA_REFERENCES.md, whose own header records that two of
+#  its citations were WRONG when checked against Crossref: the ColabFit dataset
+#  names say "PRM2019" and the paper is Phys. Rev. Materials 4, 093802 (2020).
+#  A dataset's NAME is not its citation, so these are the resolved ones.
+FORCE_SRC = {
+    "Mo": "Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020)",
+    "Nb": "Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020)",
+    "Ta": "Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020)",
+    "V": "Byggmastar, Nordlund, Djurabekova, Phys. Rev. Materials 4, 093802 (2020)",
+    "W": "Byggmastar, Hamedani, Nordlund, Djurabekova, Phys. Rev. B 100, 144105 (2019)",
+    "Cu": "Fellman, Byggmastar, Granberg, Nordlund, Djurabekova, "
+          "Phys. Rev. Materials 9, 053807 (2025)",
+    "Ni": "Fellman, Byggmastar, Granberg, Nordlund, Djurabekova, "
+          "Phys. Rev. Materials 9, 053807 (2025)",
+}
 
 HEADER = """\
 # {el} - Ugur interatomic potential, {what}
@@ -111,8 +140,7 @@ HEADER = """\
 # Truncation: {trunc}
 {warn}
 #
-# Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
-# constants of {el} at its experimental lattice constant.  Nothing else.
+{fitted}
 #
 # Format is LAMMPS's Tersoff convention - one line per ordered triple
 # (centre, leg, leg) - so that this file and a multi-element one are read the
@@ -257,7 +285,7 @@ def main():
             #  rather than in md_screen_all.json, so they are looked up there.
             #  The four shipped sets keep the old path untouched - reading
             #  rec first for those would change what they report.
-            if name in ("rc", "rc_ug", "disp", "nudge"):
+            if name in ("rc", "rc_ug", "disp", "nudge", "force"):
                 md = rec.get("md_screen")
             else:
                 md = scr.get((el, {"mau": "hard", "mau_taper": "tap",
@@ -296,7 +324,7 @@ def main():
             #  interface calculation would meet it immediately.
             #  same split as the screen above: the candidates carry their
             #  own jiggle result, the shipped four keep the old lookup
-            if name in ("rc", "rc_ug", "disp", "nudge"):
+            if name in ("rc", "rc_ug", "disp", "nudge", "force"):
                 jg = rec.get("jiggle")
             else:
                 jg = jig.get((el, {"mau": "hard", "mau_taper": "tap",
@@ -346,6 +374,27 @@ def main():
                         + "# Lattice stability: screened on the 8^3 and 9^3"
                         " meshes AND along the" + nl
                         + "# symmetry path; no imaginary modes.")
+            #  THE THREE-BODY CEILING.  `standalone/fit.py` refuses any
+            #  solution whose three-body sum exceeds 0.30 of the two-body one,
+            #  with no tolerance, because that ratio is what the compression
+            #  escape and the vacancy failures were traced to.  The
+            #  force-matched arm was fitted without it and five of its seven
+            #  records land above the line - by 0.0002 to 0.0012, small
+            #  numbers against a bound that is enforced exactly.  A reader
+            #  holding one of these files is holding a set the library's own
+            #  acceptance test would have rejected, and has to be told so
+            #  here rather than on a web page they may never have opened.
+            if rec.get("gate") == "reject":
+                warn = (warn + nl + "#" + nl
+                        + "# THREE-BODY CEILING: this set is OVER it."
+                        + nl
+                        + f"# E3/E2 = {rec.get('ratio')} against the bound of"
+                        f" 0.30, exceeding it by {rec.get('violation')}."
+                        + nl
+                        + "# standalone/fit.py applies that bound with no"
+                        " tolerance, so this solution" + nl
+                        + "# would not have been accepted by the fit that"
+                        " produced the shipped sets.")
             warn = warn + nl + jwarn
             #  What the measured dispersion says about this candidate,
             #  which is NOT a second copy of the finite-temperature warning
@@ -446,7 +495,25 @@ def main():
                             + ("; ".join(ft)) + "." + nl
                             + "# Use it for static properties only, if at"
                             " all.")
+            #  Per set, and named.  The force-matched files say which
+            #  published database they were fitted to, because a reader
+            #  holding one has to be able to check it without the web page.
+            if name == "force":
+                fitted = ("# Fitted to: DFT FORCES on displaced supercells of "
+                          + el + ", from the" + nl
+                          + "# database cited here, with the cohesive energy,"
+                          " lattice constant and" + nl
+                          + "# elastic constants kept as anchors." + nl
+                          + "# Source: "
+                          + FORCE_SRC.get(el, "see refit/DATA_REFERENCES.md")
+                          + ".")
+            else:
+                fitted = ("# Fitted to: cohesive energy, lattice constant,"
+                          " bulk modulus and the elastic" + nl
+                          + "# constants of " + el + " at its experimental"
+                          " lattice constant.  Nothing else.")
             open(os.path.join(OUT, el + suffix), "w").write(HEADER.format(
+                fitted=fitted,
                 el=el, fn=el + suffix, style=style, what=what, trunc=trunc,
                 warn=warn,
                 vals=" ".join(f"{v:.17g}" for v in vals)))
@@ -473,6 +540,7 @@ and the CANDIDATE sets, which are not part of the published library:
     <El>_recut.ugur.ang    {written['rc_ug']} elements, pair_style ugur/ang
     <El>_disp.ugur         {written['disp']} elements, pair_style ugur
     <El>_nudge_taper.ugur  {written['nudge']} elements, pair_style ugur
+    <El>_force_taper.ugur  {written['force']} elements, pair_style ugur
 
 They are here because the page compares them with the published sets and a
 reader who wants to check that comparison needs the files it was made with.
@@ -490,6 +558,14 @@ against it.  Read that before using one.  In one line each:
   _nudge_taper  the best solution in the same pool as the plain _taper set
                 that survives a 1e-5 A displacement, which the shipped one
                 does not.  It pays for that in elastic accuracy.
+  _force_taper  fitted to DFT FORCES on displaced supercells, not to the
+                elastic constants alone.  That is what repairs the surfaces:
+                copper falls from 3.4x the DFT surface energy to 1.2x with
+                the elastic constants intact.  The price is stated per file -
+                four of the seven are over the three-body ceiling that the
+                fit enforces without tolerance, and vanadium is not a
+                harmonic minimum.  Seven elements only: Cu, Mo, Nb, Ni, Ta,
+                V, W.
 
 The extension says which pair style the file needs, the way .eam / .eam.alloy /
 .eam.fs do.  The stem says which parameter set it is: a plain name is

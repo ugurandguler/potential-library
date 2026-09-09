@@ -30,8 +30,15 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ARM = (sys.argv[1] if len(sys.argv) > 1 else "tap")
-if ARM not in ("tap", "tap_ug", "rc", "rc_ug"):
-    raise SystemExit("arm must be tap, tap_ug, rc or rc_ug")
+#  The list used to end at rc_ug, so `tap_force` - a shipped arm with a full
+#  parameter set - could not be put through this producer at all.  It is a
+#  whitelist rather than a free string because ANG below decides which
+#  implementation is imported, and an unknown name would silently take the
+#  non-angular path.  Angularity is read off the suffix, which is right for
+#  every arm so far: only the _ug ones carry the angular term.
+ARMS_OK = ("tap", "tap_ug", "rc", "rc_ug", "tap_force", "hard_disp")
+if ARM not in ARMS_OK:
+    raise SystemExit("arm must be one of: " + ", ".join(ARMS_OK))
 ANG = ARM.endswith("_ug")
 if ANG:
     sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "angular")))

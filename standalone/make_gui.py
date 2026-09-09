@@ -776,7 +776,14 @@ let PAR_SET = "mau";
     screens - so the whole panel can stand on one of them, which is the only
     way to read the candidate against the published arm rather than beside
     fragments of it.  */
-const SETKEY = {mau:d=>d, ug:d=>d.ug, rc:d=>d.rc, rc_ug:d=>d.rc_ug};
+/*  THE SELECTOR IS A DIFFERENT AXIS FROM ARMS, and adding an arm to one
+    does not add it to the other: ARMS decides which CURVES a panel draws,
+    SETKEY and setsOf decide which PARAMETER SET the tables show.  Note also
+    that `mau` here resolves to `d`, the TOP-LEVEL hard-cut record, not to
+    d.tap - the selector's "MAU" and the ARMS entry "tap" are different
+    records.  */
+const SETKEY = {mau:d=>d, ug:d=>d.ug, rc:d=>d.rc, rc_ug:d=>d.rc_ug,
+                tap_force:d=>d.tap_force};
 const parSet = d => ((SETKEY[PAR_SET]||SETKEY.mau)(d)) || d;
 
 Object.defineProperty(window,"PAR_UG",{get:()=>PAR_SET==="ug"});
@@ -799,10 +806,19 @@ const pt=$("#pt");
     more of it than the published arm - and then fail the warm ones for a
     specific set of elements.  Keeping them off the page would leave that
     finding invisible.  */
+/*  tap_force is the FORCE-MATCHED arm: the same functional form fitted to
+    DFT forces and energies while the experimental anchors are held.  It is
+    not a better fit of the same thing - it is a different reference frame,
+    which is why it sits beside the others rather than replacing them, and
+    why `refit/ARM_NAMING.md` refused the name `tap_dft`.  Seven of the
+    thirty-eight elements have one.  */
 const ARMS = [["tap", "MAU"], ["tap_ug", "UG"],
-              ["rc", "re-cut"], ["rc_ug", "re-cut UG"]];
-const ARM_DASH = {tap: [], tap_ug: [6, 3], rc: [2, 2], rc_ug: [5, 2, 1, 2]};
-const ARM_ANG  = {tap: false, tap_ug: true, rc: false, rc_ug: true};
+              ["rc", "re-cut"], ["rc_ug", "re-cut UG"],
+              ["tap_force", "force-matched"]];
+const ARM_DASH = {tap: [], tap_ug: [6, 3], rc: [2, 2], rc_ug: [5, 2, 1, 2],
+                  tap_force: [1, 3]};
+const ARM_ANG  = {tap: false, tap_ug: true, rc: false, rc_ug: true,
+                  tap_force: false};
 /*  Four of the forty-five candidate records failed selection outright -
     Mo and W in both arms, with a mode near -13 cm^-1 on the symmetry path and
     molybdenum also putting fcc 209 meV/atom below bcc.  They are kept as the
@@ -816,17 +832,27 @@ const ARM_ANG  = {tap: false, tap_ug: true, rc: false, rc_ug: true};
     reason to stamp them rejected.  The two criteria agree only on the
     candidates, which is exactly the case that hides the difference.  */
 const armBad = r => !!(r && r.stable === false);
+/*  A force-matched record can fail for a DIFFERENT reason, and the two must
+    not wear the same word.  `armBad` means the crystal is dynamically
+    unstable.  Over the ceiling means `standalone/fit.py`'s acceptance test -
+    a strict three-body bound with no tolerance - would not have kept the fit;
+    four of the seven sit 0.0002-0.0013 eV/atom above it while niobium,
+    tantalum and vanadium sit strictly inside with a violation of exactly
+    zero.  The record carries the verdict in `gate`, precomputed, so this page
+    does not reimplement the rule and cannot drift from it.  */
+const armOverCeiling = r => !!(r && r.gate === "reject");
+const armMark = r => armBad(r) ? " \u2014 REJECTED"
+                   : armOverCeiling(r) ? " \u2014 OVER CEILING" : "";
 /*  [key, record, label] for every arm this element has that satisfies `has` */
 const armRecs = (d, has) =>
-  ARMS.map(a => [a[0], d[a[0]], a[1] + (armBad(d[a[0]]) ? " — REJECTED"
-                                                       : "")])
+  ARMS.map(a => [a[0], d[a[0]], a[1] + armMark(d[a[0]])])
       .filter(o => o[1] && has(o[1]));
 
 /*  ARM_DASH in words, for the caption.  The two have to agree, so they sit
     together: a pattern here that no longer matches the one the plot uses is
     worse than no legend at all.  */
 const ARM_STYLE = {tap:"solid", tap_ug:"dashed",
-                   rc:"dotted", rc_ug:"dash-dot"};
+                   rc:"dotted", rc_ug:"dash-dot", tap_force:"fine dots"};
 
 /*  The legend for a panel, built from the SAME armRecs call that panel draws
     from.  Written by hand it named MAU and UG in four captions while the
@@ -837,7 +863,12 @@ const armKey = recs => recs.map(o =>
   + o[2] + ` (${ARM_STYLE[o[0]]||"solid"})`).join("&nbsp;&middot;&nbsp;");
 
 const setsOf = d => [["mau","MAU",d],["ug","UG",d.ug],
-                     ["rc","re-cut",d.rc],["rc_ug","re-cut UG",d.rc_ug]]
+                     ["rc","re-cut",d.rc],["rc_ug","re-cut UG",d.rc_ug],
+                     ["tap_force","force-matched",d.tap_force]]
+                    /*  the rms filter is why a new arm needs a NUMERIC rms:
+                        without one the record is dropped here silently, the
+                        page still builds, and the arm simply never appears in
+                        the menu.  */
                     .filter(o=>o[2]&&typeof o[2].rms==="number");
 
 /*  The table used to colour every cell by d.rms - the hard-cut MAU fit -
@@ -1064,8 +1095,16 @@ function drawElasticT(d){
     if(!pts.length) return;
     const q=pts[pts.length-1];
     const txt=o.r.label;
+    /*  THE SAME TABLE THE CURVE USED, not a second copy written by hand.
+        This line said `o.k==="tap"?p2:p3`, which gave every arm but `tap` the
+        angular colour - so the re-cut arm and the force-matched arm, neither
+        of which carries an angular term, were labelled in one colour and
+        drawn in another.  The comment above the curve records that exact bug
+        being fixed there; it was left standing here, which is what a table
+        written out twice does.                                              */
     lab.push({y:Y(q[ET_Q]), x:X(q.T),
-              col:(o.r.nudge_bad?bad:(o.r.kind==="ours"?(o.k==="tap"?p2:p3):ref)),
+              col:(o.r.nudge_bad?bad
+                   :(o.r.kind==="ours"?(ARM_ANG[o.k]?p3:p2):ref)),
               txt:txt+(o.r.nudge_bad?" ⚠":"")});
   });
   lab.sort((a,b)=>a.y-b.y);
@@ -1075,7 +1114,26 @@ function drawElasticT(d){
   if(over>0) lab.forEach(l=>l.y-=over);
   c.font="11px system-ui,-apple-system,sans-serif";
   c.textAlign="left";
-  lab.forEach(l=>{ c.fillStyle=l.col; c.fillText(l.txt, W-R+6, l.y+4); });
+  /*  FIT THE LABEL TO THE MARGIN.  Vertical collision and vertical overflow
+      were both handled; horizontal width was never measured, and 32 of the
+      179 labels in this library do not fit the 98 px that R leaves - a
+      published potential's is the long one, "Mendelev, unattributed
+      (EAM/FS)" at about 164 px.  The canvas clips at its own edge, so the
+      reader saw a truncated NAME with nothing to say it had been cut.
+      Shortened in the order that loses least: the full name, then without its
+      trailing parenthetical - the model class is already carried by the dash
+      pattern and by the caption - then a hard cut with an ellipsis, which at
+      least admits that something is missing.                                */
+  const room=R-8;
+  const fit=t=>{
+    if(c.measureText(t).width<=room) return t;
+    const noparen=t.replace(/\s*\([^()]*\)\s*$/,"");
+    if(noparen!==t&&c.measureText(noparen).width<=room) return noparen;
+    let u=noparen;
+    while(u.length>1&&c.measureText(u+"…").width>room) u=u.slice(0,-1);
+    return u+"…";
+  };
+  lab.forEach(l=>{ c.fillStyle=l.col; c.fillText(fit(l.txt), W-R+6, l.y+4); });
 
   c.save();c.translate(14,T+ph/2);c.rotate(-Math.PI/2);
   c.textAlign="center";c.fillStyle=ink;
@@ -2105,6 +2163,69 @@ const RC_NOGAP = {
   hcp: "1.000 and 1.019 &mdash; the densest of the three, and c/a-dependent",
   fcc: "1.000, 1.414 and 1.732 &mdash; wide and evenly spaced"};
 
+function forceNote(d){
+  if(d.tap_force) return "";
+  return `<p class="plotnote"><strong>No force-matched record exists for
+    ${d.name}.</strong> That is a gap in what has been computed, not a fit
+    that failed: force matching needs a density-functional force dataset for
+    the element and a fitting run of its own, and this arm covers
+    <strong>seven of the thirty-eight</strong> &mdash; copper, nickel,
+    niobium, tantalum, tungsten, molybdenum and vanadium. Where a panel shows
+    nothing for it, nothing has been measured.</p>`;
+}
+
+/*  A force-matched record that IS present still needs a sentence, because
+    four of the seven would not pass the library's own acceptance test.  The
+    ceiling is not moved to admit them and the violation travels in the
+    record; this says so where the numbers are read rather than in a caption
+    somewhere else.  */
+/*  What the arm has been measured ON, read off the record.  A fixed list
+    would be a sentence that starts lying the day the surface run is folded
+    in; this one follows the data.  */
+const FORCE_PANELS = [["Cij","the elastic constants"],
+                      ["dyn","dynamical stability"],
+                      ["compression","the compression screen"],
+                      ["surface","surface energy"],
+                      ["stacking","the stacking fault"],
+                      ["ground","the ground state"],
+                      ["bain","the Bain path"],
+                      ["expansion","thermal expansion"],
+                      ["md_screen","the MD screen"],
+                      ["jiggle","the nudge test"]];
+
+function forceCoverageNote(d){
+  const r = d.tap_force; if(!r) return "";
+  const has = FORCE_PANELS.filter(p=>r[p[0]]!=null).map(p=>p[1]);
+  if(d.elasticT&&d.elasticT.tap_force) has.push("elastic constants against temperature");
+  const lacks = FORCE_PANELS.filter(p=>r[p[0]]==null).map(p=>p[1]);
+  if(!lacks.length||!has.length) return "";
+  const list=a=>a.length<2?a[0]:a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  return `<p class="plotnote"><strong>The force-matched arm is measured on
+    ${list(has)}, and on nothing else here.</strong> It carries no
+    ${list(lacks)}, so those panels draw ${d.sym}'s other arms and not this
+    one. Nothing failed: those runs have not been done for this arm, and an
+    absent curve means an absent measurement, never a rejected result.</p>`;
+}
+
+function forceGateNote(d){
+  const r = d.tap_force;
+  if(!r) return "";
+  if(r.gate === "pass")
+    return `<p class="plotnote">${d.sym}'s force-matched record sits
+      <strong>inside</strong> the three-body ceiling &mdash;
+      e<sub>3</sub>/e<sub>2</sub> = ${r.ratio.toFixed(4)} with a violation of
+      exactly zero &mdash; so the shipped fitting script would have kept it.</p>`;
+  return `<p class="plotnote"><strong>${d.sym}'s force-matched record is over
+    the three-body ceiling.</strong> e<sub>3</sub>/e<sub>2</sub> =
+    ${r.ratio.toFixed(4)} against a limit of 0.30, a violation of
+    ${r.violation.toFixed(4)} eV/atom, and <code>standalone/fit.py</code>
+    rejects on that comparison with no tolerance. It is shown because the arm
+    is a separate reference frame rather than a candidate for the library, and
+    because niobium, tantalum and vanadium sit strictly inside the same
+    ceiling &mdash; so 0.30 is not a wall every element is driven into, and
+    moving it to admit these four would delete that.</p>`;
+}
+
 function recutNote(d){
   const has = d.rc || d.rc_ug;
   const el = d.sym, nm = d.name;
@@ -2487,6 +2608,7 @@ function lammpsBlock(d){
       <td><code>${r[3]}</code></td><td>${r[4]}</td><td>${verdict}</td></tr>`;
   }).join("");
   const rcnote = recutNote(d);
+  const fnote = forceNote(d) + forceGateNote(d) + forceCoverageNote(d);
   return `<h3>Running this in LAMMPS</h3>
   ${bad.length?`<div class="warn" style="border-left-color:var(--bad)">
     <strong>${bad.length===SETS.length?"None of the":
@@ -2503,6 +2625,7 @@ function lammpsBlock(d){
     <th>parameters</th><th>molecular dynamics</th></tr></thead>
     <tbody>${rows}</tbody></table>
   ${rcnote}
+  ${fnote}
   <p class="note">Files are in <code>lammps/potentials/</code>. The extension
   says which pair style the file needs, the way <code>.eam</code> and
   <code>.eam.alloy</code> do; the stem says which parameter set it is, a plain
@@ -3073,8 +3196,11 @@ function render(){
       the smooth switch reaches 0.00.
       <br><br>The switch is not a free improvement and is not what this library
       ships. Over all 38 elements the median error moves the wrong way,
-      5.83 &rarr; 7.67 %: the hcp metals go from 7.86 to 19.81 and the alkalis
-      lose heavily. Cadmium and zinc, which fail on axial anisotropy rather
+      6.11 &rarr; 6.26 %, and on the hcp metals it moves hard, 8.22 to 20.10;
+      the alkalis lose heavily too, 0.00 to 13.02. Read the overall median as
+      a direction and not as a magnitude: with fcc at 0.00 and hcp above 20,
+      the middle of thirty-eight sits on a boundary and one element crossing
+      it moves the figure more than the physics does. Cadmium and zinc, which fail on axial anisotropy rather
       than on C<sub>44</sub>/C&prime;, are not rescued either. What it removes
       is this one limitation.
       ${d.tap_ug?`<br><br><strong>And the angular factor is still worth
