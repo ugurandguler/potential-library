@@ -21,6 +21,18 @@ unlike entries written straight back into the same file.
 `--set tap` uses the tapered parameters, which is what anything going into MD
 should use; the default is the hard-truncated reference set.
 
+WHICH SETS ARE AVAILABLE DEPENDS ON THE LIBRARY YOU HAVE.  This reads
+`standalone/library.json`, and the published tree does not ship one - it ships
+`fit.json` and `refresh.py` builds the rest.  That chain rebuilds the 0 K
+analytic layer only, so a freshly rebuilt library carries the hard-truncated
+sets and NOT `tap`, `rc`, `tap_force` or the rest; asking for one of those
+gets a refusal naming it rather than a file.  The arms live in the library
+that ships inside the page, and `UG_LIB` points this at another tree's copy.
+
+An ANGULAR set - `ug`, `tap_ug`, `rc_ug` - is refused outright: there is no
+mixing rule for lam2/lam4 and writing them as zero would produce a file that
+runs and is not that arm.
+
     python make_alloy_file.py --correct --set tap Cu Ni
     python make_alloy_file.py --chi-d 1.03 --chi-r0 0.99 --set tap Cu Ni
 
@@ -37,6 +49,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+NL = chr(10)
 
 PAIR = ("m", "D", "alpha", "r0", "gamma")
 CUT = ("rcut2", "rcut3")
@@ -175,15 +189,63 @@ def main():
         raise SystemExit("two or more elements are required, for example: "
                          "python make_alloy_file.py Cu Ni")
 
-    lib = json.load(open(os.path.join(ROOT, "standalone", "library.json")))
+    #  UG_LIB lets this read another tree's library, which is how an arm that
+    #  lives outside this one is generated without copying the file in.
+    lib = json.load(open(os.environ.get(
+        "UG_LIB", os.path.join(ROOT, "standalone", "library.json"))))
     recs = {}
     for el in args:
         if el not in lib:
             raise SystemExit(f"{el} is not in the library")
-        r = lib[el]["tap"] if which == "tapered" else lib[el]
-        if which == "tapered" and not r:
-            raise SystemExit(f"no tapered record for {el}")
+        #  ANY ARM, BY NAME.  This line used to read
+        #      r = lib[el]["tap"] if which == "tapered" else lib[el]
+        #  so every name except `tap` fell through to the top-level hard-cut
+        #  record while the header went on saying which set had been asked
+        #  for.  Measured: `--set tap_ug Re Na` wrote "from the tap_ug
+        #  parameter set" above m = 10.897, D = 0.5781, taper off - the
+        #  hard-cut numbers - where tap_ug is m = 1.2048, D = 1.0175,
+        #  taper 0.85.  A header that misnames its own contents is worse than
+        #  no header, and the hard-cut set is the one whose own file says
+        #  "DO NOT use for molecular dynamics".
+        if which == "tapered":
+            r = lib[el].get("tap")
+        elif which == "hard-truncated":
+            r = lib[el]
+        else:
+            r = lib[el].get(which)
+        if not r:
+            raise SystemExit(f"no {which} record for {el}")
         recs[el] = r
+
+    #  AN ANGULAR ARM CANNOT BE MIXED, and asking for one used to write a file
+    #  with lam2 = lam4 = 0 that ran perfectly well and was not that arm - the
+    #  UG radial parameters carrying MAU's angle-free physics, with no error
+    #  and no warning.
+    #
+    #  The kernel is not the limitation: pair_ugur.cpp reads lam2/lam4 per
+    #  TRIPLE and refuses them under a non-angular style.  What is missing is a
+    #  rule for combining them, and there is no obvious one - lambda weights
+    #  the angular factor of a (centre, leg, leg) triple, so it belongs to the
+    #  triple rather than to a pair, and whether it should follow the centre
+    #  alone or all three is a physical question, not an arithmetic one.
+    #
+    #  It matters across the library: only 7 of the 38 records carry
+    #  |lam2| + |lam4| below 0.01, and the largest are near 3.1 (Re, Na, Li).
+    ang = {e: r for e, r in recs.items()
+           if abs(r.get("lam2") or 0.0) + abs(r.get("lam4") or 0.0) > 1e-12}
+    if ang:
+        carried = ", ".join("%s(lam2=%.4g, lam4=%.4g)"
+                            % (e, r.get("lam2") or 0.0, r.get("lam4") or 0.0)
+                            for e, r in sorted(ang.items()))
+        raise SystemExit(
+            ("%s is an angular set and there is no mixing rule for lam2/lam4."
+             % which) + NL
+            + "  carried by: " + carried + NL
+            + "Generating it would write lam2 = lam4 = 0, which runs and is"
+              " NOT this arm." + NL
+            + "Use a non-angular set for a multi-element file: tap, rc,"
+              " tap_force," + NL
+            + "hard_disp, tap_nudge, or the hard-truncated default.")
 
     tapers = {r.get("taper") or -1.0 for r in recs.values()}
     if len(tapers) > 1:
@@ -227,6 +289,9 @@ def main():
                 tri = (mix_triple([recs[a], recs[b], recs[c]])
                        if not (a == b == c) else
                        {"C": recs[a]["C"], "alpha3": recs[a]["alpha3"]})
+                #  lam2/lam4 are written as ZERO, and that is not a
+                #  placeholder waiting for a rule - see the refusal in main().
+                #  Reaching here means the arm carries no angular term.
                 v = [pb["m"], pb["D"], pb["alpha"], pb["r0"], pb["gamma"],
                      tri["C"], tri["alpha3"], pb["rcut2"], pb["rcut3"],
                      taper, 0.0, 0.0]
