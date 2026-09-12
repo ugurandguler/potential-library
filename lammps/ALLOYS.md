@@ -185,6 +185,31 @@ Measure the relaxed cell shape — not just the elastic constants — before
 trusting any alloy file from this generator, and read a good force score as
 evidence about gradients only.
 
+**The same failure across the ten binaries, and one exception.** The quinary is
+a single composition. The ten binary pairs of those same five elements, relaxed
+identically — the force-matched set at χ = 1, a 5×5×5 = 250-site bcc cell,
+three random arrangements each — fall into three regimes, not two:
+
+    NbTa  1.0005 ± 0.0002     cubic
+    MoV   1.0112 ± 0.0003     1 % distortion
+    VW    1.0289 ± 0.0000     3 % distortion
+    TaV   1.2958 ± 0.0000     part way
+    MoW   1.3589 ± 0.0002     part way
+    TaW   1.4138 ± 0.0016     Bain
+    MoTa  1.4140 ± 0.0016     Bain
+    NbW   1.4146 ± 0.0013     Bain
+    MoNb  1.4147 ± 0.0004     Bain
+    NbV   1.4357 ± 0.1989     Bain, but the three arrangements disagree
+
+**Five of the ten reach the Bain value and only Nb–Ta is cleanly cubic.**
+Reading the table as a two-way split would put MoV's one per cent in the same
+class as MoNb's phase change, so the threshold has to be chosen before the
+table is read, not after.
+
+**We do not know why Nb–Ta survives**, and it should not be read as a recipe.
+The one pair that worked, used without knowing why it worked, is how the Al–Ni
+attempt above went wrong.
+
 ### What is in this release and what is not
 
 Shipped, because it is validated and a reader has to be able to check it:
@@ -198,6 +223,15 @@ Held back: the layer that fits an alloy to alloy data — `alloy_fit.py`,
 comparisons. That work is unfinished and its only measured outcome is the
 instability above. It will appear in a later release when there is a result
 to go with it. Nothing shipped here depends on it.
+
+Also held back: the drivers that produced the instability tables above —
+`md_hea.py`, which builds a random solid solution and relaxes the cell, and
+`binary_scan.py`, which drives it over the ten pairs. `make_alloy_file.py`,
+`pair_ugur` and `alloy.py` are all here, so the alloy files themselves can be
+rebuilt and checked against the independent implementation; the relaxation
+protocol that transformed them cannot be re-run without writing one. **The cell
+ratios above are therefore reported rather than reproducible from this release
+alone**, and are stated as measurements of this potential, not of the elements.
 
 ## What the mixing rule actually gets wrong (measured 2026-08-29)
 

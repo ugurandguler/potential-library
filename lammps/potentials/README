@@ -70,6 +70,29 @@ transferability to any of those.
 
 Alloys
 ------
-See ALLOYS.md.  A multi-element file can be generated with make_alloy_file.py,
-but the unlike-pair and unlike-triple entries it writes come from conventional
-mixing rules that have not been tested against alloy data.
+See ALLOYS.md.  A multi-element file can be generated with make_alloy_file.py.
+The unlike-pair and unlike-triple entries it writes come from conventional
+mixing rules, and those rules have now been measured rather than assumed.
+
+What the measurement says.  On MoNbTaVW the mixed potential reproduces alloy
+DFT forces about as well as it reproduces the pure elements it was fitted to -
+0.91x the single-element control - so the mixing rule costs nothing on forces.
+That does not make the alloy usable.  Under a free relaxation the bcc crystal
+leaves bcc entirely, axis ratio 1.412 +/- 0.004 against the Bain value of
+sqrt(2), on every seed, while all five constituents stay cubic under the
+identical relaxation.  Of the ten binaries of those five elements, five reach
+the full Bain value, two sit between, and three stay cubic or nearly so; only
+Nb-Ta, at 1.0005, is cleanly cubic.  Use a generated file for forces at a
+fixed cell shape, not for anything that lets the cell relax.
+
+Which sets can be mixed.  An angular set - ug, tap_ug, rc_ug - is refused,
+because there is no mixing rule for lam2 and lam4.  A set an element does not
+have is refused by name; the force-matched set covers only Cu, Mo, Nb, Ni, Ta,
+V and W.  That leaves the hard-truncated, tapered and re-cut sets.
+
+One thing to know first.  A library rebuilt from the shipped fit.json by
+standalone/refresh.py carries only the hard-truncated sets, so --set tap -
+which the generator recommends for anything going into molecular dynamics -
+will report that there is no tapered record.  The tapered parameters are in
+the library embedded in the published page, docs/index.html; the public tree
+ships fit.json and no library.json at all.
