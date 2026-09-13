@@ -88,6 +88,11 @@ def main(meshes=(8, 9)):
                       "imag_frac": round(float((f < IMAG_TOL_CM1).mean()), 5),
                       "nq": "+".join(map(str, meshes)),
                       "path": "Setyawan-Curtarolo"}
+        #  `stable` means the same thing on every record: mesh AND path.  This
+        #  producer used to write only `dyn`, and the mesh-only `stable` the
+        #  overlay had left stayed beside it - 14 shipped tapered records said
+        #  stable while their own dyn block said not.
+        rec["stable"] = ok
         print(f"{el:4s}{mn_m:9.2f}{mn_p:9.2f}{str(was):>7s}{str(ok):>8s}")
         if not ok:
             bad.append((el, round(mn_p, 1)))

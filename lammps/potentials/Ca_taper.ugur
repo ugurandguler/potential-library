@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Ca_taper.ugur Ca
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.7 % against the hard sets' 9.5 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.5 % against the hard sets' 9.6 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
 # MD: structure screened - holds its shape at 600 K (305 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

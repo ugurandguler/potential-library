@@ -81,6 +81,9 @@ def main(meshes=(8, 9)):
                     #  the viewer renders nq as "8^3 and 9^3", so the path
                     #  travels as its own field rather than inside that string
                     "path": "Setyawan-Curtarolo"}
+        #  `stable` means the same thing on every record: mesh AND path.  See
+        #  unify_stable.py for the 16 records that said otherwise.
+        v["stable"] = neg == 0
         tag = "stable" if neg == 0 else "DYNAMICALLY UNSTABLE"
         if neg:
             bad.append((frac, el, most))

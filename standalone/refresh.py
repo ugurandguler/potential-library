@@ -52,6 +52,11 @@ The order is not arbitrary:
                   reconstructed ones.  Both read refdata_phonon_curves.py and
                   need nothing fetched
   add_dynstab_ug  the same stability screen on the angular arm
+  unify_stable    one meaning for `stable` on every record, mesh AND path -
+                  AFTER the last stability screen, whose verdict it copies
+  add_ld_tap      the switched arm's own 0 K dispersion, which the finite-T
+                  panel draws its reference curve from; a clean clone has no
+                  `tap` record and the step does nothing there
   add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
                   contain no member of <111>, which for a cubic crystal is
                   where the extremum sits
@@ -122,6 +127,12 @@ CHAIN = [
      "coordinate planes miss", False),
     ("fix_mp_path.py", "MP high-symmetry labels and path discontinuities", True),
     ("fix_mark_x.py", "the fractional index of each high-symmetry label", True),
+    #  Added for 1.3.0.  Both read nothing but library.json, so neither is
+    #  optional.  unify_stable must follow every stability screen above;
+    #  add_ld_tap must precede the page, or the finite-temperature panel falls
+    #  back to drawing no reference curve at all.
+    ("unify_stable.py", "one meaning for stable: mesh AND path", False),
+    ("add_ld_tap.py", "the switched arm's own 0 K dispersion", False),
     ("make_gui.py", "potential.html", False),
 ]
 

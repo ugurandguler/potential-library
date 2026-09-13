@@ -11,6 +11,14 @@
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
+# Measured dispersion: 9 % against 9.9 % for the published switched
+# arm - better.
+# Both are nearest-branch scores against points read from a figure,
+# so both are lower bounds.
+# On the 41 accepted candidate records the re-cut is close to break-even
+# overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10
+# worse; 300 K elastic constants 3.4 % -> 2.7 %, 7 better and 3 worse.
+#
 # Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
 # constants of Ir at its experimental lattice constant.  Nothing else.
 #

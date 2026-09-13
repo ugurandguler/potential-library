@@ -11,7 +11,7 @@
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
-# Measured dispersion: 10.6 % against 15.9 % for the published switched
+# Measured dispersion: 12.9 % against 18.3 % for the published switched
 # arm - better.
 # On the 41 accepted candidate records the re-cut is close to break-even
 # overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10

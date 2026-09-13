@@ -126,6 +126,9 @@ def build(el, lib):
     #  correction curve_mae applies has nothing to correct here.
     cry = L.Crystal(v["struct"], v["a0"], v.get("c_over_a"))
     hcp = v["struct"] == "hcp"
+    #  a digitised record with no branch labels says so itself; its points
+    #  are read against the nearest branch, as curve_mae reads them
+    near = bool(ec.get("nearest"))
     R = L.reciprocal(cry)
     Rinv = np.linalg.inv(R)
     #  Cartesian quantities that will be compared with phana's eigenvectors
@@ -182,7 +185,7 @@ def build(el, lib):
             #  the Cartesian wavevector, which the hcp reading needs to say
             #  what "along q" and "perpendicular to the basal plane" mean
             idx.append({"seg": sk, "i": i, "label": lab, "nu": nu,
-                        "nrm": nrm, "hcp": hcp,
+                        "nrm": nrm, "hcp": hcp, "near": near,
                         "qc": (np.asarray(q, float) @ RL).tolist()})
     #  the rotated copies, appended as one block so the file stays in order
     n = len(qs)
@@ -258,7 +261,7 @@ def score(el, lib, tag=None):
                                             - np.asarray(r["nus"])))))
             nu_max = max(nu_max, max(r["nus"]))
             continue
-        if r["hcp"] or r["nrm"] is None:
+        if r["hcp"] or r.get("near") or r["nrm"] is None:
             got = float(min(f, key=lambda x: abs(x - r["nu"])))
         else:
             got = pick_polar(f, vec[:3], r["nrm"], r["label"])
@@ -269,6 +272,7 @@ def score(el, lib, tag=None):
     return {"el": el, "tag": tag or el, "n": len(err), "T": ec["T_K"],
             "kind": kind,
             "mae": mae, "pct": 100.0 * mae / nu_max, "hcp": rows[0]["hcp"],
+            "near": bool(rows[0].get("near")),
             "sc": float(np.mean(scatter)), "sc_max": float(max(scatter)),
             "sc_pct": 100.0 * float(np.mean(scatter)) / nu_max}
 
@@ -302,7 +306,7 @@ def main():
     print(head)
     print("-" * 62)
     for r in out:
-        tag = (r["tag"] + ("*" if r["hcp"] else "")
+        tag = (r["tag"] + ("*" if r["hcp"] or r.get("near") else "")
                + ("~" if r.get("kind") == "model" else ""))
         print("%-10s%4dK%5d%10.3f%6.1f%%%12.3f%5.1f%%  (en buyuk %.2f)"
               % (tag, r["T"], r["n"], r["mae"], r["pct"], r["sc"],
@@ -321,6 +325,11 @@ def main():
         print()
         print("* hcp: distance to the NEAREST branch, a lower bound, as in "
               "curve_mae.")
+
+    if any(r.get("near") and not r["hcp"] for r in out):
+        print()
+        print("* a cubic row marked * is a digitised source with no branch")
+        print("  labels: distance to the NEAREST branch, a lower bound.")
 
 
 if __name__ == "__main__":

@@ -193,9 +193,9 @@ def main():
                                              rec.get("lam4", 0.0)]
             #  What each truncation is for, with the measurement behind it.
             #
-            #  The hard sets reproduce the MEASURED dispersion better - 9.5 %
-            #  mean over the 29 elements that carry a neutron curve against
-            #  12.7 % for the switched ones, and better in 23 of the 29 - and
+            #  The hard sets reproduce the MEASURED dispersion better - 9.6 %
+            #  mean over the 32 elements that carry a neutron curve against
+            #  12.5 % for the switched ones, and better in 25 of the 32 - and
             #  they cannot be run at temperature.  Both halves are measured
             #  and neither is a preference.  The discontinuity is what does
             #  it, so each file carries its own rather than an average: it
@@ -210,9 +210,9 @@ def main():
                     f"{-abs(jump):.3g} meV ({jump / kT296:.3g} of k_B T at "
                     "296 K).  USE for static properties and for lattice "
                     "dynamics: measured against neutron dispersion the hard "
-                    "sets average 9.5 % over the 29 elements that have one, "
-                    "against 12.7 % for the switched sets, and are closer in "
-                    "23 of them.  DO NOT use for molecular dynamics: "
+                    "sets average 9.6 % over the 32 elements that have one, "
+                    "against 12.5 % for the switched sets, and are closer in "
+                    "25 of them.  DO NOT use for molecular dynamics: "
                     "copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in "
                     "NVE and climbs from 296 K to over 1100 K in 200 ps")
                 if name == "disp":
@@ -239,8 +239,8 @@ def main():
                 #  A different cutoff, so the 12.7 % measured on the shipped
                 #  switched sets is not theirs.  Measured on the 17 elements
                 #  that have both a re-cut record and a neutron curve, the
-                #  re-cut arm reaches 8.5 % against 11.6 % for the shipped
-                #  switched arm on the same 17, and is closer in 13 of them.
+                #  re-cut arm reaches 8.8 % against 11.6 % for the shipped
+                #  switched arm on the same 18, and is closer in 14 of them.
                 #
                 #  That is not a recommendation, and the reason is the whole
                 #  point of these files.  The biggest gains are the alkalis -
@@ -271,8 +271,8 @@ def main():
                     "0.4 meV/atom/ns for copper, 876x less than its hard "
                     "twin.  USE for molecular dynamics, which no hard set "
                     "can do.  It pays for that on the dispersion: the "
-                    "switched sets average 12.7 % against the hard sets' "
-                    "9.5 %, because switching the pair term off over the "
+                    "switched sets average 12.5 % against the hard sets' "
+                    "9.6 %, because switching the pair term off over the "
                     "outer 15 % moves the force constants at the largest "
                     "separations, which is the short-wavelength end, and "
                     "nothing in the fit sees it")
@@ -399,20 +399,26 @@ def main():
             #  What the measured dispersion says about this candidate,
             #  which is NOT a second copy of the finite-temperature warning
             #  further down - it is the other half of the same fact.  The
-            #  re-cut reaches 8.5 % over the 17 elements that have both a
+            #  re-cut reaches 8.8 % over the 18 elements that have both a
             #  candidate record and a neutron curve, against 11.6 % for the
-            #  published switched arm on the same 17, closer in 13 of them.
+            #  published switched arm on the same 18, closer in 14 of them.
             #  Its largest gains are the alkalis, and the alkalis are exactly
             #  what it breaks warm: a 0 K dispersion and an elastic constant
             #  are both properties of the curvature AT the minimum, so an arm
             #  can have that neighbourhood right and the shape of the well
             #  away from it wrong.
+            #  The same table as RC_DISP in standalone/make_gui.py, and it
+            #  must stay the same: this copy had drifted older than the page's
+            #  and told K_recut.ugur it was worse than the published arm, when
+            #  the current scoring says better.  Recomputed 2026-09-13 with
+            #  curve_mae.py, arms rc and tap.  Ir is nearest-branch against a
+            #  digitised figure, so both of its numbers are lower bounds.
             RC_DISP = {"Ag": (13.0, 12.7), "Au": (4.2, 4.4), "Ba": (8.3, 9.6),
-                       "Ca": (8.6, 8.3), "Cs": (3.9, 16.7), "Cu": (9.3, 10.0),
-                       "K": (16.6, 11.4), "Li": (5.8, 25.2), "Mg": (8.3, 6.6),
-                       "Na": (9.4, 15.4), "Ni": (12.1, 13.4), "Pb": (10.6, 15.9),
-                       "Pd": (3.5, 3.6), "Pt": (4.8, 4.7), "Rb": (5.4, 13.5),
-                       "W": (17.2, 17.8), "Yb": (8.5, 8.6)}
+                       "Ca": (8.6, 8.3), "Cs": (6.4, 12.9), "Cu": (9.3, 10.0),
+                       "Ir": (9.0, 9.9), "K": (11.8, 13.9), "Li": (7.0, 25.9),
+                       "Mg": (8.3, 6.6), "Na": (5.8, 16.2), "Ni": (12.1, 13.4),
+                       "Pb": (12.9, 18.3), "Pd": (3.5, 3.6), "Pt": (5.0, 4.8),
+                       "Rb": (7.6, 11.8), "W": (17.2, 17.8), "Yb": (8.5, 8.6)}
             warm = ""
             if name in ("rc", "rc_ug") and el in RC_DISP:
                 mine, pub = RC_DISP[el]
@@ -422,6 +428,10 @@ def main():
                         + f"# Measured dispersion: {mine:g} % against"
                         f" {pub:g} % for the published switched" + nl
                         + f"# arm - {verdict}." + nl)
+                if el == "Ir":
+                    warm += ("# Both are nearest-branch scores against points"
+                             " read from a figure," + nl
+                             + "# so both are lower bounds." + nl)
                 if el in ("Na", "K", "Rb", "Cs", "Li"):
                     warm += ("# Read that beside the finite-temperature note"
                              " below rather than instead of" + nl

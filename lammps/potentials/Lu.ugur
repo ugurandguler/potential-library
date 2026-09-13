@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Lu.ugur Lu
 #
-# Truncation: hard - phi2 does not vanish at rcut2, it stops at -58.9 meV (2.31 of k_B T at 296 K).  USE for static properties and for lattice dynamics: measured against neutron dispersion the hard sets average 9.5 % over the 29 elements that have one, against 12.7 % for the switched sets, and are closer in 23 of them.  DO NOT use for molecular dynamics: copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in NVE and climbs from 296 K to over 1100 K in 200 ps
+# Truncation: hard - phi2 does not vanish at rcut2, it stops at -58.9 meV (2.31 of k_B T at 296 K).  USE for static properties and for lattice dynamics: measured against neutron dispersion the hard sets average 9.6 % over the 32 elements that have one, against 12.5 % for the switched sets, and are closer in 25 of them.  DO NOT use for molecular dynamics: copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in NVE and climbs from 296 K to over 1100 K in 200 ps
 # MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 301 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

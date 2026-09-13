@@ -99,6 +99,12 @@ def main():
                                 #  those points are the symmetry points
                                 #  (beryllium) or a scattered handful that the
                                 #  paper tabulated beside a figure (tungsten)
+                                #  read from a figure rather than a table, and
+                                #  with no branch labels to score by
+                                **({"nearest": True}
+                                   if rec.get("nearest") else {}),
+                                **({"digitised": rec["digitised"]}
+                                   if "digitised" in rec else {}),
                                 "points_only": bool(rec.get("sparse")
                                                     or (at and not rec.get(
                                                         "branches")))}

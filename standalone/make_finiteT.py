@@ -43,7 +43,12 @@ OUT = {
     "cold": ("Al", "Be", "K", "Pt"),
     "screen": ("Li",),
     "model": ("Co", "Cr", "Mo", "Rh", "Sr", "V"),
-    "none": ("Ir", "Re", "Ru"),
+    "none": (),
+    #  entered 2026-09-13 - Ir and Ru read from published figures, Re from a
+    #  Raman table - and runs submitted, so these wait on a RESULT, not on a
+    #  reference
+    "pending": ("Ir", "Ru"),
+    "gamma": ("Re",),
 }
 
 

@@ -322,6 +322,10 @@ def main(only=(), field="exp_curve"):
         if only and el not in only:
             continue
         ec = v[field]
+        #  a record with no branch labels at all - a figure digitised dot by
+        #  dot - can only be read against the nearest computed branch, and
+        #  says so itself rather than being guessed into T1/T2/L
+        near_rec = bool(ec.get("nearest"))
         segs = {(a, b): (ka, kb) for a, ka, b, kb
                 in sc_segments(v["struct"])}
         #  Build the crystal at the volume the MEASUREMENT was made at, when
@@ -339,6 +343,8 @@ def main(only=(), field="exp_curve"):
         cry = L.Crystal(v["struct"], a_use, coa, mass=refdata.MASSES[el])
         out = {"el": el, "T": ec["T_K"], "n": 0,
                "hcp": v["struct"] == "hcp" and field == "exp_curve"}
+        if near_rec and field == "exp_curve":
+            out["near"] = True
         for key, name in ARMS:
             rec = v if key is None else v.get(key)
             if not rec or "m" not in rec:
@@ -394,7 +400,7 @@ def main(only=(), field="exp_curve"):
                 for i, row in enumerate(pts):
                     if field == "exp_curve":
                         _, nu, _, lab = row
-                        if hcp and not NEAREST:
+                        if hcp and not NEAREST and not near_rec:
                             val, how = pick_hcp(f[i], vecs[i], qcart[i], lab)
                             HCPHOW[how] = HCPHOW.get(how, 0) + 1
                             if how == "cift":
@@ -403,7 +409,7 @@ def main(only=(), field="exp_curve"):
                                 got = [min(f[i], key=lambda x: abs(x - nu))]
                             else:
                                 got = [val]
-                        elif hcp or NEAREST:
+                        elif hcp or NEAREST or near_rec:
                             got = [min(f[i], key=lambda x: abs(x - nu))]
                         elif nrm[i] is not None:
                             got = [pick_polar(f[i], vecs[i], nrm[i], lab)]
@@ -486,6 +492,13 @@ def main(only=(), field="exp_curve"):
             print("* nearest computed branch, not a labelled comparison.")
             print("  It cannot be larger than a correct one, so read it as a "
                   "lower bound.")
+        if (any(r.get("near") and not r.get("hcp") for r in rows)
+                and any(r.get("hcp") for r in rows) and not NEAREST):
+            print()
+            print("* a cubic row marked * is a digitised source with no branch "
+                  "labels, scored")
+            print("  against the nearest computed branch - a lower bound, like "
+                  "the hcp rows.")
     else:
         print("A model curve carries no branch labels, so both sides are "
               "compared sorted.")

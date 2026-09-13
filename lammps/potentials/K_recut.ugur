@@ -11,8 +11,8 @@
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
-# Measured dispersion: 16.6 % against 11.4 % for the published switched
-# arm - worse.
+# Measured dispersion: 11.8 % against 13.9 % for the published switched
+# arm - better.
 # Read that beside the finite-temperature note below rather than instead of
 # it.  Both are the same fact: a dispersion at 0 K is a property of the
 # curvature AT the minimum, and this arm has that neighbourhood right

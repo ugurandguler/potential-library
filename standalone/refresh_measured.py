@@ -140,12 +140,13 @@ def main():
             #  could not say so, since make_gui.py's `armBad` reads `stable`
             #  and `stable` was absent.
             #
-            #  UNRESOLVED, and deliberately not resolved here: for `tap` this
-            #  mesh says Mo and W are stable while their own `dyn` record - the
-            #  stronger mesh+path test - says they are not.  The page shows the
-            #  mesh verdict.  Unifying the column would mark two shipped
-            #  elements REJECTED, which is an editorial decision about the
-            #  published library and not a refactor.
+            #  RESOLVED 2026-09-13: this mesh-only verdict never overrides a
+            #  `dyn` block's.  For `tap` the mesh called Mo, W and six others
+            #  stable while their own dyn record - mesh AND path - said not.
+            #  The page now labels a shipped arm that fails the path screen
+            #  "UNSTABLE ON THE PATH", distinct from the candidates' REJECTED,
+            #  so unifying the column no longer mislabels a published record.
+            #  See unify_stable.py.
             if name in ("hard", "tap", "tap_force", "disp"):
                 try:
                     cry = L.Crystal(e["struct"], e["a0"], e.get("c_over_a"),
@@ -164,6 +165,8 @@ def main():
                     rec["stable"] = bool(d["stable"])
                     rec["min_cm1"] = d["min_cm1"]
                     n["stable"] += 1
+            if (rec.get("dyn") or {}).get("stable") is False:
+                rec["stable"] = False
 
             #  --- finite-amplitude stability -------------------------------
             #  The phonon screen above answers a question at zero amplitude.

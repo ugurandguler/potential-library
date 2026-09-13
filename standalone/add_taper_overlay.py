@@ -80,6 +80,10 @@ def main():
                  float(L.spectrum(cry, pot, nq=9).min()))
         rec["stable"] = bool(mn > -1e-3)
         rec["min_cm1"] = round(mn, 3)
+        #  MESH ONLY, and the record is rebuilt from scratch here, so any `dyn`
+        #  block is gone until add_dynstab_arms.py tap runs again - which then
+        #  writes `stable` from mesh AND path.  Run it after this; until then
+        #  this verdict is the weaker one.
         n_stable += rec["stable"]
         v["tap"] = rec
         print(f"{el:4s}{v['rms']:9.2f}{rec['rms']:9.2f}"

@@ -11,7 +11,7 @@
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
-# Measured dispersion: 5.4 % against 13.5 % for the published switched
+# Measured dispersion: 7.6 % against 11.8 % for the published switched
 # arm - better.
 # Read that beside the finite-temperature note below rather than instead of
 # it.  Both are the same fact: a dispersion at 0 K is a property of the

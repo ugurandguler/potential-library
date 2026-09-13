@@ -74,6 +74,10 @@ def main(meshes=(8, 9)):
                   "nq": "+".join(map(str, meshes)),
                   "path": "Setyawan-Curtarolo"})
         u["dyn"] = d
+        #  `stable` means the same thing on every record: mesh AND path.
+        #  refresh_measured.py used to leave the mesh-only verdict here, which
+        #  is how Al and Na read stable beside a dispersion dipping below zero.
+        u["stable"] = neg == 0
         if bool(was) != (neg == 0):
             changed.append((el, was, neg == 0))
         if neg:

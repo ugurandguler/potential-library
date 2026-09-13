@@ -841,11 +841,26 @@ const armBad = r => !!(r && r.stable === false);
     zero.  The record carries the verdict in `gate`, precomputed, so this page
     does not reimplement the rule and cannot drift from it.  */
 const armOverCeiling = r => !!(r && r.gate === "reject");
-const armMark = r => armBad(r) ? " \u2014 REJECTED"
-                   : armOverCeiling(r) ? " \u2014 OVER CEILING" : "";
+/*  An unstable record is not always a REJECTED one.  REJECTED is a selection
+    verdict and only the re-cut candidates went through selection; the four
+    that failed are kept as controls.  A PUBLISHED arm with an imaginary mode
+    was shipped, and its potential file says so in a LATTICE STABILITY
+    warning - calling it rejected would conflate "never selected" with
+    "shipped with a known defect".  Since 2026-09-13 `stable` means mesh AND
+    path on every record (unify_stable.py); before that the labels read a
+    mesh-only verdict on 16 records and said nothing while the red box below
+    them said dynamically unstable.  ON THE PATH when the mesh alone is clean,
+    because that is the case a reader would otherwise not believe.  */
+const CANDIDATE_ARMS = ["rc", "rc_ug"];
+const armStab = (r, k) => !armBad(r) ? ""
+  : CANDIDATE_ARMS.indexOf(k) >= 0 ? " — REJECTED"
+  : ((r.dyn||{}).min_mesh_cm1 !== undefined && r.dyn.min_mesh_cm1 >= -1)
+    ? " — UNSTABLE ON THE PATH" : " — DYNAMICALLY UNSTABLE";
+const armMark = (r, k) => armBad(r) ? armStab(r, k)
+                   : armOverCeiling(r) ? " — OVER CEILING" : "";
 /*  [key, record, label] for every arm this element has that satisfies `has` */
 const armRecs = (d, has) =>
-  ARMS.map(a => [a[0], d[a[0]], a[1] + armMark(d[a[0]])])
+  ARMS.map(a => [a[0], d[a[0]], a[1] + armMark(d[a[0]], a[0])])
       .filter(o => o[1] && has(o[1]));
 
 /*  ARM_DASH in words, for the caption.  The two have to agree, so they sit
@@ -1796,6 +1811,17 @@ function drawDisp(d){
   const span=set=>set.forEach(p=>p.branches.forEach(b=>b.forEach(v=>{
     if(v===null)return; if(v>hi)hi=v; if(v<lo)lo=v;})));
   span(segs); if(usegs) span(usegs);
+  /*  The measured points and a fitted model are drawn on this axis as well,
+      so they set its range too.  Scaled on the computed branches alone,
+      niobium's highest measured frequencies (6.49 THz, 6.59 with the error
+      bar) sat above an axis that stopped at 6, outside the frame.  */
+  const onPath=[];
+  if(d.exp_curve&&d.exp_curve.segs) Object.values(d.exp_curve.segs).forEach(
+    v=>v.forEach(pt=>onPath.push(pt[1]+(pt[2]||0))));
+  if(d.model_curve&&d.model_curve.segs) Object.values(d.model_curve.segs).forEach(
+    v=>v.forEach(row=>row.slice(1).forEach(x=>{if(x!=null)onPath.push(x);})));
+  expPts.forEach(p=>(p.exp||[]).forEach(f=>onPath.push(f)));
+  onPath.forEach(f=>{const v=f*CM1_PER_THZ; if(v>hi)hi=v;});
   const Y=axes(THZ(lo),THZ(hi));
   const brk=segs.map((p,i)=>i<segs.length-1 && p.b!==segs[i+1].a);
   const tot=segs.reduce((a,p)=>a+p.len,0);
@@ -1858,7 +1884,12 @@ function drawDisp(d){
         const x=x0+pt[0]*w, y=Y(pt[1]), e=pt[2]||0;
         if(e>0){const y1=Y(pt[1]-e), y2=Y(pt[1]+e);
           c.beginPath();c.moveTo(x,y1);c.lineTo(x,y2);c.stroke();}
-        c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();});
+        /*  a point READ from a figure is drawn as a diamond, never with
+            the circle a tabulated measurement gets  */
+        if(d.exp_curve.digitised){c.beginPath();c.moveTo(x,y-3.3);
+          c.lineTo(x+3.3,y);c.lineTo(x,y+3.3);c.lineTo(x-3.3,y);
+          c.closePath();c.stroke();}
+        else{c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();}});
       c.restore();
     }
     x0 += w + (brk[i]?GAP:0);
@@ -1912,7 +1943,7 @@ const marmRec = (d, k) => k === "mau" ? d
                 : d[k];
 const marmOpts = d => [["mau", "MAU"], ["ug", "UG"]].concat(
     ARMS.filter(a => a[0] !== "tap")
-        .map(a => [a[0], a[1] + (armBad(d[a[0]]) ? " — REJECTED" : "")]))
+        .map(a => [a[0], a[1] + armStab(d[a[0]], a[0])]))
   .filter((o, i, all) => all.findIndex(x => x[0] === o[0]) === i)
   .filter(o => {const r = marmRec(d, o[0]); return r && r.mech_planes;});
 
@@ -2132,23 +2163,51 @@ function uf3Note(nb, here){
 }
 
 /*  What to make of the re-cut candidate for THIS element, which is not the
-    same answer twice.  The arm looks strong in aggregate - 7.9 % against the
-    published switched arm's 11.2 % over the 16 elements that have both and
+    same answer twice.  The arm looks strong in aggregate - 8.3 % against the
+    published switched arm's 11.2 % over the 17 elements that have both and
     were not rejected - and that number is misleading on its own: almost all
-    of the gap is sodium, potassium, rubidium and caesium, which are exactly
-    the elements the arm breaks once the crystal is warm.  Take them out and
-    it is 8.3 against 8.9 over 11 elements, better in 7.  A wash.
+    of the gap is lithium, sodium, potassium, rubidium and caesium, and the
+    last four are exactly the elements the arm breaks once the crystal is
+    warm.  Take those five out and it is 8.6 against 9.2 over 12 elements,
+    better by more than half a point in 5.  A wash.  (Recomputed 2026-09-13,
+    after the 2026-08-29 lattice-constant correction and with iridium.)
 
     So the page says it per element rather than quoting the aggregate.  The
     dispersion numbers are the measured comparison, arm against published
     switched arm, as a percentage of that element's highest measured
     frequency; the warm classes come from three independent screens - thermal
     expansion, 300 K elastic constants, and the sign of dC11/dT.  */
+/*  curve_mae.py with the arms rc and tap, 2026-09-13.  Li, Pb and Rb had been
+    left at their values from before the 2026-08-29 lattice-constant
+    correction; a copy of this table in lammps/export_potentials.py was older
+    still.  Iridium's points are read from a figure and carry no branch
+    labels, so both of its numbers are nearest-branch lower bounds.  */
 const RC_DISP = {Ag:[13.0,12.7], Au:[4.2,4.4], Ba:[8.3,9.6], Ca:[8.6,8.3],
-                 Cs:[6.4,12.9], Cu:[9.3,10.0], K:[11.8,13.9], Li:[5.8,25.2],
-                 Mg:[8.3,6.6], Na:[5.8,16.2], Ni:[12.1,13.4], Pb:[10.6,15.9],
-                 Pd:[3.5,3.6], Pt:[5.0,4.8], Rb:[5.4,13.5], W:[17.2,17.8],
-                 Yb:[8.5,8.6]};
+                 Cs:[6.4,12.9], Cu:[9.3,10.0], Ir:[9.0,9.9], K:[11.8,13.9],
+                 Li:[7.0,25.9], Mg:[8.3,6.6], Na:[5.8,16.2], Ni:[12.1,13.4],
+                 Pb:[12.9,18.3], Pd:[3.5,3.6], Pt:[5.0,4.8], Rb:[7.6,11.8],
+                 W:[17.2,17.8], Yb:[8.5,8.6]};
+const RC_NEAR = ["Ir"];
+/*  Distinct measured frequencies in a points-only record.  One Gamma point is
+    drawn at every place the path passes Gamma, so counting drawn marks says
+    three where rhenium has one.  */
+function nMeasured(ec){
+  return new Set(Object.values(ec.segs).flatMap(
+    v=>v.map(p=>String(p[3])+"|"+p[1]))).size;
+}
+/*  C_p - C_v = 9 alpha^2 B V_m T for the crystal as measured: the CRC linear
+    expansion coefficient (carried in tap.expansion), the bulk modulus of the
+    elastic constants the fit targets (B[1]), the molar volume from a0.  It
+    turns the tabulated C_p into the quantity the curve is.  null where any
+    input is missing.  */
+function cpLat(d){
+  const al=((d.tap||{}).expansion||{}).alpha_exp_1e6,
+        Bx=Array.isArray(d.B)?d.B[1]:null;
+  if(!al||!Bx||!d.a0||!d.Cp298) return null;
+  const a=d.a0, v=d.struct==="fcc"?a*a*a/4:d.struct==="bcc"?a*a*a/2
+        :Math.sqrt(3)/4*a*a*a*(d.c_over_a||1.633);
+  return 9*Math.pow(al*1e-6,2)*Bx*1e9*v*1e-30*6.02214076e23*298.15;
+}
 const RC_BROKEN = ["Na","K","Rb","Cs"];      /* warm screens: catastrophic  */
 const RC_SUSPECT = ["Yb"];                   /* the same failure, milder    */
 const RC_REPAIRED = ["Ba","Ir","Mg","Co","Re","Pb","Cu","Sr","Ni","Au","Rh"];
@@ -2249,9 +2308,14 @@ function recutNote(d){
   const dsp = RC_DISP[el];
   const cmp = dsp ? (dsp[0] < dsp[1] - 0.5 ? "better than"
                    : dsp[0] > dsp[1] + 0.5 ? "worse than" : "the same as") : null;
+  const nPts = (d.exp_curve&&d.exp_curve.points_only)?nMeasured(d.exp_curve):0;
   const num = dsp ? `Against the measured dispersion it reaches
       <strong>${dsp[0].toFixed(1)}&nbsp;%</strong> where the published
-      switched arm reaches ${dsp[1].toFixed(1)}&nbsp;% &mdash; ${cmp} it.`
+      switched arm reaches ${dsp[1].toFixed(1)}&nbsp;% &mdash; ${cmp} it.${
+      RC_NEAR.indexOf(el)>=0?` Both are nearest-branch scores against points
+      read from a figure, so both are lower bounds.`:""}`
+    : nPts ? `${el} has ${nPts===1?"one measured frequency":nPts+" measured frequencies"},
+      not a dispersion, so that comparison is not made here.`
     : `${el} has no measured dispersion, so that comparison cannot be made
       here.`;
   if(RC_BROKEN.indexOf(el) >= 0){
@@ -2335,6 +2399,16 @@ const FT_WHY = {
          + `reconstruction is drawn throughout this library, never scored, `
          + `at 0 K as much as at temperature`;
   },
+  /*  entered after the study ran, with a run queued: the absence is of a
+      RESULT, not of a measurement, and the sentence must say which  */
+  pending: T => `a measured dispersion for this element was entered after the `
+           + `study ran, read from a published figure; a run at the `
+           + `measurement's own ${T} K has been submitted and its result is `
+           + `not in yet`,
+  gamma: T => `the only measurement is one frequency, the Raman-active optic `
+           + `mode at &Gamma;, so there is no dispersion to set a curve `
+           + `against; a small-cell run at ${T} K that measures that one `
+           + `frequency has been submitted and its result is not in yet`,
   none: () => `no dispersion reference exists for this element, measured or `
            + `reconstructed`,
 };
@@ -2342,11 +2416,15 @@ const FT_V = {gain: ["gain", "ok"], loss: ["loss", "bad"],
               flat: ["below the floor", "warn"]};
 
 /*  The finite-temperature dispersion.  finiteTBlock is the panel; this is its
-    picture.  ld.std is cm^-1 and phana returns THz, so the harmonic curve is
+    picture.  The dashed 0 K curve is `tap.ld`, the SAME switched record the
+    run measures (add_ld_tap.py).  It used to be `d.ld`, the top-level hard-cut
+    record, which set a switched run against a hard-cut calculation - and at
+    0 K those two differ by more than the temperature effect in 15 of the 24
+    elements.  ld.std is cm^-1 and phana returns THz, so the harmonic curve is
     converted on the way in and the axis is THz throughout - the same axis the
     dispersion panel uses.                                                   */
 function drawFT(d){
-  const cv=(FT.curve||{})[d.sym], segs=(d.ld||{}).std;
+  const cv=(FT.curve||{})[d.sym], segs=((d.tap||{}).ld||{}).std;
   if(!cv||!segs||!segs.length) return;
   const s=setup("#ftdisp",0.60); if(!s) return;
   const {c,W,H,p2,p3,lin,ink}=s;
@@ -2356,20 +2434,35 @@ function drawFT(d){
 
   /*  One range over BOTH curves.  Two auto-scaled axes would make a softening
       look like an artefact of the scale, which is the one thing this plot
-      exists to show.  It does not open downwards: the substitution near Gamma
-      removed the last negative frequency in the set, and a curve that still
-      had one would be a fault to fix rather than a range to widen.          */
-  let hi=0;
+      exists to show.  The MEASURED curve never opens it downwards - the
+      substitution near Gamma removed its last negative frequency.  The 0 K
+      reference can: it is the switched record's own harmonic dispersion, and
+      for iron, niobium, tungsten, rubidium and caesium that record has an
+      imaginary mode on the path.  That is a property of the record, not a drawing
+      fault, so the axis opens under the same rule as the dispersion panel:
+      shallower than 1 cm^-1 is arithmetic and floored to zero, deeper is
+      drawn.                                                                 */
+  let hi=0, lo=0;
   segs.forEach(p=>p.branches.forEach(b=>b.forEach(v=>{
-    if(v!==null&&THZ(v)>hi) hi=THZ(v);})));
+    if(v===null) return;
+    if(THZ(v)>hi) hi=THZ(v); if(THZ(v)<lo) lo=THZ(v);})));
+  if(lo > -1.0/CM1_PER_THZ) lo = 0;
   cv.f.forEach(r=>r.forEach(v=>{if(v>hi)hi=v;}));
-  const step=niceStep(hi,5);
+  /*  and the measured points drawn on top, with their error bars  */
+  if(d.exp_curve&&d.exp_curve.segs) Object.values(d.exp_curve.segs).forEach(
+    v=>v.forEach(pt=>{const t=pt[1]+(pt[2]||0); if(t>hi)hi=t;}));
+  const step=niceStep(hi-lo,5);
   hi=Math.ceil(hi/step)*step||step;
+  lo=lo<0?-Math.ceil(-lo/step)*step:0;
   const dec=(step<1||Math.abs(step-Math.round(step))>1e-9)?1:0;
-  const Y=v=>T+ph-v/hi*ph;
+  const Y=v=>T+ph-(v-lo)/(hi-lo)*ph;
 
   c.font="11px ui-monospace,Consolas,monospace";
-  for(let k=0;k<=Math.round(hi/step);k++){
+  if(lo<0){            /* omega = 0, solid like the rest of the frame */
+    c.strokeStyle=ink;c.lineWidth=1;
+    c.beginPath();c.moveTo(L,Y(0));c.lineTo(W-R,Y(0));c.stroke();
+  }
+  for(let k=Math.round(lo/step);k<=Math.round(hi/step);k++){
     const v=k*step, y=Y(v);
     c.strokeStyle=ink;c.lineWidth=1.2;
     c.beginPath();c.moveTo(L,y);c.lineTo(L+5,y);c.stroke();
@@ -2454,7 +2547,12 @@ function drawFT(d){
         const x=x0+pt[0]*w, y=Y(pt[1]), e=pt[2]||0;
         if(e>0){c.beginPath();c.moveTo(x,Y(pt[1]-e));c.lineTo(x,Y(pt[1]+e));
           c.stroke();}
-        c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();});
+        /*  a point READ from a figure is drawn as a diamond, never with
+            the circle a tabulated measurement gets  */
+        if(d.exp_curve.digitised){c.beginPath();c.moveTo(x,y-3.3);
+          c.lineTo(x+3.3,y);c.lineTo(x,y+3.3);c.lineTo(x-3.3,y);
+          c.closePath();c.stroke();}
+        else{c.beginPath();c.arc(x,y,2.6,0,2*Math.PI);c.stroke();}});
       c.restore();
     }
     x0+=w+(brk[i]?GAP:0);
@@ -2465,7 +2563,7 @@ function drawFT(d){
       is a figure that will be read wrong once it is on its own.             */
   const rT=(FT.rows||{})[d.sym];
   const keys=[[p2,[],(rT?rT.T:"")+" K, molecular dynamics"],
-              [p3,[5,3],"0 K, harmonic"]];
+              [p3,[5,3],"0 K, harmonic, same record"]];
   /*  On an opaque patch of the panel's own background.  Titanium's highest
       branch runs through this corner, and a key drawn straight onto the
       curves is a key that has to be deciphered.                            */
@@ -2489,21 +2587,38 @@ function finiteTBlock(d){
   if(!r && !o) return "";
   if(!r){
     return `<h3>The dispersion at the temperature it was measured</h3>
-      <p class="plotnote"><strong>${nm} is outside this study</strong> &mdash;
-      ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. Twenty-four of the thirty-eight
+      <p class="plotnote"><strong>${nm} ${(o.kind==="pending"||o.kind==="gamma")
+        ?"is not in this study yet":"is outside this study"}</strong> &mdash;
+      ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. ${(o.kind==="pending"||o.kind==="gamma")
+      ?`Twenty-four of the thirty-eight elements carry a finite-temperature
+      measurement so far; this one is waiting on its run.`
+      :`Twenty-four of the thirty-eight
       elements carry a finite-temperature measurement; this is one of the
       fourteen that do not, and that is a fact about the reference data rather
-      than about the potential.</p>`;
+      than about the potential.`}</p>`;
   }
   const [word, cls] = FT_V[r.v];
-  const cv = (FT.curve||{})[el], hasCurve = !!cv && !!((d.ld||{}).std);
+  const cv = (FT.curve||{})[el], hasCurve = !!cv && !!(((d.tap||{}).ld||{}).std);
   const amRow = (r.am !== r.a0) ? `<tr><td>0 K, at the paper's own lattice
       constant</td><td>${r.am.toFixed(1)} %</td></tr>` : "";
   return `<h3>The dispersion at the temperature it was measured</h3>
   ${hasCurve?`<canvas id="ftdisp"></canvas>
-  <p class="plotnote">The same path as the harmonic dispersion above, on the
-    same axis, so the two temperatures can be read against each other. The
-    open circles with their error bars are the neutron measurement itself,
+  <p class="plotnote">The same path and the same axis as the dispersion above.
+    <strong>The dashed curve is the 0&nbsp;K harmonic dispersion of this same
+    switched record</strong>, not the hard-cut curve drawn above, so the two
+    temperatures are read against each other with nothing else changed.${(()=>{
+      const m=Math.min(...d.tap.ld.std.flatMap(p=>p.branches.flat()));
+      return m<=-1?` At 0&nbsp;K this record has an <strong>imaginary mode on
+        the path</strong>, down to ${m.toFixed(1)}&nbsp;cm<sup>&minus;1</sup>,
+        which is why the dashed curve dips below zero.`:"";})()} ${
+    d.exp_curve&&d.exp_curve.digitised
+      ?`The diamonds are the measurement itself, read from the published
+        figure because the paper tabulates no frequencies,`
+      :d.exp_curve&&d.exp_curve.points_only
+      ?`The circles are the measured frequencies &mdash; single points, not a
+        dispersion &mdash;`
+      :`The open circles with their error bars are the neutron measurement
+        itself,`}
     at ${d.exp_curve?d.exp_curve.T_K:r.T}&nbsp;K.
     <br><strong>The dotted stretch beside &Gamma; was not measured.</strong>
     The mesh is fixed by the box &mdash; ${r.mesh} cells &mdash; and inside
@@ -2550,8 +2665,8 @@ function lammpsBlock(d){
   /*  The "what" column carries the USE, not just the name.  Which truncation
       a reader wants is not a matter of taste and the two answers point
       opposite ways: measured against neutron dispersion the hard sets average
-      9.5 % over the 29 elements that have a curve and the switched ones
-      12.7 %, hard being closer in 23 of the 29 - and no hard set can be run
+      9.6 % over the 32 elements that have a curve and the switched ones
+      12.5 %, hard being closer in 25 of the 32 - and no hard set can be run
       at temperature, because phi2 does not vanish at the cutoff.  Copper
       drifts 350 meV per atom per nanosecond in NVE with the hard set and 0.4
       with the switched one, a factor of 876.  Each file's own header carries
@@ -2940,7 +3055,7 @@ function render(){
       ${setsOf(d)
         .filter(o=>o[2]).map(o=>`<option value="${o[0]}"${
           PAR_SET===o[0]?" selected":""}>${o[1]} &mdash; ${
-          o[2].rms.toFixed(2)}%${armBad(o[2])?" — REJECTED":""}</option>`)
+          o[2].rms.toFixed(2)}%${armStab(o[2], o[0])}</option>`)
         .join("")}
     </select>`:""}</h3>
   <div class="pars">
@@ -3066,8 +3181,11 @@ function render(){
         ${d.struct==="hcp"?erow("C33",epair("C33"),fz.C33,me.C33,null,"C33",arms):""}
         ${erow("C44",epair("C44"),fz.C44,me.C44,(d.Cij_unc||{}).C44,"C44",arms)}
       </tbody></table>${arms.some(a=>armBad(a[1]))?`<p class="plotnote">
-        &#10007; marks an arm that failed selection: it reaches these elastic
-        constants and has imaginary modes on the symmetry path.</p>`:""}`;})()}
+        &#10007; marks an arm with imaginary modes on the mesh or the symmetry
+        path: it reaches these elastic constants and is still not a harmonic
+        minimum. For a re-cut candidate that is why it failed selection; a
+        published arm marked so ships with the same warning in its potential
+        file.</p>`:""}`;})()}
       ${mp.mp_id?`<p class="plotnote" style="margin-top:9px">
         Materials Project <strong>${mp.mp_id}</strong>, space group
         ${mp.spacegroup}${mp.matches_structure?"":
@@ -3403,9 +3521,9 @@ function render(){
         <code>${d.name}.ugur.ang</code>. The switched-cutoff sets
         (<code>${d.name}_taper.ugur</code>) carry no stored dispersion and are
         reachable only from the download table below. That distinction is not
-        cosmetic: measured against neutron data over the 29 elements that have
-        it, the hard-truncated sets average 9.5&nbsp;% and the switched ones
-        12.7&nbsp;%, and the hard one is closer in 23 of the 29. The switched
+        cosmetic: measured against neutron data over the 32 elements that have
+        it, the hard-truncated sets average 9.6&nbsp;% and the switched ones
+        12.5&nbsp;%, and the hard one is closer in 25 of the 32. The switched
         sets are what molecular dynamics has to use, because a hard cut leaves
         the pair energy discontinuous, and that is the arm any
         finite-temperature number quoted elsewhere belongs to.</p>
@@ -3437,11 +3555,18 @@ function render(){
         ${d.model_curve.check.published_cp}.`:""}<br>Source:
         ${d.model_curve.ref}.</p>`:""}
       ${d.exp_curve?`<p class="plotnote">${d.exp_curve.points_only
-        ?`The circles are <strong>${Object.values(d.exp_curve.segs).reduce(
-        (a,v)=>a+v.length,0)} measured frequencies, not a dispersion</strong>.
+        ?(nMeasured(d.exp_curve)===1
+          ?`The circle is <strong>one measured frequency, not a
+        dispersion</strong>, drawn at each place the path passes its point of
+        the zone. Nothing between is measured and nothing is drawn`
+          :`The circles are <strong>${nMeasured(d.exp_curve)} measured frequencies, not a dispersion</strong>.
         This element's was published as a figure with a list of points beside
         it &mdash; the symmetry points, or a handful the authors singled out
-        &mdash; so there is no measured curve between them and none is drawn`
+        &mdash; so there is no measured curve between them and none is drawn`)
+        :d.exp_curve.digitised?`The diamonds along the branches are
+        <strong>${Object.values(d.exp_curve.segs).reduce(
+        (a,v)=>a+v.length,0)} points read from the published figure</strong>,
+        not a table &mdash; see below`
         :`The circles along the branches are the <strong>whole measured
         dispersion</strong>, ${Object.values(d.exp_curve.segs).reduce(
         (a,v)=>a+v.length,0)} points with their quoted errors`}, at
@@ -3450,12 +3575,17 @@ function render(){
         with it${d.exp_curve.T_K<200?`, and this set is well below room
         temperature &mdash; the full dispersion of this element has not been
         measured at 300 K, which is why the density-functional literature
-        compares against ${d.exp_curve.T_K} K as well`:""}.${d.struct==="hcp"
+        compares against ${d.exp_curve.T_K} K as well`:""}.${d.exp_curve.points_only?""
+        :d.struct==="hcp"
         ?` The [&zeta;&zeta;0] branch runs past K and on to M; the points
         beyond K belong on M&ndash;K and are drawn there, not folded back
-        onto &Gamma;&ndash;K`
-        :` Points on the part of &Sigma; beyond K are measured but not drawn:
-        this path does not go there`}.${d.exp_curve.a_meas?`<br><b>Scored at the
+        onto &Gamma;&ndash;K.`
+        :d.struct!=="fcc"?""
+        :d.exp_curve.segs["U|X"]
+        ?` Points on the part of &Sigma; beyond K are drawn on U&ndash;X, the
+        same line continued to X by symmetry.`
+        :` Points on the part of &Sigma; beyond K, where measured, are not
+        drawn: this path does not go there.`}${d.exp_curve.a_meas?`<br><b>Scored at the
         crystal's lattice constant at the measurement temperature</b>,
         a&nbsp;=&nbsp;${d.exp_curve.a_meas.toFixed(4)}&nbsp;&#8491;${
           d.exp_curve.c_meas?`, c&nbsp;=&nbsp;${d.exp_curve.c_meas.toFixed(4)}`
@@ -3474,6 +3604,8 @@ function render(){
              where Kittel does publish both ends, it runs about 12&nbsp;% high,
              so read it as carrying that much slack.`
           : `This one is a measurement: ${d.exp_curve.a_meas_from}.`}`:""}`:""}
+        ${d.exp_curve.digitised?`<br><b>Digitised, not tabulated.</b>
+        ${d.exp_curve.digitised}`:""}
         <br>Source: ${d.exp_curve.ref}.</p>`:""}
       <p class="plotnote">${g.std[0].branches.length} branches. From the
       dynamical matrix &mdash; phonons are not fit targets, so this is a
@@ -3522,7 +3654,9 @@ function render(){
       ${(d.S298||d.Cp298)?`Rings: the measured S&deg; and C<sub>p</sub>&deg; at
         298.15 K, from the <strong>CRC Handbook of Chemistry and Physics</strong>
         standard thermodynamic tables. Nothing thermal enters the fit, so these
-        are out of sample.`
+        are out of sample. <strong>The heat-capacity ring is C<sub>p</sub> and
+        the curve is C<sub>v</sub></strong>, which are not the same quantity
+        &mdash; see the note under the numbers below.`
        :`<strong>No rings:</strong> the measured S&deg; and
         C<sub>p</sub>&deg; are not in the table for this element yet, so there
         is nothing to compare the curves against here.`}</p>
@@ -3535,7 +3669,8 @@ function render(){
     ${cell3("zero point energy",tv(g,"zpe")+" eV")}
     ${cell3("entropy S",tv(g,"S")+" J/(mol K)",d.S298?exact(d.S298):null)}
     ${cell3("heat capacity C_v",tv(g,"Cv")+" J/(mol K)",
-       d.Cp298?exact(d.Cp298)+" (C_p)":null)}
+       d.Cp298?exact(d.Cp298)+" (C_p)"+(cpLat(d)!=null
+         ?"; "+(d.Cp298-cpLat(d)).toFixed(2)+" as C_v":""):null)}
     ${cell3("Helmholtz F",tv(g,"F")+" eV")}
     ${cell3("highest frequency",
        ((g.maxfreq||0)/CM1_PER_THZ).toFixed(2)+" THz ("
@@ -3546,10 +3681,24 @@ function render(){
   above, evaluated at 298 K from force constants computed at 0 K, so nothing
   in them depends on a trajectory and nothing in them is affected by the
   finite-temperature behaviour reported further down the page.
-  The tabulated experimental value is C<sub>p</sub>; the
-  calculation gives C<sub>v</sub>. For metals near 300 K the difference is about
-  1-2 J/(mol K), so a slightly lower C<sub>v</sub> is expected. No thermal
-  quantity enters the fit.</p>`:""}
+  <br><br><strong>The tabulated value is C<sub>p</sub>; the calculation gives
+  C<sub>v</sub>.</strong> They differ by the lattice term
+  C<sub>p</sub>&nbsp;&minus;&nbsp;C<sub>v</sub>&nbsp;=&nbsp;9&alpha;<sup>2</sup>BV<sub>m</sub>T,
+  with &alpha; the linear expansion coefficient.${cpLat(d)!=null?` With this
+  element's measured &alpha; and bulk modulus it is
+  <strong>${cpLat(d).toFixed(2)}&nbsp;J/(mol&nbsp;K)</strong> at 298&nbsp;K,
+  ${(100*cpLat(d)/d.Cp298).toFixed(1)}&nbsp;% of C<sub>p</sub>, and the
+  measured value carried to C<sub>v</sub> is
+  ${(d.Cp298-cpLat(d)).toFixed(2)}.`:""} Across the library the term is
+  small &mdash; about half a J/(mol&nbsp;K) at the median, and 1 or more only
+  for potassium, sodium, rubidium, caesium, lead, thallium, aluminium and
+  silver &mdash; while the calculated C<sub>v</sub> of the switched arm sits a
+  median 6.8&nbsp;% below the tabulated C<sub>p</sub>. The lattice term
+  accounts for about two of those points. <strong>The rest is not accounted
+  for here.</strong> A metal's measured heat capacity also has an electronic
+  part, which no interatomic potential contains; it is the likely remainder,
+  but it has not been evaluated on this page. No thermal quantity enters the
+  fit.</p>`:""}
 
   ${finiteTBlock(d)}
 
@@ -4142,7 +4291,7 @@ function render(){
       ${setsOf(d).map(o=>`<option value="${o[0]}"${
           PAR_SET===o[0]?" selected":""}>${
           o[0]==="ug"?"UG (Ugur-Guler)":o[1]} &mdash; ${
-          o[2].rms.toFixed(2)}%${armBad(o[2])?" — REJECTED":""}</option>`)
+          o[2].rms.toFixed(2)}%${armStab(o[2], o[0])}</option>`)
         .join("")}
     </select>`:""}
     <select id="fmt">
