@@ -1,4 +1,4 @@
-# Ca - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Ca - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Ca the re-cut Ca_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Ca_taper.ugur Ca

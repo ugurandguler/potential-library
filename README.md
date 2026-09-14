@@ -386,10 +386,12 @@ Every phonon comparison above scores a 0 K harmonic calculation against a
 measurement made at 9 to 296 K, which charges the potential for a temperature
 difference it was never asked to reproduce. LAMMPS' `fix phonon` can measure
 the spectrum a molecular-dynamics trajectory actually has, so it was run for
-each element at its own paper's temperature. **24 of the 38 carry that
+each element at its own paper's temperature. **27 of the 38 carry that
 measurement**; each element page shows the curve beside the 0 K one and the
-neutron points, and the 14 without it carry a sentence saying which kind of
-absence it is.
+neutron points, and the 11 without it carry a sentence saying which kind of
+absence it is. Iridium, ruthenium and rhenium joined the original 24 in
+September 2026: the first two scored against points digitised from published
+figures, rhenium against its single Raman frequency at Γ.
 
 Two things make the table readable. The numbers are the **switched** arm
 (`<El>_taper.ugur`), not the hard-truncated root the parameter selector calls
@@ -397,10 +399,13 @@ MAU — a hard cut leaves the pair energy discontinuous and copper drifts
 350 meV per atom per nanosecond under it, so the switched arm is the only one
 that can be run at temperature at all. And every run is scored twice, at q and
 at a symmetry image of q, so it reports **its own noise floor**; the verdict is
-computed from that rather than left to the reader, because 12 of the 24
+computed from that rather than left to the reader, because 15 of the 27
 differences are smaller than it.
 
-The result is **12 gains, no losses, and 12 differences too small to read**.
+The result is **12 gains, no losses, and 15 differences too small to read**.
+The three newest are all in the last group: iridium 9.9 to 9.4 per cent
+against a floor of 1.3, ruthenium 9.0 to 8.4 against 2.9, rhenium 12.0 to 12.7
+against 2.4.
 The gains are mostly one to three points, which is the size the effect ought to
 be: copper's real 49 K to 298 K shift is 0.5 per cent on average, and two
 independent 1967 neutron measurements of copper disagree by the same 0.5 per

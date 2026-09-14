@@ -57,6 +57,9 @@ The order is not arbitrary:
   add_ld_tap      the switched arm's own 0 K dispersion, which the finite-T
                   panel draws its reference curve from; a clean clone has no
                   `tap` record and the step does nothing there
+  recommend_recut which switched set to recommend for MD, per element, by a
+                  rule over the warm and cold screens; needs `rc` and `tap`,
+                  so it too does nothing on a clean clone
   add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
                   contain no member of <111>, which for a cubic crystal is
                   where the extremum sits
@@ -133,6 +136,7 @@ CHAIN = [
     #  back to drawing no reference curve at all.
     ("unify_stable.py", "one meaning for stable: mesh AND path", False),
     ("add_ld_tap.py", "the switched arm's own 0 K dispersion", False),
+    ("recommend_recut.py", "which switched set to recommend for MD", False),
     ("make_gui.py", "potential.html", False),
 ]
 

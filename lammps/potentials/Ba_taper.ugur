@@ -1,4 +1,4 @@
-# Ba - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Ba - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Ba the re-cut Ba_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Ba_taper.ugur Ba

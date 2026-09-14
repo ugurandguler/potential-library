@@ -2208,9 +2208,47 @@ function cpLat(d){
         :Math.sqrt(3)/4*a*a*a*(d.c_over_a||1.633);
   return 9*Math.pow(al*1e-6,2)*Bx*1e9*v*1e-30*6.02214076e23*298.15;
 }
-const RC_BROKEN = ["Na","K","Rb","Cs"];      /* warm screens: catastrophic  */
+/*  Lithium added 2026-09-13.  Its re-cut expands at -37e-6/K against a
+    measured +46 and its C11 rises x4.6 across its grid - the alkali failure,
+    and it had been left off this list.  Which element the re-cut is
+    RECOMMENDED for is not a list typed here: recommend_recut.py computes
+    `md_recommended` from the library by a rule stated in the record, which is
+    what keeps it from going stale the way RC_DISP did.  */
+const RC_BROKEN = ["Na","K","Rb","Cs","Li"];  /* warm screens: catastrophic  */
 const RC_SUSPECT = ["Yb"];                   /* the same failure, milder    */
-const RC_REPAIRED = ["Ba","Ir","Mg","Co","Re","Pb","Cu","Sr","Ni","Au","Rh"];
+const RCREC = d => !!(d && d.md_recommended && d.md_recommended.set === "rc");
+/*  The warm failure in this element's own numbers.  The sentence used to quote
+    fixed ranges - "-36 to -42", "84-94 % against 12-18 %" - which no longer
+    matched the stored data and could not cover lithium, whose grid stops at
+    68 K.  */
+function rcWarm(d){
+  const et = (d.elasticT||{}).rc, x = (d.rc||{}).expansion||{},
+        f = (d.md_recommended||{}).facts||{}, bits = [];
+  if(x.alpha_1e6 != null && x.alpha_1e6 <= 0)
+    bits.push(`thermal expansion comes out NEGATIVE,
+      ${x.alpha_1e6.toFixed(0)}&times;10<sup>&minus;6</sup>/K${
+      x.alpha_exp_1e6 != null ? ` against a measured +${x.alpha_exp_1e6.toFixed(0)}` : ""}`);
+  if(et && et.pts && et.pts.length > 1){
+    /*  Molecular-dynamics points only.  The table's T = 0 row is the fit's
+        static target, and the jump from it to the first finite-temperature
+        point is internal relaxation, not a temperature dependence - which
+        is what had made barium look as if it stiffened.  */
+    const pts = et.pts.filter(p => !p.above_melt && p.T > 0);
+    if(pts.length > 1){
+      const p0 = pts.reduce((a,p) => p.T < a.T ? p : a);
+      const p3 = pts.reduce((a,p) => Math.abs(p.T-300) < Math.abs(a.T-300) ? p : a);
+      if(p3 !== p0 && p3.C11 > p0.C11)
+        bits.push(`C<sub>11</sub> rises &times;${(p3.C11/p0.C11).toFixed(2)} from
+          ${p0.T.toFixed(0)} to ${p3.T.toFixed(0)}&nbsp;K instead of softening,
+          so dC<sub>11</sub>/dT has the wrong SIGN`);
+    }
+  }
+  if(f.e300_rc != null && f.e300_tap != null)
+    bits.push(`the elastic constants near 300&nbsp;K land
+      ${f.e300_rc.toFixed(0)}&nbsp;% off the room-temperature values, against
+      ${f.e300_tap.toFixed(0)}&nbsp;% for the published switched set`);
+  return bits.length ? bits.join("; ") : "see the screens below";
+}
 /*  Why an element has no candidate at all.  It is not that the fit was tried
     and failed - a cutoff has to sit in a GAP between neighbour shells, and
     in two of the three structures there is nowhere to put one.  Shells in
@@ -2320,11 +2358,8 @@ function recutNote(d){
       here.`;
   if(RC_BROKEN.indexOf(el) >= 0){
     return `<p class="plotnote"><strong>${el}: do not use the re-cut at finite
-      temperature.</strong> ${num} And it fails every warm screen: thermal
-      expansion comes out NEGATIVE, &minus;36 to &minus;42&times;10<sup>&minus;6</sup>/K
-      against a measured +80; the 300&nbsp;K elastic constants land 84&ndash;94&nbsp;%
-      off against 12&ndash;18&nbsp;% for the published arm; and
-      dC<sub>11</sub>/dT has the wrong SIGN. Those two are one fact, not two:
+      temperature.</strong> ${num} And it fails the warm screens:
+      ${rcWarm(d)}. The dispersion and the failure are one fact, not two:
       a dispersion at 0&nbsp;K and an elastic constant are both properties of
       the curvature AT the minimum, and this arm has that neighbourhood right
       while the shape of the well away from it is wrong. Static properties
@@ -2336,15 +2371,28 @@ function recutNote(d){
       rules the alkalis out &mdash; check thermal expansion and the 300&nbsp;K
       elastic constants before using it warm.</p>`;
   }
-  const rep = RC_REPAIRED.indexOf(el) >= 0;
-  return `<p class="plotnote"><strong>${el}: the re-cut is usable, and there
-    is no measured reason to prefer it.</strong> It passes every screen${
-    rep?", and it is one of the elements the re-cut modestly REPAIRS warm":""}.
-    ${num} Read that against the arm as a whole: its aggregate advantage is
-    almost entirely sodium, potassium, rubidium and caesium, which cannot be
-    used warm at all. With those out it is 8.3&nbsp;% against 8.9&nbsp;% over
-    eleven elements, better in seven &mdash; a wash. It remains a candidate,
-    not a replacement.</p>`;
+  const mr = d.md_recommended || {}, f = mr.facts || {};
+  if(RCREC(d)){
+    return `<p class="plotnote"><strong>${el}: the re-cut is the RECOMMENDED
+      set for molecular dynamics</strong> &mdash; <code>${el}_recut.ugur</code>
+      in place of <code>${el}_taper.ugur</code>, which still ships. It passes
+      every cold and warm screen${f.isf_rc != null && f.isf_tap != null
+        ? `, and it gets the sign of the intrinsic stacking fault right:
+          ${f.isf_rc.toFixed(0)} mJ&nbsp;m<sup>&minus;2</sup> against
+          ${f.isf_tap.toFixed(0)} for the switched set` : ""}${
+      f.e300_rc != null && f.e300_tap != null
+        ? `; near 300&nbsp;K its elastic constants are
+          ${f.e300_rc.toFixed(1)}&nbsp;% off the room-temperature values
+          against ${f.e300_tap.toFixed(1)}&nbsp;%` : ""}. ${num} Not chosen by
+      hand: <code>recommend_recut.py</code> applies one rule to every element
+      that has a re-cut &mdash; ${mr.rule}. The angular re-cut,
+      <code>${el}_recut.ugur.ang</code>, is not part of the recommendation.</p>`;
+  }
+  return `<p class="plotnote"><strong>${el}: the re-cut is usable, and it is
+    not recommended.</strong> ${mr.why && mr.why.length
+      ? `It misses the rule on ${mr.why.join("; ")}.` : ""} ${num} The
+    published switched set, <code>${el}_taper.ugur</code>, stays the set to
+    use for molecular dynamics.</p>`;
 }
 
 /*  The finite-temperature dispersion, measured rather than computed.
@@ -2581,6 +2629,16 @@ function drawFT(d){
 }
 
 
+/*  Counted from finiteT.json, never typed: these sentences said
+    "twenty-four" and "twelve" for a study that has since grown to 27
+    elements, 15 of them below the floor.  */
+function ftCount(){
+  const rows = Object.values(FT.rows||{});
+  return {rows: rows.length, out: Object.keys(FT.out||{}).length,
+          all: rows.length + Object.keys(FT.out||{}).length,
+          flat: rows.filter(r => r.v === "flat").length};
+}
+
 function finiteTBlock(d){
   const el = d.sym, nm = d.name,
         r = (FT.rows||{})[el], o = (FT.out||{})[el];
@@ -2590,12 +2648,12 @@ function finiteTBlock(d){
       <p class="plotnote"><strong>${nm} ${(o.kind==="pending"||o.kind==="gamma")
         ?"is not in this study yet":"is outside this study"}</strong> &mdash;
       ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. ${(o.kind==="pending"||o.kind==="gamma")
-      ?`Twenty-four of the thirty-eight elements carry a finite-temperature
-      measurement so far; this one is waiting on its run.`
-      :`Twenty-four of the thirty-eight
+      ?`${ftCount().rows} of the ${ftCount().all} elements carry a
+      finite-temperature measurement so far; this one is waiting on its run.`
+      :`${ftCount().rows} of the ${ftCount().all}
       elements carry a finite-temperature measurement; this is one of the
-      fourteen that do not, and that is a fact about the reference data rather
-      than about the potential.`}</p>`;
+      ${ftCount().out} that do not, and that is a fact about the reference data
+      rather than about the potential.`}</p>`;
   }
   const [word, cls] = FT_V[r.v];
   const cv = (FT.curve||{})[el], hasCurve = !!cv && !!(((d.tap||{}).ld||{}).std);
@@ -2645,7 +2703,7 @@ function finiteTBlock(d){
         <td>${r.d>0?"+":""}${r.d.toFixed(1)} &mdash; <strong>${word}</strong></td></tr>
   </tbody></table>
   <p class="plotnote">Per cent of the highest measured frequency, over
-    ${r.n} points. ${r.mesh} cells, ${(r.steps/1e6).toFixed(1)} million steps
+    ${r.n} point${r.n===1?"":"s"}. ${r.mesh} cells, ${(r.steps/1e6).toFixed(1)} million steps
     of 2 fs under a barostat, so the volume is the potential's own at that
     temperature and not one imposed on it.
     <strong>This is the switched record</strong>
@@ -2653,11 +2711,16 @@ function finiteTBlock(d){
     selector above calls MAU &mdash; that is the hard-truncated root record.
     The switched arm is the only one that can be run at temperature at all:
     a hard cut leaves the pair energy discontinuous, and copper drifts
-    350 meV per atom per nanosecond under it.
+    350 meV per atom per nanosecond under it.${r.note?`
+    <br>${r.note}`:""}${RCREC(d)?`
+    <br><strong>For ${el} the recommended set for molecular dynamics is now
+    the re-cut</strong>, <code>${el}_recut.ugur</code>, and this study has not
+    run it: what is measured here is the switched file that still ships
+    beside it.`:""}
     ${r.v==="flat"?`<br>The difference here is smaller than what the run can
       resolve, so it is <strong>not a result</strong> in either direction.
-      Twelve of the twenty-four elements are in that position; the floor is
-      printed so that the reader does not have to guess which.`:""}</p>`;
+      ${ftCount().flat} of the ${ftCount().rows} elements are in that position;
+      the floor is printed so that the reader does not have to guess which.`:""}</p>`;
 }
 
 
@@ -2677,22 +2740,30 @@ function lammpsBlock(d){
      "hard truncation &mdash; static properties and lattice dynamics, "
      + "<strong>not molecular dynamics</strong>"],
     ["tap",  d.tap,    d.sym+"_taper.ugur",       "ugur",
-     "switched &mdash; <strong>the only sets that can run MD</strong>; "
-     + "about 3 points worse on the measured dispersion"],
+     (RCREC(d)
+       ? "switched &mdash; runs MD, but for " + d.sym + " the re-cut below is "
+         + "<strong>recommended instead</strong>"
+       : "switched &mdash; <strong>the set to use for MD</strong>; "
+         + "about 3 points worse on the measured dispersion")],
     ["ug",   d.ug,     d.sym+".ugur.ang",         "ugur/ang",
      "hard + angular &mdash; static properties and lattice dynamics, "
      + "<strong>not molecular dynamics</strong>"],
     ["tap_ug", d.tap_ug, d.sym+"_taper.ugur.ang", "ugur/ang",
      "switched + angular &mdash; <strong>MD</strong>; about 3 points worse "
      + "on the measured dispersion"],
-    /*  The re-cut candidates ship too, under their own stem, because a reader
-        who wants to reproduce the comparison on this page needs the file the
-        comparison was made with.  They are NOT part of the published library,
-        and the row says so.  */
+    /*  The re-cut ships under its own stem.  Where recommend_recut.py finds
+        it passes every cold and warm screen it is the RECOMMENDED set for
+        molecular dynamics; elsewhere it is a candidate, shipped so the
+        comparison on this page can be checked with the file it was made
+        with.  The angular re-cut is never the recommendation.  */
     ["rc",    d.rc,    d.sym+"_recut.ugur",     "ugur",
-     "re-cut candidate, not published" + (armBad(d.rc)?" — REJECTED":"")],
+     (RCREC(d)
+       ? "re-cut, switched &mdash; <strong>recommended for MD</strong> for "
+         + d.sym
+       : "re-cut candidate, not recommended"
+         + (armBad(d.rc)?" — REJECTED":""))],
     ["rc_ug", d.rc_ug, d.sym+"_recut.ugur.ang", "ugur/ang",
-     "re-cut + angular, not published"
+     "re-cut + angular, candidate"
      + (armBad(d.rc_ug)?" — REJECTED":"")],
     /*  The two other candidate sets ship for the same reason the re-cut ones
         do: a reader who wants to check a comparison made on this page needs
@@ -3099,10 +3170,13 @@ function render(){
   them differs: for this element D is ${fmt(d.D,3)} eV under MAU against
   ${fmt(P.D,3)} here.${isAng?` Setting &lambda;<sub>2</sub> =
   &lambda;<sub>4</sub> = 0 recovers the MAU <em>form</em> exactly, but not
-  these values.`:""}${PAR_SET.startsWith("rc")?` The re-cut candidates are
-  <strong>not part of the published library</strong>: they are the shell-gap
-  re-cut, which passes every cold screen and is a per-element decision at
-  finite temperature.`:""}</p>`:""}
+  these values.`:""}${PAR_SET==="rc"&&RCREC(d)?` This is the shell-gap re-cut,
+  and for ${d.name} it is the <strong>recommended set for molecular
+  dynamics</strong>: it passes every cold and warm screen the rule asks for.`
+  :PAR_SET.startsWith("rc")?` The shell-gap re-cut is <strong>not the
+  recommended set</strong> ${PAR_SET==="rc_ug"?"in its angular form":"for this element"}:
+  it passes every cold screen, and whether it can be used warm is a
+  per-element decision.`:""}</p>`:""}
   ${dynSel.stable===false?`<div class="warn">
     <strong>Dynamically unstable.</strong> ${(dynSel.imag_frac*100).toFixed(1)}% of
     modes on the ${String(dynSel.nq).split("+").map(n=>n+"&sup3;").join(" and ")}

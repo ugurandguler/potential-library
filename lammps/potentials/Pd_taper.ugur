@@ -1,4 +1,4 @@
-# Pd - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Pd - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Pd the re-cut Pd_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Pd_taper.ugur Pd

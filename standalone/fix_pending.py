@@ -15,6 +15,13 @@ parameter of the potential and would always look present.  elasticT lives at
 lib[el]["elasticT"][arm] rather than on the arm.  Both are handled here rather
 than by matching names to keys.
 
+NOT APPLICABLE is not outstanding.  The generalized stacking fault and the
+intrinsic stacking fault are fcc/hcp quantities: no bcc record in the library
+has a `stacking` block, the published tapered arm included.  So for the eight
+bcc candidates (Ba Cs K Li Mo Na Rb W) `gamma` and `stacking` could never be
+found, and the page kept saying those runs had not been done - for runs that
+are not defined for that lattice.  They are dropped for bcc, not marked done.
+
 The key is REMOVED when nothing is outstanding, so the viewer's own
 `P.lammps_pending ? ... : ""` says nothing at all.
 
@@ -38,6 +45,9 @@ WHERE = {
 }
 
 
+NOT_FOR_BCC = ("gamma", "stacking")
+
+
 def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
@@ -50,8 +60,9 @@ def main():
             r = v.get(arm)
             if not isinstance(r, dict) or not r.get("lammps_pending"):
                 continue
+            na = NOT_FOR_BCC if v.get("struct") == "bcc" else ()
             still = [k for k in r["lammps_pending"]
-                     if k in WHERE and not WHERE[k](v, arm, r)]
+                     if k in WHERE and k not in na and not WHERE[k](v, arm, r)]
             if still:
                 r["lammps_pending"] = still
                 left.setdefault(", ".join(still), []).append(f"{el}/{arm}")

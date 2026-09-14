@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Yb_recut.ugur Yb
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  Against measured neutron dispersion this arm reaches 7.9 % over the 16 elements that have both a candidate record and a neutron curve and were not rejected outright, against 11.2 % for the published switched arm on the same 16.  That gap is almost all alkali: sodium, potassium, rubidium and caesium are where the arm gains most and are also what it breaks warm.  Leave them out and it is 8.3 % against 8.9 % over 11 elements, better in 7 - a wash.  There is no measured reason to prefer this arm for its dispersion
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: C11 stiffens from 55 K to 300 K (x1.055).  For MD on this element use Yb_taper.ugur
 # MD: structure screened - holds its shape at 600 K (301 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
@@ -13,9 +13,9 @@
 #
 # Measured dispersion: 8.5 % against 8.6 % for the published switched
 # arm - the same.
-# On the 41 accepted candidate records the re-cut is close to break-even
-# overall: thermal expansion 30.7 % -> 25.6 % median, 10 better and 10
-# worse; 300 K elastic constants 3.4 % -> 2.7 %, 7 better and 3 worse.
+# Over the 21 accepted re-cut records: thermal expansion error 30.7 % -> 25.6 %
+# median, 10 better and 10 worse; elastic constants near 300 K against the
+# room-temperature values 5.2 % -> 3.4 % median, 11 better and 10 worse.
 #
 # FINITE TEMPERATURE: this candidate passes the screens above and fails
 # below room temperature - C11 RISES 8 % between 0 K and 658 K instead of softening.

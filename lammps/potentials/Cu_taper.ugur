@@ -1,4 +1,4 @@
-# Cu - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Cu - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Cu the re-cut Cu_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Cu_taper.ugur Cu

@@ -1,4 +1,4 @@
-# Rh - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Rh - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Rh the re-cut Rh_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Rh_taper.ugur Rh

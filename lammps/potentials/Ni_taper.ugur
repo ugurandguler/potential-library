@@ -1,4 +1,4 @@
-# Ni - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Ni - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Ni the re-cut Ni_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Ni_taper.ugur Ni

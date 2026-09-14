@@ -21,8 +21,9 @@ leaves the pair energy discontinuous and copper drifts 350 meV/atom/ns.
 THE FLOOR IS THE POINT.  Every q is scored twice, at q and at a symmetry
 image of q, and the spread between them is what the run cannot resolve.  A
 difference between columns smaller than that has not been measured, so the
-verdict is computed FROM the floor rather than left to the reader's eye: 13
-of the 24 differences are below it.
+verdict is computed FROM the floor rather than left to the reader's eye: 15
+of the 27 differences are below it (2026-09-14, after Ir, Ru and Re).  The page
+counts them from this file rather than quoting a number.
 
     python make_finiteT.py        # -> finiteT.json
 """
@@ -44,11 +45,11 @@ OUT = {
     "screen": ("Li",),
     "model": ("Co", "Cr", "Mo", "Rh", "Sr", "V"),
     "none": (),
-    #  entered 2026-09-13 - Ir and Ru read from published figures, Re from a
-    #  Raman table - and runs submitted, so these wait on a RESULT, not on a
-    #  reference
-    "pending": ("Ir", "Ru"),
-    "gamma": ("Re",),
+    #  Ir, Ru and Re were "pending" and "gamma" from 2026-09-13 until their
+    #  runs landed on 2026-09-14; they are rows now.  The two kinds stay so a
+    #  later entry can use them.
+    "pending": (),
+    "gamma": (),
 }
 
 
@@ -107,6 +108,10 @@ def main():
             "d": round(d, 1),
             "v": "flat" if abs(d) < fl else ("gain" if d > 0 else "loss"),
         }
+        #  a row scored differently from the rest says how, in its own words
+        #  (rhenium: one Gamma frequency, floored by its degenerate split)
+        if m.get("note"):
+            rows[el]["note"] = m["note"]
 
     why = {}
     for kind, group in OUT.items():

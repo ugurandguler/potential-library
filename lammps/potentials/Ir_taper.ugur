@@ -1,4 +1,4 @@
-# Ir - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Ir - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Ir the re-cut Ir_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Ir_taper.ugur Ir

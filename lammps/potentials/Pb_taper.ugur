@@ -1,4 +1,4 @@
-# Pb - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Pb - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Pb the re-cut Pb_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Pb_taper.ugur Pb

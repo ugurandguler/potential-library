@@ -74,13 +74,15 @@ SETS = (
      "hard truncation, with the angular factor"),
     ("ug_taper", "tap_ug", "ugur/ang", "_taper.ugur.ang",
      "switched, with the angular factor"),
-    #  The shell-gap re-cut candidates.  NOT part of the shipped library and
-    #  named so they cannot be mistaken for it: same pair styles and the same
-    #  0.85 taper as the two switched sets above, but fitted at a different
-    #  cutoff.  Before using either one, read the verdict column on the page -
-    #  they repair molybdenum and tungsten and they break the alkalis, whose
-    #  elastic constants come out three times too stiff at 300 K and whose
-    #  thermal expansion comes out negative.
+    #  The shell-gap re-cut.  Same pair styles and the same 0.85 taper as the
+    #  two switched sets above, fitted at a different cutoff.  Where
+    #  standalone/recommend_recut.py finds it passes every cold and warm
+    #  screen, <El>_recut.ugur is the RECOMMENDED set for molecular dynamics
+    #  and the description below is overridden for that element.  It breaks
+    #  lithium, sodium, potassium, rubidium and caesium once warm (negative
+    #  expansion, C11 stiffening), and the molybdenum and tungsten records
+    #  failed selection outright - an earlier version of this comment said
+    #  the re-cut repaired those two.
     ("rc", "rc", "ugur", "_recut.ugur",
      "CANDIDATE, re-cut, switched"),
     ("rc_ug", "rc_ug", "ugur/ang", "_recut.ugur.ang",
@@ -191,6 +193,18 @@ def main():
             vals = [rec[k] for k in KEYS] + [taper,
                                              rec.get("lam2", 0.0),
                                              rec.get("lam4", 0.0)]
+            #  The first header line names what the file is.  For an element
+            #  whose re-cut is recommended, "CANDIDATE" on that line would
+            #  contradict the paragraph below it, and the switched file must
+            #  say where MD users should go instead.
+            what_el = what
+            if (lib[el].get("md_recommended") or {}).get("set") == "rc":
+                if name == "rc":
+                    what_el = ("RECOMMENDED for molecular dynamics, re-cut, "
+                               "switched")
+                elif name == "mau_taper":
+                    what_el = (what + " - for MD on " + el + " the re-cut "
+                               + el + "_recut.ugur is recommended instead")
             #  What each truncation is for, with the measurement behind it.
             #
             #  The hard sets reproduce the MEASURED dispersion better - 9.6 %
@@ -236,34 +250,40 @@ def main():
                     "the page carries both errors side by side.  Read them "
                     "before using this")
             elif name in ("rc", "rc_ug"):
-                #  A different cutoff, so the 12.7 % measured on the shipped
-                #  switched sets is not theirs.  Measured on the 17 elements
-                #  that have both a re-cut record and a neutron curve, the
-                #  re-cut arm reaches 8.8 % against 11.6 % for the shipped
-                #  switched arm on the same 18, and is closer in 14 of them.
-                #
-                #  That is not a recommendation, and the reason is the whole
-                #  point of these files.  The biggest gains are the alkalis -
-                #  lithium 25.2 % to 5.8, caesium 16.7 to 3.9, rubidium 13.5
-                #  to 5.4 - and those are exactly the elements the re-cut
-                #  BREAKS once the crystal is warm.  Both facts have the same
-                #  cause: a dispersion at 0 K and an elastic constant are
-                #  properties of the curvature AT the minimum, and the re-cut
-                #  gets that neighbourhood right while getting the shape of
-                #  the well away from it wrong.
-                trunc = (
-                    f"switched from {taper:g} of each cutoff to the cutoff, "
-                    "quintic, C2 - energy is conserved in MD.  CANDIDATE, not "
-                    "part of the published library.  Against measured neutron "
-                    "dispersion this arm reaches 7.9 % over the 16 elements "
-                    "that have both a candidate record and a neutron curve "
-                    "and were not rejected outright, against 11.2 % for the "
-                    "published switched arm on the same 16.  That gap is "
-                    "almost all alkali: sodium, potassium, rubidium and "
-                    "caesium are where the arm gains most and are also what "
-                    "it breaks warm.  Leave them out and it is 8.3 % against "
-                    "8.9 % over 11 elements, better in 7 - a wash.  There is "
-                    "no measured reason to prefer this arm for its dispersion")
+                #  A different cutoff, so the 12.5 % measured on the published
+                #  switched sets is not theirs.  curve_mae.py, rerun
+                #  2026-09-13: over the 17 elements that have a re-cut record
+                #  and a measured dispersion and were not rejected, the re-cut
+                #  reaches 8.3 % against 11.2 % for the published switched
+                #  set.  Most of that gap is lithium, sodium, potassium,
+                #  rubidium and caesium, the elements it BREAKS warm; without
+                #  them it is 8.6 % against 9.2 % over 12, better by more
+                #  than half a point in 5.  So the dispersion is not the
+                #  reason to use it.  What recommend_recut.py weighs is the
+                #  warm screens, per element, and the file says the result.
+                mr = lib[el].get("md_recommended") or {}
+                base = (f"switched from {taper:g} of each cutoff to the "
+                        "cutoff, quintic, C2 - energy is conserved in MD.  ")
+                if name == "rc" and mr.get("set") == "rc":
+                    trunc = base + (
+                        f"RECOMMENDED for molecular dynamics on {el}, in place"
+                        f" of {el}_taper.ugur, which still ships.  It passes "
+                        "every screen of the rule - " + mr.get("rule", "")
+                        + " - which standalone/recommend_recut.py applies to "
+                        "every element that has a re-cut, not by hand")
+                elif name == "rc":
+                    why = "; ".join(mr.get("why") or [])
+                    trunc = base + (
+                        "CANDIDATE, not the recommended set"
+                        + (f": {why}" if why else "")
+                        + ".  For MD on this element use "
+                        f"{el}_taper.ugur")
+                else:
+                    trunc = base + (
+                        "CANDIDATE: the angular re-cut is never the "
+                        "recommended set.  Its dispersion advantage is mostly "
+                        "the alkalis, which it breaks warm; read the notes "
+                        "below before using it")
             else:
                 trunc = (
                     f"switched from {taper:g} of each cutoff to the cutoff, "
@@ -441,13 +461,25 @@ def main():
                              " that neighbourhood right" + nl
                              + "# while the shape of the well away from it is"
                              " wrong." + nl)
+                #  Recomputed 2026-09-13 from library.json, per arm.  The
+                #  sentence this replaces put both arms under "41 records"
+                #  and quoted 300 K elastic constants 3.4 -> 2.7 %, 7 better
+                #  and 3 worse, which no slice of the current data
+                #  reproduces; the expansion figures did, for `rc` alone.
+                elif name == "rc":
+                    warm += ("# Over the 21 accepted re-cut records: thermal"
+                             " expansion error 30.7 % -> 25.6 %" + nl
+                             + "# median, 10 better and 10 worse; elastic"
+                             " constants near 300 K against the" + nl
+                             + "# room-temperature values 5.2 % -> 3.4 %"
+                             " median, 11 better and 10 worse." + nl)
                 else:
-                    warm += ("# On the 41 accepted candidate records the"
-                             " re-cut is close to break-even" + nl
-                             + "# overall: thermal expansion 30.7 % -> 25.6 %"
-                             " median, 10 better and 10" + nl
-                             + "# worse; 300 K elastic constants 3.4 % ->"
-                             " 2.7 %, 7 better and 3 worse." + nl)
+                    warm += ("# Over the 20 accepted angular re-cut records:"
+                             " thermal expansion error" + nl
+                             + "# 35.0 % -> 34.7 % median, 11 better and 8"
+                             " worse; elastic constants near 300 K" + nl
+                             + "# against the room-temperature values 3.7 %"
+                             " -> 3.4 % median, 9 better and 11 worse." + nl)
                 warm = warm.rstrip(nl)
             warn = warn + (nl + warm if warm else "")
             #  The 600 K screen asks whether the crystal survives, which is
@@ -524,7 +556,7 @@ def main():
                           " lattice constant.  Nothing else.")
             open(os.path.join(OUT, el + suffix), "w").write(HEADER.format(
                 fitted=fitted,
-                el=el, fn=el + suffix, style=style, what=what, trunc=trunc,
+                el=el, fn=el + suffix, style=style, what=what_el, trunc=trunc,
                 warn=warn,
                 vals=" ".join(f"{v:.17g}" for v in vals)))
             n += 1
@@ -533,6 +565,9 @@ def main():
         print(f"{name:12s}{n:9d}{len(skipped):9d}   {what}")
         if skipped:
             print(f"{'':12s}skipped: {' '.join(skipped)}")
+    rec_els = sorted(e for e in lib if isinstance(lib[e], dict)
+                     and (lib[e].get("md_recommended") or {}).get("set")
+                     == "rc")
     #  a README beside them, because a directory of bare numbers is not a
     #  distribution
     open(os.path.join(OUT, "README"), "w").write(f"""\
@@ -544,10 +579,17 @@ Ugur interatomic potential - LAMMPS parameter files
     <El>.ugur.ang          {written['ug']} elements, pair_style ugur/ang
     <El>_taper.ugur.ang    {written['ug_taper']} elements, pair_style ugur/ang
 
-and the CANDIDATE sets, which are not part of the published library:
+and the re-cut sets.  <El>_recut.ugur is the RECOMMENDED set for molecular
+dynamics on {len(rec_els)} elements and a candidate for the rest;
+<El>_recut.ugur.ang is always a candidate.  Recommended for:
+
+    {' '.join(rec_els)}
 
     <El>_recut.ugur        {written['rc']} elements, pair_style ugur
     <El>_recut.ugur.ang    {written['rc_ug']} elements, pair_style ugur/ang
+
+and the CANDIDATE sets, which are not part of the published library:
+
     <El>_disp.ugur         {written['disp']} elements, pair_style ugur
     <El>_nudge_taper.ugur  {written['nudge']} elements, pair_style ugur
     <El>_force_taper.ugur  {written['force']} elements, pair_style ugur
@@ -557,10 +599,12 @@ reader who wants to check that comparison needs the files it was made with.
 Every one of them carries, in its own header, what it is and what is known
 against it.  Read that before using one.  In one line each:
 
-  _recut        a different pair cutoff.  Repairs molybdenum and tungsten and
-                BREAKS the alkalis once the crystal is warm - their elastic
-                constants come out three times too stiff at 300 K and their
-                thermal expansion negative.
+  _recut        a different pair cutoff.  Where it is recommended it passes
+                every cold and warm screen and gets the sign of the
+                intrinsic stacking fault right, which the _taper sets get
+                wrong.  It BREAKS lithium, sodium, potassium, rubidium and
+                caesium once the crystal is warm, and its molybdenum and
+                tungsten records failed selection.
   _disp         the same targets and the same elastic residual as the plain
                 set, chosen among the solutions that residual cannot tell
                 apart by which describes the measured phonon dispersion
@@ -585,9 +629,12 @@ it is in its own header.
 
 Which one to use
 ----------------
-For molecular dynamics, use a *_taper set.  The hard-truncated potentials do
-not conserve energy: phi2 does not vanish at the cutoff, so a neighbour
-crossing it changes the energy in one step.  Measured, that is a drift of 5 to
+For molecular dynamics, use a *_taper set - or, for the {len(rec_els)} elements
+named above, <El>_recut.ugur, which is recommended there instead.
+
+The hard-truncated potentials do not conserve energy: phi2 does not vanish at
+the cutoff, so a neighbour crossing it changes the energy in one step.
+Measured, that is a drift of 5 to
 7256 meV/atom/ps against 0.03 to 0.28 for the switched sets, and on three of
 the hexagonal metals the crystal does not merely drift but comes apart.
 

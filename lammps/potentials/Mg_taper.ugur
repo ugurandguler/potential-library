@@ -1,4 +1,4 @@
-# Mg - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Mg - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Mg the re-cut Mg_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Mg_taper.ugur Mg

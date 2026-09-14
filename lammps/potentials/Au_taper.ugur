@@ -1,4 +1,4 @@
-# Au - Ugur interatomic potential, cutoff switched off over its outer 15 %
+# Au - Ugur interatomic potential, cutoff switched off over its outer 15 % - for MD on Au the re-cut Au_recut.ugur is recommended instead
 #
 # pair_style ugur
 # pair_coeff * * Au_taper.ugur Au
