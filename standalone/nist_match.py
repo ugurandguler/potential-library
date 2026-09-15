@@ -44,6 +44,7 @@ potential file for someone else's broken relaxation.
     import nist_match; nist_match.confirmed()
 """
 import json
+import statistics
 import os
 import sys
 
@@ -184,7 +185,7 @@ def main():
           + (f" ({', '.join(r['el'] for r in nb)})" if nb else ""))
     if ok:
         w = sorted(r["worst_pct"] for r in ok)
-        print(f"worst deviation among the confirmed: median {w[len(w)//2]:.3f} %, "
+        print(f"worst deviation among the confirmed: median {statistics.median(w):.3f} %, "
               f"en fazla %{w[-1]:.3f}")
     out = os.path.join(HERE, "nist_match.json")
     json.dump({r["el"] + "|" + r["file"]: r for r in rows},

@@ -34,7 +34,7 @@ authors:
   - family-names: "Güler"
     given-names: "Emre"
     affiliation: "Ankara Hacı Bayram Veli University"
-version: "1.4.1"
+version: "1.4.2"
 date-released: "2026-09-15"
 license: GPL-2.0-only
 repository-code: "https://github.com/ugurandguler/potential-library"

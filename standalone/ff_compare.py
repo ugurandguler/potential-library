@@ -23,6 +23,7 @@ to one says nothing about a seven-parameter analytic form.
     python ff_compare.py Cu Fe
 """
 import json
+import statistics
 import os
 import sys
 
@@ -46,7 +47,7 @@ def main():
             continue
         rms = sorted(r["rms"] for r in rows)
         n = len(rms)
-        best, med = rms[0], rms[n // 2]
+        best, med = rms[0], statistics.median(rms)
         v = lib[el]
         hard = v["rms"]
         tap = (v.get("tap") or {}).get("rms")

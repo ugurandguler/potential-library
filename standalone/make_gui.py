@@ -3438,12 +3438,10 @@ function render(){
       search budget, moves niobium only 20.4 &rarr; 18.3 &rarr; 16.8 %, where
       the smooth switch reaches 0.00.
       <br><br>The switch is not a free improvement and is not what this library
-      ships. Over all 38 elements the median error moves the wrong way,
-      6.11 &rarr; 6.26 %, and on the hcp metals it moves hard, 8.22 to 20.10;
-      the alkalis lose heavily too, 0.00 to 13.02. Read the overall median as
-      a direction and not as a magnitude: with fcc at 0.00 and hcp above 20,
-      the middle of thirty-eight sits on a boundary and one element crossing
-      it moves the figure more than the physics does. Cadmium and zinc, which fail on axial anisotropy rather
+      ships. Over all 38 elements the median error does not move,
+      5.83 &rarr; 5.83 %, and that is a trade rather than no effect: the bcc
+      metals gain, 11.45 to 5.41, while the hcp metals lose hard, 7.86 to
+      19.81, and the alkalis lose too, 0.00 to 13.02. Cadmium and zinc, which fail on axial anisotropy rather
       than on C<sub>44</sub>/C&prime;, are not rescued either. What it removes
       is this one limitation.
       ${d.tap_ug?`<br><br><strong>And the angular factor is still worth
@@ -4298,7 +4296,7 @@ function render(){
           " goes"} through the identical barostat and land${b.length>1?"":"s"}
           at ${Math.min(...b).toFixed(2)}&ndash;${Math.max(...b).toFixed(2)} of
           experiment; across the library their median is 0.96 against our
-          0.69.` : "";
+          0.68.` : "";
     if(a<0) return `<p class="note"><strong style="color:var(--bad)">This
       record contracts on heating.</strong> A negative expansion coefficient
       for a simple metal is not a small error, and it is not a subtlety of the
@@ -4308,7 +4306,7 @@ function render(){
       second derivative was fitted, so nothing constrains it &mdash; getting
       the curvature right at one volume says nothing about how it changes with
       volume.</p>`;
-    return `<p class="note">The library sits at a median 0.69 of the measured
+    return `<p class="note">The library sits at a median 0.68 of the measured
       coefficient, systematically low.${scale} That is a milder failure than
       the coordination tests above and it has a different cause: the expansion
       is the third derivative of the same energy curve whose second derivative

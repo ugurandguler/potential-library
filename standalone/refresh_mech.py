@@ -23,6 +23,7 @@ constant, which is what `build_library.py` and `add_mech_recut.py` both used.
     python refresh_mech.py [--dry]
 """
 import json
+import statistics
 import os
 import sys
 
@@ -115,7 +116,7 @@ def main():
               % ", ".join("%s/%s %+.1f%%" % (e, t, 100 * d)
                           for d, e, t in moved[-4:]))
         print("  median change: %+.2f%%"
-              % (100 * moved[len(moved) // 2][0]))
+              % (100 * statistics.median(d for d, _, _ in moved)))
 
     #  and the point of the exercise: against the measured values
     rat = []

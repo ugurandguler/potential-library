@@ -28,6 +28,7 @@ the wrong gamma is two errors cancelling.  A metal sits between about 1 and 3.
     python add_expansion.py --dry
 """
 import json
+import statistics
 import os
 import sys
 
@@ -184,7 +185,7 @@ def main():
         if not rows:
             return None
         r = sorted(x[0] for x in rows)
-        med = r[len(r) // 2]
+        med = statistics.median(r)
         neg = [x for x in rows if x[0] < 0]
         lo = [x for x in rows if 0 <= x[0] < 0.75]
         hi = [x for x in rows if x[0] > 1.25]
@@ -225,7 +226,7 @@ def main():
                 if isinstance(v, dict) and v.get("gruneisen") is not None)
     if gs:
         odd = [g for g in gs if not 0.5 < g < 4.0]
-        print(f"\nGruneisen: median {gs[len(gs)//2]:.2f}, "
+        print(f"\nGruneisen: median {statistics.median(gs):.2f}, "
               f"range {gs[0]:.2f}..{gs[-1]:.2f}; "
               f"fiziksel araligin disinda {len(odd)}/{len(gs)}")
 

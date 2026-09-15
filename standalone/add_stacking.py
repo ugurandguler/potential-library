@@ -37,6 +37,7 @@ LAMMPS ships under that name is not the one NIST hosts.
     python add_stacking.py --dry
 """
 import json
+import statistics
 import math
 import os
 import sys
@@ -198,14 +199,14 @@ def main():
         rat = sorted(m / p for p, m, _ in preds if p)
         print(f"\nPREDICTION from the ground-state difference ({len(preds)} records):")
         print(f"  isaret uyusmasi {sign}/{len(preds)}")
-        print(f"  measured/predicted: median {rat[len(rat)//2]:.2f}, "
+        print(f"  measured/predicted: median {statistics.median(rat):.2f}, "
               f"range {rat[0]:.2f}-{rat[-1]:.2f}")
         #  Carry the library-wide figures INTO each record so the page states
         #  them from data.  The surface section once carried a hand-typed
         #  "0.8-1.1" that had drifted to a true 0.48-1.97, and it flattered
         #  our own comparison for weeks before anybody re-derived it.
         summ = {"n": len(preds), "sign_ok": sign,
-                "ratio_median": rat[len(rat) // 2],
+                "ratio_median": statistics.median(rat),
                 "ratio_lo": rat[0], "ratio_hi": rat[-1]}
         for _, _, key in preds:
             el, tag = key.split("|", 1)
@@ -215,7 +216,7 @@ def main():
         checks.sort()
         d = [c[0] for c in checks]
         print(f"\nNIST comparison ({len(checks)} confirmed files):")
-        print(f"  difference: median {d[len(d)//2]:.2f}, largest {d[-1]:.2f} mJ/m2")
+        print(f"  difference: median {statistics.median(d):.2f}, largest {d[-1]:.2f} mJ/m2")
         for dd, el, fn, o, ni in checks[-3:]:
             print(f"   {el:3s} {fn[:30]:30s} ours {o:8.2f}  NIST {ni:8.2f}")
     else:

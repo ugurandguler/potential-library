@@ -28,6 +28,7 @@ Whatever the numbers below say, they are not saying it about the method.
     python add_surface.py --dry
 """
 import json
+import statistics
 import os
 import sys
 
@@ -84,9 +85,9 @@ def summarise(struct, gam, ref):
     rat = {f: fs[f] / rf[f] for f in fs if rf.get(f)}
     if rat:
         out["ratio_dft"] = rat
-        out["ratio_dft_median"] = sorted(rat.values())[len(rat) // 2]
+        out["ratio_dft_median"] = statistics.median(rat.values())
     if (ref or {}).get("tyson"):
-        out["ratio_exp_median"] = (sorted(fs.values())[len(fs) // 2]
+        out["ratio_exp_median"] = (statistics.median(fs.values())
                                    / ref["tyson"])
     if rf:
         ro = sorted(rf, key=rf.get)
@@ -217,7 +218,7 @@ def main():
     rr = [s["ratio_dft_median"] for s in ours if s.get("ratio_dft_median")]
     if rr:
         rr.sort()
-        print(f"ratio to DFT, our records: median {rr[len(rr)//2]:.2f}, "
+        print(f"ratio to DFT, our records: median {statistics.median(rr):.2f}, "
               f"range {rr[0]:.2f}-{rr[-1]:.2f}, {len(rr)} records")
     bs = [s for el in lib for s in (lib[el].get("baseline_surface") or {}).values()]
     rb = [s["ratio_dft_median"] for s in bs if s.get("ratio_dft_median")]
@@ -225,7 +226,7 @@ def main():
         rb.sort()
         nb_ok = sum(1 for s in bs if s.get("order_ok"))
         nb_tie = sum(1 for s in bs if s.get("order_ok") is None)
-        print(f"ratio to DFT, published baselines: median {rb[len(rb)//2]:.2f}, "
+        print(f"ratio to DFT, published baselines: median {statistics.median(rb):.2f}, "
               f"range {rb[0]:.2f}-{rb[-1]:.2f}, {len(rb)} records; "
               f"siralamasi dogru olan {nb_ok}/{len(bs)}"
               f" ({nb_tie} ayirt edilemez)")

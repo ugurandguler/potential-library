@@ -49,11 +49,11 @@ identical code:
 
 | quantity | how it does |
 | --- | --- |
-| elastic constants C_ij | median RMS 1.54 % (UG), 6.11 % (MAU) |
+| elastic constants C_ij | median RMS 1.45 % (UG), 5.83 % (MAU) |
 | vacancy formation energy | **2.25× the published median** for the switched arms over the 21 elements that have a published value, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.06 MAU, 1.54 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
-| thermal expansion | 31 % low; 9 records contract on heating |
+| thermal expansion | 32 % low; 9 records contract on heating |
 
 **So: do not use these parameters for defect energies, surface energies,
 diffusion barriers or melting.** Use them for elastic and vibrational

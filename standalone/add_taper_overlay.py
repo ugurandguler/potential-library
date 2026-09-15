@@ -18,8 +18,11 @@ separates the two possible explanations: shortening the hard cutoff instead
 while the switch reaches 0.00.  So it is the discontinuity, not the range.
 
 This is not a free improvement and the page should not read like one.  The
-median over all 38 goes the wrong way, 6.11 -> 6.26 per cent: the hcp metals
-lose heavily (7.86 -> 19.81) and so do the alkalis.  Cadmium and zinc, which
+median over all 38 does not move, 5.83 -> 5.83 per cent, and that is a trade
+rather than no effect: the bcc metals gain (11.45 -> 5.41) while the hcp metals
+lose heavily (7.86 -> 19.81) and so do the alkalis (0.00 -> 13.02).  Take a
+median of an even count as the mean of the middle two; the upper one of them
+had put 6.11 -> 6.26 here and in the README for a week.  Cadmium and zinc, which
 fail on axial anisotropy rather than on C44/C', are not rescued either.  The
 switch removes one specific limitation and costs accuracy elsewhere.
 
