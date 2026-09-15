@@ -43,13 +43,17 @@ import curve_mae as CM                      # noqa: E402
 OUT = {
     "cold": ("Al", "Be", "K", "Pt"),
     "screen": ("Li",),
-    "model": ("Co", "Cr", "Mo", "Rh", "Sr", "V"),
+    "model": ("Co", "Cr", "Mo", "Rh", "Sr"),
     "none": (),
     #  Ir, Ru and Re were "pending" and "gamma" from 2026-09-13 until their
     #  runs landed on 2026-09-14; they are rows now.  The two kinds stay so a
     #  later entry can use them.
     "pending": (),
     "gamma": (),
+    #  vanadium, 2026-09-15: a MEASURED dispersion (Bosak et al. 2008, x-ray)
+    #  replaced the Colella model as its reference, and no fix phonon run has
+    #  been made against it - not waiting on a job, simply not run
+    "unrun": ("V",),
 }
 
 

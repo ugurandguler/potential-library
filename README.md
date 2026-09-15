@@ -213,11 +213,12 @@ configurations are both plausible, and this measurement does not separate
 them. It also gives no floor: four body-centred elements suggested a common
 limit near 9–10 per cent and copper's 4.1 removed it.
 
-Vanadium's reference is a Born–von Kármán model rather than neutron data,
-because none exists or will — vanadium scatters neutrons almost entirely
-incoherently, which is exactly what makes it the standard neutron calibrant.
-That model is nevertheless gated on the elastic constants it was *not* fitted
-to. Tungsten has twelve measured points and molybdenum fifteen against
+Vanadium's row in this comparison is scored against a Born–von Kármán model
+(Colella and Batterman 1970), gated on the elastic constants it was *not*
+fitted to. Vanadium scatters neutrons almost entirely incoherently, which is
+what makes it the standard neutron calibrant, so no neutron dispersion exists;
+a measured one does, by inelastic x-ray scattering (Bosak *et al.* 2008), and
+since September 2026 the library's 0 K comparison uses it. Tungsten has twelve measured points and molybdenum fifteen against
 niobium's hundred and thirty-eight, so those two rows are thin.
 
 ## Three potentials, one hierarchy
@@ -353,20 +354,26 @@ distinction that cost a whole comparison to learn.
 
 Experimental targets are traceable to primary compilations — Landolt-Börnstein
 III/29a for elastic constants, Brewer LBL-3720 Rev. (1977) for cohesive
-energies — and are cited in `refdata.py` at the point of use.
+energies — and are cited in `refdata.py` at the point of use. The electronic
+heat-capacity coefficients the thermodynamics panel subtracts come from
+Kittel's *Introduction to Solid State Physics*, 8th ed., Table 2, and are
+cited in `refdata_electronic.py`; lutetium and ytterbium are not in that table
+and carry no electronic term.
 
 The **measured phonon** comparison outgrew a single compilation. It began as
 III/13a's zone-boundary points and is now a set of dispersion curves along the
-symmetry path: **35 of the 38 elements carry one** — 29 from tabulated
-measured frequencies, 6 reconstructed from published force constants — with
-only iridium, rhenium and ruthenium still without. Seven reconstructions are
-drawn in all, because tungsten has both: Chen and Brockhouse tabulate a dozen
-of its points and plot the rest, so it is counted among the 29 measured and
-carries their force constants for the remainder of the path. Each is
-transcribed from its own source's table and
-cited there; a reconstruction is drawn as a dashed line, never with the open
-circles used for individually measured points, and carries the reason its
-paper published a fit instead of frequencies. Three of them needed a model
+symmetry path, and **all 38 elements carry one**: 27 dispersions transcribed
+from tabulated measured frequencies; 3 digitised from published figures —
+iridium and ruthenium by neutrons, vanadium by x-rays — and flagged as such;
+4 records of individual measured frequencies rather than a dispersion
+(beryllium, molybdenum, rhenium, tungsten); and 4 reconstructed only from
+published force constants (cobalt, chromium, rhodium, strontium). Seven
+reconstructions are drawn in all, because molybdenum, tungsten and vanadium
+carry one beside their measured points. Each is transcribed from its own
+source and cited there; a reconstruction is drawn as a dashed line, a
+digitised point as a diamond, and only a tabulated measurement gets the open
+circle, and a reconstruction carries the reason its paper published a fit
+instead of frequencies. Three of them needed a model
 form of their own — a Fourier interplanar series for molybdenum, an axially
 symmetric model for tungsten, a dipolar fluctuation model for cobalt — and
 each was tested against measured curves already on the page before it was

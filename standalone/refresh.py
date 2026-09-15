@@ -60,6 +60,8 @@ The order is not arbitrary:
   recommend_recut which switched set to recommend for MD, per element, by a
                   rule over the warm and cold screens; needs `rc` and `tap`,
                   so it too does nothing on a clean clone
+  add_electronic  the electronic heat-capacity coefficient gamma per element
+                  (Kittel Table 2), which the thermodynamics note subtracts
   add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
                   contain no member of <111>, which for a cubic crystal is
                   where the extremum sits
@@ -137,6 +139,7 @@ CHAIN = [
     ("unify_stable.py", "one meaning for stable: mesh AND path", False),
     ("add_ld_tap.py", "the switched arm's own 0 K dispersion", False),
     ("recommend_recut.py", "which switched set to recommend for MD", False),
+    ("add_electronic.py", "electronic heat-capacity coefficients", False),
     ("make_gui.py", "potential.html", False),
 ]
 

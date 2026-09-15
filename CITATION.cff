@@ -9,14 +9,13 @@ abstract: >-
   nested forms (AU, MAU, UG), refitted against experimental elastic constants,
   lattice constants and cohesive energies, with a LAMMPS pair style and a
   self-contained interactive library page. The elastic tensor at the fitted
-  volume is reproduced to a median 1.45 per cent RMS; defect, surface and
-  stacking-fault energies are not, and the README states by how much.
-  Thirty-five of the thirty-eight elements carry an experimental phonon
-  dispersion along the symmetry path for comparison, twenty-nine of them from
-  tabulated measured frequencies, and twenty-four also carry a
+  volume is reproduced to a median 1.45 per cent RMS in the UG form; defect,
+  surface and stacking-fault energies are not, and the README states by how
+  much. All thirty-eight elements carry an experimental phonon reference along
+  the symmetry path for comparison, twenty-seven of them dispersions from
+  tabulated measured frequencies, and twenty-seven also carry a
   molecular-dynamics measurement of their own spectrum at the temperature the
-  neutron experiment was performed at. The parameters in 1.1.0 are unchanged
-  from 1.0.0.
+  experiment was performed at.
 type: software
 #  CITATION.cff 1.2.0 has no field for an academic title, and bibliographic
 #  style omits them in any case, so the names appear here as given-names and
@@ -35,8 +34,8 @@ authors:
   - family-names: "Güler"
     given-names: "Emre"
     affiliation: "Ankara Hacı Bayram Veli University"
-version: "1.4.0"
-date-released: "2026-09-14"
+version: "1.4.1"
+date-released: "2026-09-15"
 license: GPL-2.0-only
 repository-code: "https://github.com/ugurandguler/potential-library"
 url: "https://ugurandguler.github.io/potential-library/"

@@ -1776,6 +1776,79 @@ PHONON_CURVE["Re"] = {"T_K": 295, "struct": "hcp", "ref": RE_REF, "points": {
 }}
 
 
+V_REF = ("A. Bosak, M. Hoesch, D. Antonangeli, D. L. Farber, I. Fischer and "
+         "M. Krisch, Phys. Rev. B <b>78</b>, 020301(R) (2008), Fig. 2(a): inelastic "
+         "<b>x-ray</b> scattering on beamline ID28 of the ESRF, 3.0 meV energy "
+         "resolution.  Vanadium scatters neutrons almost entirely incoherently, "
+         "which is why its measured dispersion is an x-ray one.  <b>Digitised from "
+         "the figure</b>, which is vector in the PDF, so the coordinates are exact: "
+         "86 points, every marker in the panel, on the branches the paper labels L, T, "
+         "T<sub>1</sub> and T<sub>2</sub> (polarisations in its Table I).  No error "
+         "bars are given.  The temperature is not stated and the measurement is "
+         "taken as room temperature.  Checked against a number the reading did not "
+         "use: the initial slopes of L and T along [100], L along [110] and L and T "
+         "along [111] agree with the sound velocities of the elastic constants to "
+         "within 3.5&nbsp;%")
+PHONON_CURVE["V"] = {
+    "T_K": 295, "struct": "bcc", "ref": V_REF, "nu_scale": MEV_THZ,
+    "digitised": ("These points were read from Fig. 2(a) of the source, drawn as "
+                  "vectors in the PDF, so their coordinates are exact.  The source "
+                  "labels every branch, so they are scored by polarisation like a "
+                  "tabulated measurement.  The two transverse branches along "
+                  "&Gamma;&ndash;N are nearly degenerate up to &xi; &asymp; 0.15, and "
+                  "the paper reports an anomaly in each."),
+    #  Two markers sit on the H line: the [z00] scan ends there and the [zzz]
+    #  scan starts there.  H is a point where the branches are degenerate, so
+    #  one goes to each line and neither assignment changes a score.
+    "branches": {
+        "L[z00]": [[0.050, 4.34, 0.0], [0.100, 8.45, 0.0],
+                  [0.200, 15.77, 0.0], [0.300, 22.07, 0.0],
+                  [0.400, 26.76, 0.0], [0.501, 29.29, 0.0],
+                  [0.550, 29.74, 0.0], [0.601, 29.46, 0.0],
+                  [0.634, 29.45, 0.0], [0.668, 29.58, 0.0],
+                  [0.701, 30.01, 0.0], [0.734, 30.07, 0.0],
+                  [0.767, 30.33, 0.0], [0.800, 30.96, 0.0],
+                  [0.851, 31.33, 0.0], [0.900, 31.84, 0.0],
+                  [1.000, 31.98, 0.0]],
+        "T[z00]": [[0.050, 1.82, 0.0], [0.100, 3.63, 0.0],
+                  [0.200, 6.90, 0.0], [0.300, 10.67, 0.0],
+                  [0.400, 15.87, 0.0], [0.501, 21.28, 0.0],
+                  [0.601, 26.17, 0.0], [0.701, 29.60, 0.0],
+                  [0.800, 30.98, 0.0], [0.900, 32.01, 0.0],
+                  [1.000, 32.66, 0.0]],
+        "L[zzz]": [[0.050, 6.89, 0.0], [0.100, 13.77, 0.0],
+                  [0.200, 24.32, 0.0], [0.300, 29.35, 0.0],
+                  [0.349, 29.31, 0.0], [0.400, 27.62, 0.0],
+                  [0.425, 26.60, 0.0], [0.450, 25.99, 0.0],
+                  [0.475, 25.31, 0.0], [0.499, 25.34, 0.0],
+                  [0.524, 25.03, 0.0], [0.549, 23.89, 0.0],
+                  [0.599, 21.77, 0.0], [0.699, 20.19, 0.0],
+                  [0.799, 24.25, 0.0], [0.899, 30.23, 0.0],
+                  [1.000, 32.45, 0.0]],
+        "T[zzz]": [[0.100, 6.71, 0.0], [0.200, 11.97, 0.0],
+                  [0.300, 18.01, 0.0], [0.400, 22.99, 0.0],
+                  [0.499, 25.44, 0.0], [0.549, 25.36, 0.0],
+                  [0.599, 25.13, 0.0], [0.632, 25.50, 0.0],
+                  [0.666, 26.15, 0.0], [0.699, 26.74, 0.0],
+                  [0.749, 28.09, 0.0], [0.799, 29.37, 0.0],
+                  [0.899, 31.60, 0.0]],
+        "L[zz0]": [[0.050, 5.95, 0.0], [0.100, 11.29, 0.0],
+                  [0.150, 16.47, 0.0], [0.200, 20.23, 0.0],
+                  [0.250, 23.35, 0.0], [0.300, 25.86, 0.0],
+                  [0.350, 27.20, 0.0], [0.400, 28.20, 0.0],
+                  [0.425, 28.36, 0.0], [0.450, 28.04, 0.0],
+                  [0.475, 28.06, 0.0], [0.500, 28.22, 0.0]],
+        "T1[zz0]": [[0.051, 2.86, 0.0], [0.100, 5.71, 0.0],
+                   [0.200, 10.89, 0.0], [0.300, 16.05, 0.0],
+                   [0.400, 19.17, 0.0], [0.500, 20.03, 0.0]],
+        "T2[zz0]": [[0.051, 2.81, 0.0], [0.100, 5.26, 0.0],
+                   [0.150, 8.14, 0.0], [0.200, 11.32, 0.0],
+                   [0.251, 14.69, 0.0], [0.300, 18.73, 0.0],
+                   [0.350, 22.50, 0.0], [0.400, 25.97, 0.0],
+                   [0.451, 27.54, 0.0], [0.500, 27.82, 0.0]],
+    }}
+
+
 #  Which drawn segment each branch lies on, and over what range of the paper's
 #  zeta.  The path is build_library.SC_PATH["fcc"], G-X-W-K-G-L-U-W-L-K.
 #  Sigma is drawn as K->G, so a [zz0] branch runs backwards along it and only

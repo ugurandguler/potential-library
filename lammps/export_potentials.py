@@ -207,9 +207,9 @@ def main():
                                + el + "_recut.ugur is recommended instead")
             #  What each truncation is for, with the measurement behind it.
             #
-            #  The hard sets reproduce the MEASURED dispersion better - 9.6 %
-            #  mean over the 32 elements that carry a neutron curve against
-            #  12.5 % for the switched ones, and better in 25 of the 32 - and
+            #  The hard sets reproduce the MEASURED dispersion better - 9.7 %
+            #  mean over the 33 elements that carry a measured curve against
+            #  12.6 % for the switched ones, and better in 25 of the 33 - and
             #  they cannot be run at temperature.  Both halves are measured
             #  and neither is a preference.  The discontinuity is what does
             #  it, so each file carries its own rather than an average: it
@@ -223,10 +223,10 @@ def main():
                     "hard - phi2 does not vanish at rcut2, it stops at "
                     f"{-abs(jump):.3g} meV ({jump / kT296:.3g} of k_B T at "
                     "296 K).  USE for static properties and for lattice "
-                    "dynamics: measured against neutron dispersion the hard "
-                    "sets average 9.6 % over the 32 elements that have one, "
-                    "against 12.5 % for the switched sets, and are closer in "
-                    "25 of them.  DO NOT use for molecular dynamics: "
+                    "dynamics: measured against the measured dispersion the "
+                    "hard sets average 9.7 % over the 33 elements that have "
+                    "one, against 12.6 % for the switched sets, and are closer "
+                    "in 25 of them.  DO NOT use for molecular dynamics: "
                     "copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in "
                     "NVE and climbs from 296 K to over 1100 K in 200 ps")
                 if name == "disp":
@@ -291,8 +291,8 @@ def main():
                     "0.4 meV/atom/ns for copper, 876x less than its hard "
                     "twin.  USE for molecular dynamics, which no hard set "
                     "can do.  It pays for that on the dispersion: the "
-                    "switched sets average 12.5 % against the hard sets' "
-                    "9.6 %, because switching the pair term off over the "
+                    "switched sets average 12.6 % against the hard sets' "
+                    "9.7 %, because switching the pair term off over the "
                     "outer 15 % moves the force constants at the largest "
                     "separations, which is the short-wavelength end, and "
                     "nothing in the fit sees it")

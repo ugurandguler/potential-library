@@ -105,9 +105,11 @@ def reference(v, el):
 
     Vanadium is why this exists rather than a refusal: it scatters neutrons
     almost entirely incoherently, which is what makes it the standard neutron
-    calibrant and what makes a coherent measurement of it impossible, so its
-    only reference is Colella and Batterman's Born-von Karman model.  That
-    model is gated on the elastic constants it was NOT fitted to.
+    calibrant, and for the force-matched runs of 2026-09-08 its only reference
+    here was Colella and Batterman's Born-von Karman model, gated on the
+    elastic constants it was NOT fitted to.  A measured x-ray dispersion
+    (Bosak et al. 2008) has since been entered as its exp_curve, so vanadium
+    now takes the first branch below.
     """
     if "exp_curve" in v:
         return "exp", v["exp_curve"]

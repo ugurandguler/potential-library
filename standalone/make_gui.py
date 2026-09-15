@@ -11,6 +11,7 @@ import datetime as _dt
 import json, math, os
 
 import refdata
+import refdata_electronic
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = json.load(open(os.path.join(HERE, "library.json")))
@@ -1681,10 +1682,10 @@ function drawDisp(d){
         drawn on the standard path - the DFT modes replace that path with the
         reference's own.  Opening on a DFT comparison for an element that has
         neutron data would hide the stronger test behind a selector.  The same
-        applies to a MODEL curve: vanadium and cobalt have no measured points
-        and opened on Materials Project and JARVIS respectively, with their
-        reconstructed dispersions invisible until someone changed the
-        selector.  Either kind of reference counts.  */
+        applies to a MODEL curve: cobalt has no measured points (vanadium had
+        none until its x-ray dispersion was entered on 2026-09-15) and opened
+        on JARVIS, with its reconstructed dispersion invisible until someone
+        changed the selector.  Either kind of reference counts.  */
     DISP_MODE = ((d.exp_curve && d.exp_curve.segs)
               || (d.model_curve && d.model_curve.segs)) ? "std"
               : (has("mp") ? "mp"
@@ -2457,9 +2458,14 @@ const FT_WHY = {
            + `mode at &Gamma;, so there is no dispersion to set a curve `
            + `against; a small-cell run at ${T} K that measures that one `
            + `frequency has been submitted and its result is not in yet`,
+  unrun: T => `a measured dispersion for this element was entered after the `
+           + `study ran, read from a published figure, and no run at the `
+           + `measurement's ${T} K has been made against it yet`,
   none: () => `no dispersion reference exists for this element, measured or `
            + `reconstructed`,
 };
+/*  kinds that are not outside the study, only not in it yet  */
+const FT_WAIT = k => k === "pending" || k === "gamma" || k === "unrun";
 const FT_V = {gain: ["gain", "ok"], loss: ["loss", "bad"],
               flat: ["below the floor", "warn"]};
 
@@ -2645,11 +2651,12 @@ function finiteTBlock(d){
   if(!r && !o) return "";
   if(!r){
     return `<h3>The dispersion at the temperature it was measured</h3>
-      <p class="plotnote"><strong>${nm} ${(o.kind==="pending"||o.kind==="gamma")
+      <p class="plotnote"><strong>${nm} ${FT_WAIT(o.kind)
         ?"is not in this study yet":"is outside this study"}</strong> &mdash;
-      ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. ${(o.kind==="pending"||o.kind==="gamma")
+      ${(FT_WHY[o.kind]||FT_WHY.none)(o.T, d)}. ${FT_WAIT(o.kind)
       ?`${ftCount().rows} of the ${ftCount().all} elements carry a
-      finite-temperature measurement so far; this one is waiting on its run.`
+      finite-temperature measurement so far; ${o.kind==="unrun"
+      ?"no run has been made for this one yet":"this one is waiting on its run"}.`
       :`${ftCount().rows} of the ${ftCount().all}
       elements carry a finite-temperature measurement; this is one of the
       ${ftCount().out} that do not, and that is a fact about the reference data
@@ -2728,8 +2735,8 @@ function lammpsBlock(d){
   /*  The "what" column carries the USE, not just the name.  Which truncation
       a reader wants is not a matter of taste and the two answers point
       opposite ways: measured against neutron dispersion the hard sets average
-      9.6 % over the 32 elements that have a curve and the switched ones
-      12.5 %, hard being closer in 25 of the 32 - and no hard set can be run
+      9.7 % over the 33 elements that have a curve and the switched ones
+      12.6 %, hard being closer in 25 of the 33 - and no hard set can be run
       at temperature, because phi2 does not vanish at the cutoff.  Copper
       drifts 350 meV per atom per nanosecond in NVE with the hard set and 0.4
       with the switched one, a factor of 876.  Each file's own header carries
@@ -2946,6 +2953,50 @@ function ugBlock(d){
     </div>
   </div>`;
 }
+
+/*  The heat-capacity decomposition at 298.15 K, interpolated on the thermo
+    grid rather than read at the nearest point, so the numbers on the page are
+    the ones the notes quote.  cv: the model; lat: 9 alpha^2 B V T with the
+    measured alpha and B; el: gamma*T from refdata_electronic (Kittel Table 2),
+    null where the source has no gamma; rest: what is left of the tabulated
+    C_p.  */
+const ELSRC = "__ELSRC__";
+function cvAt(g, T){
+  if(!g||!g.thermo) return null;
+  const p=[...g.thermo].sort((a,b)=>a.T-b.T);
+  for(let i=1;i<p.length;i++) if(p[i-1].T<=T&&T<=p[i].T)
+    return p[i-1].Cv+(p[i].Cv-p[i-1].Cv)*(T-p[i-1].T)/(p[i].T-p[i-1].T);
+  return null;
+}
+function cpParts(d){
+  const cv=cvAt(d.ld,298.15), lat=cpLat(d);
+  const el=(d.gamma_e!=null)?d.gamma_e*298.15/1000:null;
+  if(cv==null||!d.Cp298) return null;
+  return {cv, lat, el,
+          rest:(lat!=null&&el!=null)?d.Cp298-cv-lat-el:null};
+}
+/*  Library-wide, over every element where all three terms are known -
+    counted from DATA, never typed.  */
+let CP_LIB=null;
+function cpLibrary(){
+  if(CP_LIB) return CP_LIB;
+  const med=a=>{const s=[...a].sort((x,y)=>x-y), n=s.length;
+    return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;};
+  const rows=Object.values(DATA).map(d=>({d, p:cpParts(d)}))
+    .filter(o=>o.p&&o.p.lat!=null&&o.p.el!=null);
+  const pct=f=>med(rows.map(o=>100*(f(o.p)-o.d.Cp298)/o.d.Cp298));
+  const byRest=[...rows].sort((a,b)=>a.p.rest-b.p.rest);
+  CP_LIB={n:rows.length,
+    m0:pct(p=>p.cv), m1:pct(p=>p.cv+p.lat), m2:pct(p=>p.cv+p.lat+p.el),
+    //  overshoot is only claimed where gamma is large (>= 5 mJ/mol K^2):
+    //  beryllium also comes out negative, but because the model's own C_v is
+    //  too high, not because of the electronic term
+    over:byRest.filter(o=>o.p.rest<-0.75&&o.d.gamma_e>=5).map(o=>o.d.name),
+    left:byRest.slice(-4).reverse().map(o=>o.d)};
+  return CP_LIB;
+}
+const nameList=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+const ALKALI=["Li","Na","K","Rb","Cs"];
 
 /*  value at the tabulated temperature nearest 298 K, as a number */
 function tvn(g,key){
@@ -3595,9 +3646,9 @@ function render(){
         <code>${d.name}.ugur.ang</code>. The switched-cutoff sets
         (<code>${d.name}_taper.ugur</code>) carry no stored dispersion and are
         reachable only from the download table below. That distinction is not
-        cosmetic: measured against neutron data over the 32 elements that have
-        it, the hard-truncated sets average 9.6&nbsp;% and the switched ones
-        12.5&nbsp;%, and the hard one is closer in 25 of the 32. The switched
+        cosmetic: measured against neutron and x-ray data over the 33 elements
+        that have it, the hard-truncated sets average 9.7&nbsp;% and the switched
+        ones 12.6&nbsp;%, and the hard one is closer in 25 of the 33. The switched
         sets are what molecular dynamics has to use, because a hard cut leaves
         the pair energy discontinuous, and that is the arm any
         finite-temperature number quoted elsewhere belongs to.</p>
@@ -3763,16 +3814,36 @@ function render(){
   <strong>${cpLat(d).toFixed(2)}&nbsp;J/(mol&nbsp;K)</strong> at 298&nbsp;K,
   ${(100*cpLat(d)/d.Cp298).toFixed(1)}&nbsp;% of C<sub>p</sub>, and the
   measured value carried to C<sub>v</sub> is
-  ${(d.Cp298-cpLat(d)).toFixed(2)}.`:""} Across the library the term is
-  small &mdash; about half a J/(mol&nbsp;K) at the median, and 1 or more only
-  for potassium, sodium, rubidium, caesium, lead, thallium, aluminium and
-  silver &mdash; while the calculated C<sub>v</sub> of the switched arm sits a
-  median 6.8&nbsp;% below the tabulated C<sub>p</sub>. The lattice term
-  accounts for about two of those points. <strong>The rest is not accounted
-  for here.</strong> A metal's measured heat capacity also has an electronic
-  part, which no interatomic potential contains; it is the likely remainder,
-  but it has not been evaluated on this page. No thermal quantity enters the
-  fit.</p>`:""}
+  ${(d.Cp298-cpLat(d)).toFixed(2)}.`:""}
+  <br><br><strong>The conduction electrons add a second term, &gamma;T</strong>,
+  which no interatomic potential contains.${(()=>{const p=cpParts(d);
+    return (p&&p.el!=null)?` For ${d.name} &gamma; =
+    ${d.gamma_e}&nbsp;mJ&nbsp;mol<sup>&minus;1</sup>&nbsp;K<sup>&minus;2</sup>
+    gives <strong>${p.el.toFixed(2)}&nbsp;J/(mol&nbsp;K)</strong> at
+    298&nbsp;K${p.rest!=null?`, and what is left between the curve and the
+    ring is <strong>${p.rest.toFixed(2)}&nbsp;J/(mol&nbsp;K)</strong>`:""}.`
+    :` The source used has no &gamma; for ${d.name}, so that term is not shown
+    and the gap above is not decomposed further.`;})()}
+  ${(()=>{const M=cpLibrary(); return `Over the ${M.n} elements where both
+    terms are known, the calculated C<sub>v</sub> sits a median
+    ${M.m0.toFixed(1)}&nbsp;% from the tabulated C<sub>p</sub>; the lattice term
+    takes that to ${M.m1.toFixed(1)}&nbsp;% and the electronic term to
+    <strong>${M.m2.toFixed(1)}&nbsp;%</strong>. Two things remain, and both are
+    physics rather than the potential. &gamma; is measured at low temperature,
+    where it carries the electron&ndash;phonon mass enhancement; that fades
+    above the Debye temperature, so &gamma;T at 298&nbsp;K is an upper bound, and
+    it overshoots most where &gamma; is large (${nameList(M.over)}). The largest
+    remainders are ${nameList(M.left.map(x=>x.name))}.${(()=>{
+      const alk=M.left.filter(x=>ALKALI.indexOf(x.sym)>=0).map(x=>x.name),
+            rest=M.left.filter(x=>ALKALI.indexOf(x.sym)<0).map(x=>x.name);
+      return (alk.length?` The alkali metals among them are hot for their
+        melting point at 298&nbsp;K, where anharmonicity and thermal vacancies
+        add heat capacity that a harmonic calculation from 0&nbsp;K force
+        constants does not have.`:"")
+        +(rest.length?` That does not explain ${nameList(rest)}, for which
+        298&nbsp;K is far from melting.`:"");})()}`;})()}
+  <br><span style="opacity:.75">&gamma;: ${ELSRC}.</span> No thermal quantity
+  enters the fit.</p>`:""}
 
   ${finiteTBlock(d)}
 
@@ -4581,6 +4652,7 @@ out = (HTML
        #  republish it silently.  Stripped here as well so that the
        #  licence guarantee does not depend on which file was loaded.
        .replace("__FT__", json.dumps(FT, separators=(",", ":")))
+       .replace("__ELSRC__", refdata_electronic.GAMMA_SOURCE)
        .replace("__DATA__", json.dumps(
            {e: {k: v for k, v in r.items() if k != "aflow"}
             for e, r in DATA.items()}, separators=(",", ":")))
