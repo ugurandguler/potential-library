@@ -1,0 +1,117 @@
+#  Two-phase coexistence melting, with a gate at every stage.
+#
+#  WHY THIS FILE EXISTS.  A general-purpose toolkit ran this measurement for
+#  tantalum and returned 3438 K.  The number is void: the cell contained no
+#  solid at any point.  Its template creates velocities at TWICE the target
+#  temperature over the whole cell, which melts everything before the
+#  two-phase construction begins, and its solid-temperature diagnostic cannot
+#  see that because the group it measures is fixed by INITIAL POSITION rather
+#  than by structure - two halves of a uniform liquid report two temperatures
+#  that differ only by noise, which is also what a real coexistence shows.
+#  A temperature cannot tell you a phase.  Every stage below writes a dump,
+#  and phase_gate.py reads the structure factor of each half:
+#
+#      python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
+#
+#  Two differences from that template, both of them measured rather than
+#  assumed:
+#
+#  1) The solid is built FAR BELOW the melting point (1200 K) and only the
+#     liquid half is then heated.  Equilibrating the whole cell at the trial
+#     temperature puts the crystal at its stability limit, where it melts at
+#     random: 2400 K melted and 2600 K did not, which is noise, not physics.
+#
+#  2) Stage C2 brings BOTH halves to the trial temperature before the NPH
+#     stage.  Without it the solid half keeps its 1200 K velocities (it has no
+#     integrator in B and C) and NPH starts with a cold solid against a hot
+#     liquid; the energy imbalance melts everything and the run measures the
+#     setup rather than the melting point.  The apparent recrystallisation in
+#     stage C is templating off that frozen wall, and is not evidence either.
+#
+#  Every melt stage is barostatted at zero pressure.  Melting half a cell at
+#  6000 K in NVT drives the pressure up and destroys the solid by compression:
+#  at 1600 K everything melted, which was a statement about the setup.
+#
+#  RUN, with the defaults below overridable from the command line:
+#
+#      lmp -in in.coexistence -var TTRY 2400
+#      lmp -in in.coexistence -var TTRY 2400 -var POT potentials/W_taper.ugur \
+#          -var EL W -var A0 3.1652 -var MASS 183.84
+#
+#  The temperature the NPH stage settles at is NOT the answer on its own -
+#  read the phase of each half first.  in.coexistence_bracket is the cheaper
+#  measurement and the one that stands: it needs no NPH stage and no
+#  temperature reading at all.
+
+variable TTRY  index 2400                             # trial temperature, K
+variable POT   index potentials/Ta_force_taper.ugur   # potential file
+variable EL    index Ta                               # element in that file
+variable A0    index 3.3052                           # lattice constant, A
+variable MASS  index 180.948                          # atomic mass
+variable NX    index 6                                # cells across
+variable NZ    index 30                               # cells along z, the long axis
+variable TCOLD index 1200                             # where the solid is built
+variable THOT  index 6000                             # where the liquid half is melted
+variable NEQ   index 20000                            # steps per stage
+variable NPH   index 120000                           # steps of coexistence
+
+units metal
+boundary p p p
+atom_style atomic
+
+lattice bcc ${A0}
+region cell block 0 ${NX} 0 ${NX} 0 ${NZ}
+create_box 1 cell
+create_atoms 1 box
+mass * ${MASS}
+
+pair_style ugur
+pair_coeff * * ${POT} ${EL}
+neighbor 2.0 bin
+timestep 0.002
+
+#  the control the gate needs: a perfect crystal must return S = 1.000
+write_data perfect.data nocoeff
+
+variable lz equal "lz"
+variable zc equal ${lz}/2
+region rliq block INF INF INF INF INF ${zc} units box
+group liq region rliq
+group sol subtract all liq
+compute Tliq liq temp
+compute Tsol sol temp
+
+thermo 2500
+thermo_style custom step temp pe press vol c_Tliq c_Tsol
+
+#  --- A: the whole cell SOLID, far below the melting point ---------------
+velocity all create ${TCOLD} 4928459 mom yes rot yes dist gaussian
+fix 1 all npt temp ${TCOLD} ${TCOLD} 0.1 iso 0 0 1.0
+run ${NEQ}
+unfix 1
+write_dump all custom A_solid.dump id type x y z
+
+#  --- B: melt the liquid half only; the solid half is not integrated ------
+fix 1 liq nvt temp ${THOT} ${THOT} 0.1
+run ${NEQ}
+unfix 1
+write_dump all custom B_halfmelt.dump id type x y z
+
+#  --- C: bring the liquid half to the trial temperature ------------------
+fix 1 liq nvt temp ${TTRY} ${TTRY} 0.1
+run ${NEQ}
+unfix 1
+write_dump all custom C_cooled.dump id type x y z
+
+#  --- C2: bring BOTH halves to it - see note (2) above -------------------
+fix 1 all nvt temp ${TTRY} ${TTRY} 0.1
+run ${NEQ}
+unfix 1
+write_dump all custom C2_both.dump id type x y z
+
+#  --- D: the whole system under NPH; the interface pulls the temperature --
+#  toward Tm through the latent heat.  Gate D_final before reading it.
+reset_timestep 0
+fix 1 all nph iso 0.0 0.0 0.5
+run ${NPH}
+write_dump all custom D_final.dump id type x y z

@@ -168,6 +168,30 @@ liquid report two indistinguishable temperatures. Every melting run here is now
 gated on the static structure factor per half-cell, printed beside a
 perfect-crystal control that must return 1.000.
 
+**The protocol is in the repository.** `lammps/in.coexistence_bracket` builds
+the solid at 1200 K — never at the melting point, where it nucleates at random
+— melts half of it at 6000 K, brings **both** halves to a trial temperature and
+holds them there. `lammps/phase_gate.py` then reads which phase won:
+
+```
+lmp -in in.coexistence_bracket -var TTRY 2250
+python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
+```
+
+| trial T | S per half | what happened | conclusion |
+| --- | --- | --- | --- |
+| 2000 K | 0.695 / 0.875 | the liquid half froze | Tm above 2000 |
+| 2250 K | 0.255 / 0.192 | neither phase won | Tm near 2250 |
+| 2500 K | 0.072 / 0.039 | the solid half melted | Tm below 2500 |
+
+**That is the whole measurement**: under a thermostat, whether the solid melts
+or the liquid freezes *is* the answer, so it needs no barostatted coexistence
+stage and no temperature reading — the fragile part, and the part that produced
+the void 3438 K. `lammps/in.coexistence` carries that stage for anyone who
+wants the settling temperature as well. Both files default to tantalum's
+force-matched record and take the element, potential file, lattice constant and
+mass as command-line variables.
+
 ## The same improvement, twice — and it does not add up
 
 Two separate things reduce the error against a **measured** dispersion. Force
@@ -244,8 +268,10 @@ angular/      the UG branch: the Legendre factor on phi3, plus angfc.py, which
               dynamical stability.
 lammps/       pair_ugur.cpp, the pair style, and the drivers that measured
               everything above - vacancy.py, surface.py, stacking.py,
-              npt_expansion.py, elastic_T.py.  potentials/ holds our own
-              .ugur files; the published baselines are not redistributed.
+              npt_expansion.py, elastic_T.py, and the melting measurement
+              (in.coexistence_bracket, in.coexistence, phase_gate.py).
+              potentials/ holds our own .ugur files; the published baselines
+              are not redistributed.
 docs/         index.html, the interactive library.  GitHub Pages serves from
               here.
 provenance/   how the reference numbers were read out of the source volumes.

@@ -1,0 +1,98 @@
+#  The melting bracket - the measurement that stands, and the cheap one.
+#
+#  It needs NO barostatted coexistence stage and NO temperature reading.
+#  Build a solid half and a liquid half, hold BOTH at a trial temperature,
+#  and ask what happened: if the solid melts, Tm is below the trial
+#  temperature; if the liquid freezes, Tm is above it; if neither wins, the
+#  trial temperature is Tm.  The structure factor per half answers that, and
+#  the settling temperature of an interface - the fragile part of the
+#  two-phase method, and the part that produced a void 3438 K for tantalum -
+#  never enters.  See in.coexistence for that failure and for why each stage
+#  below is built the way it is.
+#
+#  The answer is read from the dumps, never from the thermo output:
+#
+#      python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
+#
+#  Measured this way for tantalum's force-matched record, with a perfect
+#  crystal returning S = 1.000 at every step as the control:
+#
+#      2000 K   0.695 / 0.875   all solid    the liquid froze   -> Tm > 2000
+#      2250 K   0.255 / 0.192   both midway  neither wins       -> Tm ~ 2250
+#      2500 K   0.072 / 0.039   all liquid   the solid melted   -> Tm < 2500
+#
+#  so Tm = 2250 +/- 250 K against an experimental 3290 K.
+#
+#  RUN one trial temperature per invocation, in its own directory:
+#
+#      lmp -in in.coexistence_bracket -var TTRY 2250
+#
+#  At the midpoint neither half wins inside NHOLD steps, which is what
+#  sitting near Tm looks like; do not read that as a failed run.
+
+variable TTRY  index 2250                             # trial temperature, K
+variable POT   index potentials/Ta_force_taper.ugur   # potential file
+variable EL    index Ta                               # element in that file
+variable A0    index 3.3052                           # lattice constant, A
+variable MASS  index 180.948                          # atomic mass
+variable NX    index 6                                # cells across
+variable NZ    index 30                               # cells along z, the long axis
+variable TCOLD index 1200                             # where the solid is built
+variable THOT  index 6000                             # where the liquid half is melted
+variable NEQ   index 20000                            # steps per stage
+variable NHOLD index 20000                            # steps of competition at TTRY
+
+units metal
+boundary p p p
+atom_style atomic
+
+lattice bcc ${A0}
+region cell block 0 ${NX} 0 ${NX} 0 ${NZ}
+create_box 1 cell
+create_atoms 1 box
+mass * ${MASS}
+
+pair_style ugur
+pair_coeff * * ${POT} ${EL}
+neighbor 2.0 bin
+timestep 0.002
+
+#  the control the gate needs: a perfect crystal must return S = 1.000
+write_data perfect.data nocoeff
+
+variable lz equal "lz"
+variable zc equal ${lz}/2
+region rliq block INF INF INF INF INF ${zc} units box
+group liq region rliq
+group sol subtract all liq
+compute Tliq liq temp
+compute Tsol sol temp
+
+thermo 2500
+thermo_style custom step temp pe press vol c_Tliq c_Tsol
+
+#  --- A: the whole cell SOLID, far below the melting point ---------------
+velocity all create ${TCOLD} 4928459 mom yes rot yes dist gaussian
+fix 1 all npt temp ${TCOLD} ${TCOLD} 0.1 iso 0 0 1.0
+run ${NEQ}
+unfix 1
+write_dump all custom A_solid.dump id type x y z
+
+#  --- B: melt the liquid half only; the solid half is not integrated ------
+fix 1 liq nvt temp ${THOT} ${THOT} 0.1
+run ${NEQ}
+unfix 1
+write_dump all custom B_halfmelt.dump id type x y z
+
+#  --- C: bring the liquid half to the trial temperature ------------------
+fix 1 liq nvt temp ${TTRY} ${TTRY} 0.1
+run ${NEQ}
+unfix 1
+write_dump all custom C_cooled.dump id type x y z
+
+#  --- C2: hold BOTH halves at the trial temperature.  THIS is the
+#  measurement: whichever phase wins says which side of Tm we are on.
+fix 1 all nvt temp ${TTRY} ${TTRY} 0.1
+run ${NHOLD}
+unfix 1
+write_dump all custom C2_both.dump id type x y z
