@@ -100,8 +100,8 @@
  "Hf": {
   "el": "Hf",
   "how": {
-   "etiket": 93,
-   "yakin": 8
+   "label": 93,
+   "nearest": 8
   },
   "mae": 0.7543,
   "mesh": "21x21x21",
@@ -131,8 +131,8 @@
  "Lu": {
   "el": "Lu",
   "how": {
-   "etiket": 115,
-   "yakin": 8
+   "label": 115,
+   "nearest": 8
   },
   "mae": 0.4253,
   "mesh": "21x21x21",
@@ -148,8 +148,8 @@
  "Mg": {
   "el": "Mg",
   "how": {
-   "etiket": 60,
-   "yakin": 16
+   "label": 60,
+   "nearest": 16
   },
   "mae": 0.4214,
   "mesh": "21x21x21",
@@ -264,7 +264,7 @@
  "Ru": {
   "el": "Ru",
   "how": {
-   "yakin": 283
+   "nearest": 283
   },
   "mae": 0.6665,
   "mesh": "21x21x21",
@@ -280,8 +280,8 @@
  "Sc": {
   "el": "Sc",
   "how": {
-   "etiket": 125,
-   "yakin": 7
+   "label": 125,
+   "nearest": 7
   },
   "mae": 0.7802,
   "mesh": "21x21x21",
@@ -311,8 +311,8 @@
  "Ti": {
   "el": "Ti",
   "how": {
-   "etiket": 77,
-   "yakin": 2
+   "label": 77,
+   "nearest": 2
   },
   "mae": 1.2711,
   "mesh": "21x21x21",
@@ -328,8 +328,8 @@
  "Tl": {
   "el": "Tl",
   "how": {
-   "etiket": 45,
-   "yakin": 2
+   "label": 45,
+   "nearest": 2
   },
   "mae": 0.1494,
   "mesh": "10x10x10",
@@ -359,8 +359,8 @@
  "Y": {
   "el": "Y",
   "how": {
-   "etiket": 86,
-   "yakin": 5
+   "label": 86,
+   "nearest": 5
   },
   "mae": 0.6338,
   "mesh": "21x21x21",
@@ -390,9 +390,9 @@
  "Zr": {
   "el": "Zr",
   "how": {
-   "cift": 24,
-   "etiket": 32,
-   "yakin": 5
+   "pair": 24,
+   "label": 32,
+   "nearest": 5
   },
   "mae": 0.517,
   "mesh": "10x10x10",

@@ -172,7 +172,7 @@ def main():
             f = rec.get("facets") or {}
             want = ["".join(str(i) for i in m) for m in FACETS[struct]]
             got = " ".join(f"{k}={f[k]:.3f}" for k in want if k in f)
-            print(f"{el:3s} {mid:12s} {sg:8s} agirlikli "
+            print(f"{el:3s} {mid:12s} {sg:8s} weighted "
                   f"{(rec.get('weighted') or 0):5.3f}  expt "
                   f"{(rec.get('tyson') or 0):5.2f}   {got}")
 

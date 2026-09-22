@@ -108,11 +108,11 @@ def main():
         out[el] = rec
         print(f"{el:4s}{e['struct']:>7s}{str(rec['struct']):>8s}"
               f"{rec['B']:8.1f}{(rec['G'] or 0):8.1f}{bexp:9.1f}   "
-              f"{'kullanilabilir' if same else 'YANLIS FAZ'}")
+              f"{'usable' if same else 'WRONG PHASE'}")
     json.dump(out, open(os.path.join(HERE, "aflow_elastic.json"), "w"),
               indent=1, sort_keys=True)
     ok = [k for k, v in out.items() if v["usable"]]
-    print(f"\n{len(out)} elementte veri, {len(ok)} tanesi dogru fazda: "
+    print(f"\ndata for {len(out)} elements, {len(ok)} of them in the right phase: "
           f"{' '.join(ok)}")
     print("-> aflow_elastic.json")
 

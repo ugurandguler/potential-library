@@ -18,7 +18,7 @@ if A: sys.path.insert(0, ANG)
 import latdyn as L, refdata, curve_mae as CM
 from build_library import sc_segments
 angfc = __import__("angfc") if A else None
-KEYS = (("ug", "ug"), ("tap_ug", "tap_ug")) if A else ((None, "kok"), ("tap", "tap"))
+KEYS = (("ug", "ug"), ("tap_ug", "tap_ug")) if A else ((None, "root"), ("tap", "tap"))
 
 def one(el, v, rec):
     ec = v["exp_curve"]
@@ -46,7 +46,7 @@ def one(el, v, rec):
             f, vec = L.modes_many(cry, pot, q.reshape(1,3), Phi)
             if hcp:
                 val, how = CM.pick_hcp(f[0], vec[0], (q@R), lab)
-                got = (float(min(val, key=lambda x: abs(x-nu))) if how=="cift"
+                got = (float(min(val, key=lambda x: abs(x-nu))) if how=="pair"
                        else float(val) if val is not None
                        else float(min(f[0], key=lambda x: abs(x-nu))))
             elif nrm is not None:
@@ -70,5 +70,5 @@ for el in els:
             mae, sg, n0 = one(el, v, rec)
             out += "%12.1f%%%+5.1f" % (mae, sg)
         except Exception as ex:
-            out += "%18s" % ("hata")
+            out += "%18s" % ("error")
     print("%-4s%6d%s" % (el, n0, out[4:]))

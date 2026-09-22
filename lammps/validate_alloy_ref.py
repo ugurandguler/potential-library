@@ -171,7 +171,7 @@ def main():
     if bad:
         raise SystemExit(f"{bad} structures did not match")
     print("the multi-species kernel matches the independent implementation,")
-    print("karisik ucluler dahil (L1_2)")
+    print("mixed triplets included (L1_2)")
 
 
 if __name__ == "__main__":

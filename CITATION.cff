@@ -34,7 +34,7 @@ authors:
   - family-names: "Güler"
     given-names: "Emre"
     affiliation: "Ankara Hacı Bayram Veli University"
-version: "1.4.4"
+version: "1.4.5"
 date-released: "2026-09-22"
 license: GPL-2.0-only
 repository-code: "https://github.com/ugurandguler/potential-library"
@@ -52,8 +52,7 @@ keywords:
 #  which are a fresh fit and are not the published ones.
 references:
   - type: article
-    title: >-
-      A new interatomic potential for metals: application to Pd-10%Fe
+    title: "Three-body effect on the lattice dynamics of Pd-10% Fe alloys"
     authors:
       - family-names: "Akgün"
         given-names: "İ."
@@ -62,8 +61,11 @@ references:
     journal: "Physical Review B"
     volume: 51
     start: 3458
+    end: 3461
     year: 1995
+    doi: "10.1103/PhysRevB.51.3458"
   - type: article
+    title: "Three-body effect on the lattice dynamics of Fe-28%Pd alloy"
     authors:
       - family-names: "Akgün"
         given-names: "İ."
@@ -72,8 +74,11 @@ references:
     journal: "Il Nuovo Cimento D"
     volume: 19
     start: 779
+    end: 786
     year: 1997
+    doi: "10.1007/BF03185377"
   - type: article
+    title: "The lattice dynamical study of a binary type-II alloy"
     authors:
       - family-names: "Akgün"
         given-names: "İ."

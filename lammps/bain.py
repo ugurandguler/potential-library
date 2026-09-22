@@ -167,13 +167,13 @@ def main():
             bar_up = float(e[iu] - e0) if iu is not None else None
             bar_dn = float(e[idn] - e0) if idn is not None else None
             deep = float(e.min() - e0)
-            lab = "bizimki (MAU)" if tag == "tap" else tag.replace("base|", "")
+            lab = "ours (MAU)" if tag == "tap" else tag.replace("base|", "")
             fmt = (lambda x, b: f"{x:+.3f} ({b * 1000:.1f} meV)"
                    if x is not None else "none")
-            print(f"  {lab:30s} egrilik {c:8.2f}"
-                  f"   tepe(+) {fmt(up, bar_up):>20s}"
-                  f"   tepe(-) {fmt(dn, bar_dn):>20s}"
-                  f"   en dip {deep * 1000:+8.1f} meV")
+            print(f"  {lab:30s} curvature {c:8.2f}"
+                  f"   peak(+) {fmt(up, bar_up):>20s}"
+                  f"   peak(-) {fmt(dn, bar_dn):>20s}"
+                  f"   deepest {deep * 1000:+8.1f} meV")
             out[f"{el}|{tag}"] = {
                 "curvature": float(c), "turn_up": up, "turn_dn": dn,
                 "barrier_up": bar_up, "barrier_dn": bar_dn,

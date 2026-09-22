@@ -62,9 +62,9 @@ def _wsl_home():
     h = r.stdout.strip()
     if r.returncode != 0 or not h.startswith("/") or chr(0) in h:
         raise ImportError(
-            "WSL yanit vermiyor - LAMMPS yolu bulunamadi.\n"
-            "  donus kodu %s\n  cikti %r\n"
-            "Cozum: `wsl --shutdown` sonra tekrar dene."
+            "WSL is not responding - LAMMPS path not found.\n"
+            "  return code %s\n  output %r\n"
+            "Fix: `wsl --shutdown`, then try again."
             % (r.returncode, h[:120]))
     return h
 
@@ -72,7 +72,7 @@ def _wsl_home():
 HOME = _wsl_home()
 LMP = f"{HOME}/lammps/src/lmp_serial"
 if subprocess.run(["wsl", "-e", "test", "-x", LMP]).returncode != 0:
-    raise ImportError("LAMMPS ikilisi yok ya da calistirilabilir degil: %s"
+    raise ImportError("LAMMPS binary missing or not executable: %s"
                       % LMP)
 SKIN = 2.0
 
@@ -144,7 +144,7 @@ DT = 0.002
 #  the INITIAL velocity temperature, as the original screen wrote it.  600 K of
 #  initial velocities equipartitions to a 300 K crystal, and every threshold
 #  below is written against that half.  Making --temp mean the target instead
-#  silently doubles the default and reads the whole library as SUPHELI.
+#  silently doubles the default and reads the whole library as suspect.
 TEMP = 600.0
 
 
@@ -232,9 +232,9 @@ def main():
     keys = [want] if want else list(SETS)
 
     print(f"MD screening scan - {TEMP:.0f} K start -> {TEMP/2:.0f} K, "
-          f"{DT*1000:.1f} fs, 2 ps denge + 4 ps")
+          f"{DT*1000:.1f} fs, 2 ps equilibration + 4 ps")
     print("T should be near 300 K and pe ABOVE the lattice value.\n")
-    print(f"{'el':4s}{'set':16s}{'T':>7s}{'pe':>10s}{'kafes':>10s}"
+    print(f"{'el':4s}{'set':16s}{'T':>7s}{'pe':>10s}{'lattice':>10s}"
           f"{'diff':>9s}   status")
     print("-" * 62)
     bad, out = [], {}
@@ -268,11 +268,11 @@ def main():
                    else float(np.ravel(lib[el]["Ecoh"])[0]))
             if "lost" in r:
                 n0, n1 = r["lost"]
-                bad.append((el, k, "DAGILDI"))
+                bad.append((el, k, "disintegrated"))
                 out.setdefault(el, {})[k] = {"lost": [n0, n1],
                                              "collapsed": True}
                 print(f"{el:4s}{label:16s}{'':>7s}{'':>10s}{'':>10s}{'':>9s}"
-                      f"   DAGILDI - {n0} atomdan {n1} kaldi")
+                      f"   disintegrated - {n1} of {n0} atoms left")
                 continue
             gone = r["pe"] < Est - 0.05
             hot = r["T"] > 0.5 * TEMP * 1.34
@@ -283,8 +283,8 @@ def main():
             #  Whatever the mechanism, that is not a crystal, and calling it
             #  merely "suspect" understates it.
             runaway = r["T"] > 3.0 * (0.5 * TEMP)
-            state = ("COKTU" if gone or runaway
-                     else ("SUPHELI" if hot else "saglam"))
+            state = ("collapsed" if gone or runaway
+                     else ("suspect" if hot else "ok"))
             if gone or hot:
                 bad.append((el, k, state))
             out.setdefault(el, {})[k] = {"T": round(r["T"]), "pe": r["pe"],
@@ -301,11 +301,11 @@ def main():
     #  and only when this run means what the file means.  A --temp 1100
     #  diagnostic is not a screen result; merging it rewrites the verdict that
     #  152 distributed potential headers are built from, and Ba silently went
-    #  from "saglam" to "SUPHELI" that way.
+    #  from "ok" to "suspect" that way.
     if DT != 0.002 or TEMP != 600.0:
         print()
         print(f"(non-default run: {TEMP:.0f} K / {DT * 1000:.1f} fs"
-              f" - md_screen_all.json'a YAZILMADI)")
+              f" - NOT written to md_screen_all.json)")
         return
     pa = os.path.join(HERE, "md_screen_all.json")
     all_ = {}
@@ -324,11 +324,11 @@ def main():
     print(f"\n-> md_screen.json (this run), md_screen_all.json "
           f"({len(all_)} records; {kept} already present, not overwritten)")
     if bad:
-        print(f"\n{len(bad)} set MD'de kullanilamaz ya da supheli:")
+        print(f"\n{len(bad)} set(s) unusable or suspect in MD:")
         for el, k, s in bad:
             print(f"  {el:3s} {k:8s} {s}")
     else:
-        print("\nbutun setler MD'de yapisini koruyor")
+        print("\nevery set keeps its structure in MD")
 
 
 if __name__ == "__main__":

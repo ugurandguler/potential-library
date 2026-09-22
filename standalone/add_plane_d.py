@@ -52,8 +52,8 @@ def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
     n, skipped = 0, []
-    print(f"{'el':4s}{'arm':10s}{'3 kesitin en buyugu':>21s}{'yeni kesit max':>16s}"
-          f"{'kazanc':>9s}")
+    print(f"{'el':4s}{'arm':10s}{'max of 3 sections':>21s}{'new section max':>16s}"
+          f"{'gain':>9s}")
     print("-" * 60)
     for el in sorted(lib):
         v = lib[el]

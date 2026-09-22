@@ -36,7 +36,7 @@ def main():
     lib = json.load(open(os.path.join(HERE, "library.json")))
     els = sys.argv[1:] or sorted(ff)
 
-    print("JARVIS-FF dagilimina karsi konum  (elastik RMS %, dusuk iyi)")
+    print("position within the JARVIS-FF spread  (elastic RMS %, lower is better)")
     print(f"{'el':4s}{'struct':5s}{'n':>4s}{'best':>8s}{'median':>9s}"
           f"{'OURS hard':>10s}{'rank':>8s}{'OURS taper':>11s}{'rank':>8s}")
     print("-" * 68)
@@ -68,7 +68,7 @@ def main():
     print(f"median published potential  : {st.median(tot['med']):6.2f} %")
     print(f"median BEST published       : {st.median(tot['best']):6.2f} %")
     print(f"ours, hard cutoff,  median percentile : "
-          f"{100*st.median(tot['hard']):5.0f}. (kucuk = ustte)")
+          f"{100*st.median(tot['hard']):5.0f}. (small = on top)")
     print(f"ours, tapered,      median percentile : "
           f"{100*st.median(tot['tap']):5.0f}.")
 

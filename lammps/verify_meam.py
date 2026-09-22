@@ -73,7 +73,7 @@ def one(c):
     v={int(m.group(1)):float(m.group(2)) for m in re.finditer(r"BORN\s+(\d+)\s+([-\d.eE+]+)",t)}
     if len(v)<21:
         err=[l for l in t.splitlines() if "ERROR" in l]
-        return c, None, (err[0][:58] if err else "born cikmadi")
+        return c, None, (err[0][:58] if err else "no born output")
     return c, {"C11":0.5*(v[1]+v[2]),"C12":v[7],"C13":0.5*(v[8]+v[12]),
                "C33":v[3],"C44":0.5*(v[4]+v[5])}, None
 
@@ -86,7 +86,7 @@ ok=[]
 for c,v,err in res:
     el=c["el"]; ex_=refdata.ELEMENTS[el]["Cij"]; st=refdata.ELEMENTS[el]["struct"]
     if v is None:
-        print(f"{el:4s}{c['ps']:6s}{c['id'][:25]:26s}{'':>24s}  DUSTU: {err}"); continue
+        print(f"{el:4s}{c['ps']:6s}{c['id'][:25]:26s}{'':>24s}  DROPPED: {err}"); continue
     born=((v["C11"]>abs(v["C12"]) and (v["C11"]+v["C12"])*v["C33"]>2*v["C13"]**2 and v["C44"]>0)
           if st=="hcp" else (v["C11"]-v["C12"]>0 and v["C44"]>0 and v["C11"]+2*v["C12"]>0))
     dev=100*abs(v["C11"]-ex_["C11"])/ex_["C11"]
@@ -94,6 +94,6 @@ for c,v,err in res:
     if good: ok.append(c)
     print(f"{el:4s}{c['ps']:6s}{c['id'][:25]:26s}{v['C11']:8.1f}{v['C12']:8.1f}{v['C44']:8.1f}"
           f"  {'accept' if good else 'REJECT'} (expt {ex_['C11']:.0f}, {dev:.0f} %"
-          f"{', Born IHLAL' if not born else ''})")
+          f"{', Born VIOLATED' if not born else ''})")
 json.dump(ok, open("../standalone/meam_verified.json","w"), indent=1)
-print(f"\nkabul: {len(ok)}")
+print(f"\naccepted: {len(ok)}")

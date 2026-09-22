@@ -3,7 +3,7 @@
 # pair_style ugur/ang
 # pair_coeff * * Li_taper.ugur.ang Li
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift 0.4 meV/atom/ns for copper, 876x less than its hard twin.  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.6 % against the hard sets' 9.7 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2.  NOT FIT FOR MOLECULAR DYNAMICS: squeezed uniformly, this record's energy falls without a barrier (fit.py's compression test, barrier below k_B T_melt), and its re-cut fails the warm screens, so no Li record in this library is recommended for MD.  Static and harmonic properties only
 # MD: DO NOT USE.  At 600 K this structure disintegrates - 432 atoms become 13 and LAMMPS stops.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

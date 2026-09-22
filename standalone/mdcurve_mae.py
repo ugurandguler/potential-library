@@ -115,7 +115,7 @@ def reference(v, el):
         return "exp", v["exp_curve"]
     if "model_curve" in v:
         return "model", v["model_curve"]
-    raise AssertionError("%s: ne olculen ne model egrisi var" % el)
+    raise AssertionError("%s: neither a measured nor a model curve" % el)
 
 
 def build(el, lib):
@@ -228,8 +228,8 @@ def parse_ev(path, want=None):
         out.append((np.array(f), np.array(vecs).T))
     if want is not None and len(out) != want:
         raise AssertionError(
-            "%s KESILMIS ya da eksik: %d q blogu var, %d bekleniyor. "
-            "Puanlanmadi." % (os.path.basename(path), len(out), want))
+            "%s TRUNCATED or incomplete: %d q blocks present, %d expected. "
+            "Not scored." % (os.path.basename(path), len(out), want))
     return out
 
 
@@ -291,7 +291,7 @@ def main():
                     fh.write("%.10f %.10f %.10f\n" % tuple(q))
             json.dump({"idx": idx, "n": n},
                       open(os.path.join(HERE, "mdq_%s.json" % el), "w"))
-            print("%s: %d nokta + %d donmus kopya = %d q" % (el, n, n,
+            print("%s: %d points + %d rotated copies = %d q" % (el, n, n,
                                                              len(qs)))
         return
 
@@ -302,15 +302,15 @@ def main():
             out.append(score(el, lib, tag or None))
         except (OSError, AssertionError) as e:
             print("%s: %s" % (spec, e))
-    head = "%-10s%5s%5s%10s%7s%16s%6s" % ("kayit", "T", "pts", "MAE", "",
-                                         "simetri sacilmasi", "")
+    head = "%-10s%5s%5s%10s%7s%16s%6s" % ("record", "T", "pts", "MAE", "",
+                                         "symmetry scatter", "")
     print()
     print(head)
     print("-" * 62)
     for r in out:
         tag = (r["tag"] + ("*" if r["hcp"] or r.get("near") else "")
                + ("~" if r.get("kind") == "model" else ""))
-        print("%-10s%4dK%5d%10.3f%6.1f%%%12.3f%5.1f%%  (en buyuk %.2f)"
+        print("%-10s%4dK%5d%10.3f%6.1f%%%12.3f%5.1f%%  (largest %.2f)"
               % (tag, r["T"], r["n"], r["mae"], r["pct"], r["sc"],
                  r["sc_pct"], r["sc_max"]))
     print()

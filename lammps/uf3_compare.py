@@ -43,7 +43,9 @@ import cellfile                         # noqa: E402
 import latdyn as L                      # noqa: E402
 import refdata                          # noqa: E402
 
-UF3 = "/home/gokay/lammps/potentials/Nb.uf3"
+#  LAMMPS ships Nb.uf3 in its potentials/ directory; LAMMPS does not expand
+#  "~" in pair_coeff, so the path is built from the WSL home elastic_check found
+UF3 = f"{E.HOME}/lammps/potentials/Nb.uf3"
 #  the two-body cutoff the file declares, which pair_style uf3 wants as an
 #  argument; taken from the header rather than assumed
 UF3_NBODY = 3
@@ -88,16 +90,16 @@ def main():
     e = refdata.ELEMENTS[el]
     cry = L.Crystal(e["struct"], float(e["a0"]), e.get("c_over_a"),
                     mass=refdata.MASSES[el])
-    print(f"{el}, bcc, a0 = {e['a0']} A   (deneysel gerideki hucre, iki taraf da ayni)")
+    print(f"{el}, bcc, a0 = {e['a0']} A   (experimental cell, the same for both sides)")
     print()
     uf = uf3_cij(el, cry, e["a0"])
     if "err" in uf:
-        print("UF3 kosusu basarisiz:", uf["err"])
+        print("UF3 run failed:", uf["err"])
         return
     ours = E.lammps_cij(el, lib[el], cry, tag="_ref")
     exp = e["Cij"]
-    print(f"{'':6s}{'deney':>9s}{'bizim (MAU)':>13s}{'UF3':>9s}"
-          f"{'bizim sapma':>13s}{'UF3 sapma':>11s}")
+    print(f"{'':6s}{'expt':>9s}{'ours (MAU)':>13s}{'UF3':>9s}"
+          f"{'ours dev':>13s}{'UF3 dev':>11s}")
     print("-" * 62)
     for k in ("C11", "C12", "C44"):
         if k not in exp:
@@ -142,13 +144,13 @@ def uf3_surface(el, facet, a0):
     eb = S.grab(lb, "EBULK")
     if eb is None:
         err = [l for l in lb.splitlines() if "ERROR" in l]
-        return {"error": err[0][:90] if err else "bulk kosmadi"}
+        return {"error": err[0][:90] if err else "bulk did not run"}
     ls = S.run(d, S.SLAB.format(build=build, style=style, coeff=coeff,
                                 skin=S.SKIN, vac=S.VACUUM), "in.slab")
     area, nat, es = S.grab(ls, "AREA"), S.grab(ls, "NAT"), S.grab(ls, "ESLAB")
     if None in (area, nat, es):
         err = [l for l in ls.splitlines() if "ERROR" in l]
-        return {"error": err[0][:90] if err else "dilim kosmadi"}
+        return {"error": err[0][:90] if err else "slab did not run"}
     return {"gamma": (es - nat * eb) / (2.0 * area) * S.EV_A2_TO_J_M2,
             "atoms": int(nat)}
 
@@ -160,9 +162,9 @@ def surfaces():
     ref = (lib[el].get("surface_ref") or {}).get("facets") or {}
     ours = ((lib[el].get("tap") or {}).get("surface") or {}).get("gamma") or {}
     print()
-    print(f"{el} yuzey enerjileri (J/m2) - ikisi de bu ozellige FIT EDILMEDI")
-    print(f"{'facet':7s}{'DFT ref':>9s}{'bizim':>9s}{'UF3':>9s}"
-          f"{'bizim/ref':>11s}{'UF3/ref':>10s}")
+    print(f"{el} surface energies (J/m2) - NEITHER was fitted to this property")
+    print(f"{'facet':7s}{'DFT ref':>9s}{'ours':>9s}{'UF3':>9s}"
+          f"{'ours/ref':>11s}{'UF3/ref':>10s}")
     print("-" * 55)
     rows = {}
     for f in ("110", "100", "111"):
@@ -171,7 +173,7 @@ def surfaces():
         u = uf3_surface(el, f, a0_uf3)
         if "error" in u:
             print(f"{f:7s}{ref[f]:9.2f}{ours.get(f, float('nan')):9.2f}"
-                  f"   UF3 hata: {u['error'][:40]}")
+                  f"   UF3 error: {u['error'][:40]}")
             continue
         o = ours.get(f)
         print(f"{f:7s}{ref[f]:9.2f}{(o if o else float('nan')):9.2f}"

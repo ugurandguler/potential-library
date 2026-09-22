@@ -166,10 +166,10 @@ def main():
               f"{moved:13.2e}   {'ok' if ok else 'FAILED'}")
     print()
     if bad:
-        print(f"{bad} element uyusmadi")
+        print(f"{bad} element(s) disagree")
         raise SystemExit(1)
     print("the multi-species path gives the single-species energy, and")
-    print("bozulan girdi sonucu degistiriyor - yani gercekten okunuyor")
+    print("a corrupted input changes the result - so it really is read")
 
 
 if __name__ == "__main__":

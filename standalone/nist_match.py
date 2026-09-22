@@ -171,22 +171,22 @@ def main():
     print(f"{'dev %':>9s}  {'el':3s} {'file':34s}{'facet':>6s}  status")
     print("-" * 68)
     for r in rows:
-        note = ("NIST KAYDI BOZUK - disarida" if r["nist_broken"] else
-                "eslesme DOGRULANDI" if r["ok"] else
-                "ESLESME YOK - disarida")
+        note = ("NIST RECORD CORRUPT - excluded" if r["nist_broken"] else
+                "match CONFIRMED" if r["ok"] else
+                "NO MATCH - excluded")
         print(f"{r['worst_pct']:9.3f}  {r['el']:3s} {r['file'][:34]:34s}"
               f"{r['facets']:6d}  {note}")
     ok = [r for r in rows if r["ok"]]
     nb = [r for r in rows if r["nist_broken"]]
-    print(f"\n{len(ok)}/{len(rows)} eslesme dogrulandi "
-          f"(esik %{TOL:g}, herhangi bir fasette)")
-    print(f"  eslesmeyen {len(rows) - len(ok) - len(nb)}, "
+    print(f"\n{len(ok)}/{len(rows)} matches confirmed "
+          f"(threshold {TOL:g} %, on any facet)")
+    print(f"  unmatched {len(rows) - len(ok) - len(nb)}, "
           f"NIST record corrupt {len(nb)}"
           + (f" ({', '.join(r['el'] for r in nb)})" if nb else ""))
     if ok:
         w = sorted(r["worst_pct"] for r in ok)
         print(f"worst deviation among the confirmed: median {statistics.median(w):.3f} %, "
-              f"en fazla %{w[-1]:.3f}")
+              f"max {w[-1]:.3f} %")
     out = os.path.join(HERE, "nist_match.json")
     json.dump({r["el"] + "|" + r["file"]: r for r in rows},
               open(out, "w"), indent=1, sort_keys=True)

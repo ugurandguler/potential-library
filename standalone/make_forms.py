@@ -325,16 +325,21 @@ CEILING = dict(
     source="Free-spline fits on the same training sets at four to six grid "
            "resolutions per element. For each resolution the ridge is chosen on "
            "a validation slice of the training set, the resolution is then "
-           "chosen on the same slice, and the hold-out is scored once. Forces verified against finite "
+           "chosen on the same slice, and the hold-out is scored once. For the four "
+           "forms, each element was fitted in up to three searches at its knee weight "
+           "(cold, warm-started, and a converged 42-start run); the fit reported is the one "
+           "with the lowest TRAINING cost, and the hold-out plays no part in choosing it. "
+           "UG-2 lands within 0.01 eV/Å across searches (tantalum 0.15); the other forms "
+           "move by up to 0.23, so differences below about 0.1 eV/Å are not resolved. Forces verified against finite "
            "differences to 10<sup>−9</sup> eV/Å &mdash; and the fitting "
            "machinery recovers a known potential to 0.0002 eV/Å on a synthetic "
            "hold-out.",
     cols=["Element", "MAU", "UG", "FS", "UG-2", "free splines", "UG-2 / splines"],
-    rows=[["W (240)", "0.409", "0.396", "0.299", "0.295", "0.091", "3.2×"],
-          ["Mo (380)", "0.431", "0.400", "0.362", "0.308", "0.096", "3.2×"],
+    rows=[["W (240)", "0.409", "0.396", "0.299", "0.294", "0.091", "3.2×"],
+          ["Mo (380)", "0.431", "0.400", "0.308", "0.308", "0.096", "3.2×"],
           ["Nb (272)", "0.314", "0.328", "0.407", "0.236", "0.076", "3.1×"],
           ["Ta (385)", "0.397", "0.374", "0.432", "0.248", "0.082", "3.0×"],
-          ["V (248)", "0.306", "0.271", "0.238", "0.248", "0.069", "3.6×"]],
+          ["V (248)", "0.306", "0.308", "0.238", "0.248", "0.069", "3.6×"]],
     best=[None, None, None, None, None, 5, None])
 
 ANCHOR = dict(
@@ -346,7 +351,7 @@ ANCHOR = dict(
     cols=["Fit", "MAU", "UG", "FS", "UG-2"],
     rows=[["Nb at its knee (272)", "0.314", "0.328", "0.407", "0.236"],
           ["Nb with no anchors", "0.192", "0.188", "0.207", "0.195"],
-          ["Mo at its knee (380)", "0.431", "0.400", "0.362", "0.308"],
+          ["Mo at its knee (380)", "0.431", "0.400", "0.308", "0.308"],
           ["Mo with no anchors", "0.291", "0.287", "0.307", "0.298"]],
     best=[None, None, None, None, None])
 
@@ -707,10 +712,16 @@ even though both are &ldquo;Legendre corrections&rdquo;.</p>
 {plots}
 
 <h2>The fitted parameters</h2>
-<p>These are the parameter sets every number on this page was computed with, as
-read from <code>forms_params.json</code> beside the page&rsquo;s own build
-script. Lengths are in &aring;ngstr&ouml;m and energies in electronvolts; the
-switch turns on at 0.85 of each cutoff. <b>They are published so the numbers can
+<p>These are the single-element parameter sets the alloy, transfer and
+point-defect tables were built on, as read from <code>forms_params.json</code>
+beside the page&rsquo;s own build script. The ceiling table reports, for each
+element and form, the search with the lowest training cost. In thirteen of
+the twenty cases that is the same fit; in seven (tungsten's UG-2, molybdenum's
+MAU, UG and UG-2, vanadium's MAU, FS and UG-2) it is a different search of the
+same objective, and every set behind that table is in
+<code>forms_params_ceiling.json</code> beside it, with the search it came
+from. Lengths are in &aring;ngstr&ouml;m and energies in
+electronvolts; the switch turns on at 0.85 of each cutoff. <b>They are published so the numbers can
 be checked, not because they are recommended:</b> see the warning at the top of
 this page.</p>
 {params}

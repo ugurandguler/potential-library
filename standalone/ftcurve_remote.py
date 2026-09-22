@@ -117,7 +117,7 @@ def lift(b, qs, idx, radius, hcp, f):
         scaled.append([v * s for v in qs[i]])
     g = run(b, scaled)
     if len(g) != len(idx):
-        print("   kabuk %d/%d blok, bu gecis atlandi" % (len(g), len(idx)))
+        print("   shell %d/%d blocks, this pass skipped" % (len(g), len(idx)))
         return
     for j, i in enumerate(idx):
         up = [x / ratio[j] for x in g[j]]
@@ -130,12 +130,12 @@ def main():
     for el in sorted(index):
         b, N = binary(el)
         if not b:
-            print("%-3s ikili YOK" % el)
+            print("%-3s binary MISSING" % el)
             continue
         qs = [list(map(float, l.split())) for l in open(os.path.join(M, "ftq_%s.txt" % el))]
         f = run(b, qs)
         if len(f) != len(qs):
-            print("%-3s %d/%d blok, atlandi" % (el, len(f), len(qs)))
+            print("%-3s %d/%d blocks, skipped" % (el, len(f), len(qs)))
             continue
         hcp = index[el]["struct"] == "hcp"
         step = 1.0 / N
@@ -163,11 +163,11 @@ def main():
         sub = sorted(set(first) | set(broke))
         out[el] = {"f": [[round(v, 3) for v in r] for r in f],
                    "sub": sub, "mesh": N, "neg": neg}
-        print("%-3s N=%-3d %4d q, ilk hucre %2d, onarilan %2d, negatif %d"
+        print("%-3s N=%-3d %4d q, first cell %2d, repaired %2d, negative %d"
               % (el, N, len(f), len(first), len(broke), neg))
     p = os.path.join(M, "ftcurve.json")
     json.dump(out, open(p, "w"), separators=(",", ":"))
-    print("\n%s  %d bayt" % (p, os.path.getsize(p)))
+    print("\n%s  %d bytes" % (p, os.path.getsize(p)))
 
 
 if __name__ == "__main__":

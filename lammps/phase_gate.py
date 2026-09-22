@@ -94,8 +94,8 @@ def sofg(pos, boxlen, a):
 
 
 def verdict(s):
-    return ("KATI" if s > SOLID_MIN else
-            "SIVI" if s < LIQUID_MAX else "ARADA")
+    return ("SOLID" if s > SOLID_MIN else
+            "LIQUID" if s < LIQUID_MAX else "BETWEEN")
 
 
 def main():
@@ -118,18 +118,18 @@ def main():
     if control and os.path.exists(control):
         pos, L = read_data(control)
         s = max(sofg(pos, L, x) for x in np.arange(a * 0.9, a * 1.15, 0.01))
-        print("KONTROL  %-22s S = %.3f   %s"
+        print("CONTROL  %-22s S = %.3f   %s"
               % (os.path.basename(control), s,
-                 "metrik saglam" if s > 0.9 else
-                 "METRIK BOZUK - asagidaki hicbir sayiya guvenme"))
+                 "metric sound" if s > 0.9 else
+                 "METRIC BROKEN - trust none of the numbers below"))
         print()
     else:
-        print("KONTROL YOK.  --data ile kusursuz bir baslangic hucresi ver;")
-        print("aksi halde dusuk S in sivi mi yoksa hatali G mi oldugunu"
-              " bilemezsin.\n")
+        print("NO CONTROL.  Give a perfect starting cell with --data;")
+        print("otherwise you cannot tell whether a low S means liquid"
+              " or a wrong G.\n")
 
-    hdr = ("%-22s %9s %9s   %s" % ("dosya", "alt", "ust", "hukum")) if halves \
-        else ("%-22s %9s   %s" % ("dosya", "S", "hukum"))
+    hdr = ("%-22s %9s %9s   %s" % ("file", "lower", "upper", "verdict")) if halves \
+        else ("%-22s %9s   %s" % ("file", "S", "verdict"))
     print(hdr)
     print("-" * len(hdr))
     for f in files:
@@ -140,14 +140,14 @@ def main():
             lo_, hi_ = pos[pos[:, 2] < zc], pos[pos[:, 2] >= zc]
             s1 = max(sofg(lo_, L, x) for x in grid)
             s2 = max(sofg(hi_, L, x) for x in grid)
-            v = ("IKI FAZ" if abs(s1 - s2) > 0.2 else
-                 "HEPSI " + verdict(max(s1, s2)))
+            v = ("TWO PHASES" if abs(s1 - s2) > 0.2 else
+                 "ALL " + verdict(max(s1, s2)))
             print("%-22s %9.3f %9.3f   %s" % (os.path.basename(f), s1, s2, v))
         else:
             s = max(sofg(pos, L, x) for x in grid)
             print("%-22s %9.3f   %s" % (os.path.basename(f), s, verdict(s)))
-    print("\nS ~ 1 kristal, S ~ 1/sqrt(N) sivi.  Birlikte-varolma kosusunda iki")
-    print("yari FARKLI olmali; ikisi de dusukse ortada erime noktasi yoktur.")
+    print("\nS ~ 1 crystal, S ~ 1/sqrt(N) liquid.  In a coexistence run the two")
+    print("halves must DIFFER; if both are low there is no melting point here.")
     return 0
 
 

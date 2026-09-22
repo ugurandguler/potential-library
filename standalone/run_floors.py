@@ -56,7 +56,7 @@ def main(els):
                 print(f"[{len(done):2d}/{len(els)}] {el:3s} "
                       f"{(time.time()-ts)/60:5.1f} dk  "
                       f"({(time.time()-t0)/60:.0f} min in total)", flush=True)
-    print(f"\nbitti, {(time.time()-t0)/60:.0f} dakika")
+    print(f"\ndone, {(time.time()-t0)/60:.0f} minutes")
 
 
 if __name__ == "__main__":

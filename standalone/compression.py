@@ -154,21 +154,21 @@ def main():
         if r is None:
             return "?"
         if r.get("lost"):
-            return "DAGILDI"
+            return "disintegrated"
         if r.get("collapsed"):
-            return "COKTU"
+            return "collapsed"
         if r.get("T", 300) > 400:
-            return "SUPHELI"
-        return "saglam"
+            return "suspect"
+        return "ok"
 
     els = args or sorted(lib)
     out = {}
-    print("Sikisma kacagi.  Olcut: engel > k_B * T_erime (ampirik, bkz. kod).")
-    print("Engel bunun altindaysa kristal erime noktasina dayanmaz.\n")
+    print("Compression leak.  Criterion: barrier > k_B * T_melt (empirical, see the code).")
+    print("Below that barrier the crystal does not survive to its melting point.\n")
     for key in keys:
         print(f"=== {key} ===")
-        print(f"{'el':4s}{'x_baslangic':>12s}{'engel eV':>10s}"
-              f"{'derinlik':>11s}{'ulasilir':>10s}{'MD':>10s}")
+        print(f"{'el':4s}{'x_onset':>12s}{'barr. eV':>10s}"
+              f"{'depth':>11s}{'reachable':>10s}{'MD':>10s}")
         print("-" * 57)
         hit, bad = [], []
         for el in els:
@@ -178,7 +178,7 @@ def main():
                 continue
             x, b, d = probe(el, rec)
             v = verdict(f"{el}|{key}")
-            if v in ("COKTU", "DAGILDI"):
+            if v in ("collapsed", "disintegrated"):
                 bad.append(el)
             if x is None:
                 out[f"{el}|{key}"] = None
@@ -189,7 +189,7 @@ def main():
             out[f"{el}|{key}"] = {"x": x, "barrier": b, "depth": d,
                                   "reachable": bool(reach)}
             print(f"{el:4s}{x:12.3f}{b:10.3f}{d:11.1f}"
-                  f"{('EVET' if reach else 'hayir'):>10s}{v:>10s}")
+                  f"{('YES' if reach else 'no'):>10s}{v:>10s}")
         print(f"\n  reachable at 600 K: {' '.join(hit) or 'none'}")
         print(f"  collapses/disperses in MD: {' '.join(bad) or 'none'}\n")
     #  MERGE.  Running this on a handful of elements to check something used to
@@ -207,7 +207,7 @@ def main():
     all_.update(out)
     json.dump(all_, open(pa, "w"), indent=1, sort_keys=True)
     print(f"-> compression.json ({len(all_)} records; {kept} already present, "
-          f"{len(out)} tazelendi)")
+          f"{len(out)} refreshed)")
 
 
 if __name__ == "__main__":

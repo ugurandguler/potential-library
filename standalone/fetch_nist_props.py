@@ -186,9 +186,9 @@ def main():
             hit = next((h for h in hits if el in h[2]), hits[0])
             jobs.append((el, fn, hit[0], hit[1]))
 
-    print(f"eslesen: {len(jobs)}   eslesmeyen: {len(missing)}")
+    print(f"matched: {len(jobs)}   unmatched: {len(missing)}")
     if missing:
-        print("  eslesmeyenler:", [f"{e}/{f}" for e, f in missing][:8])
+        print("  unmatched:", [f"{e}/{f}" for e, f in missing][:8])
 
     out = {}
     p = os.path.join(HERE, "nist_props.json")

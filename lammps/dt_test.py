@@ -20,7 +20,7 @@ import refdata
 lib = json.load(open(os.path.join(N.ROOT, "standalone", "library.json")))
 print("tapered run, same physical time (40 ps), different step")
 print(f"{'el':4s}{'mass':>7s}{'2 fs':>10s}{'0.5 fs':>10s}{'ratio':>8s}"
-      f"{'dt^2 beklenen':>15s}   verdict")
+      f"{'dt^2 expected':>15s}   verdict")
 print("-" * 64)
 for el in sys.argv[1:] or ["Ti", "Y"]:
     e = refdata.ELEMENTS[el]
@@ -34,7 +34,7 @@ for el in sys.argv[1:] or ["Ti", "Y"]:
         print(f"{el:4s}  error: {err2 or err5}")
         continue
     ratio = abs(d2) / abs(d5) if d5 else float("inf")
-    verdict = ("integrator hatasi" if 8 <= ratio <= 32
-               else "potansiyel" if ratio < 3 else "belirsiz")
+    verdict = ("integrator error" if 8 <= ratio <= 32
+               else "potential" if ratio < 3 else "unclear")
     print(f"{el:4s}{refdata.MASSES[el]:7.1f}{d2:10.3f}{d5:10.3f}"
           f"{ratio:8.1f}{16.0:15.1f}   {verdict}")

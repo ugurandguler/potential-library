@@ -183,7 +183,7 @@ def main():
             args.remove(a)
             TAG += "_" + k
     els = args or sorted(lib)
-    print("pair_style ugur ile latdyn, esneklik sabitleri (GPa), ic gevseme dahil")
+    print("pair_style ugur against latdyn, elastic constants (GPa), internal relaxation included")
     print(f"{'el':4s}{'struct':>5s}{'const':>7s}{'latdyn':>10s}{'lammps':>10s}"
           f"{'diff %':>9s}   symmetry")
     print("-" * 62)
@@ -207,7 +207,7 @@ def main():
             ref = UGREF.get(f"{el}|{SETKEY}")
             if ref is None:
                 print(f"{el:4s}{e['struct']:>5s}  no angular reference "
-                      f"(angular/elastic_ref.py --set {SETKEY} calistirin)")
+                      f"(run angular/elastic_ref.py --set {SETKEY})")
                 continue
         if ref is None:
             ref = as_dict(L.elastic(cry, pot)[0])   # relaxed, not frozen-ion
@@ -235,7 +235,7 @@ def main():
                   f"   {note if i == 0 else ''}")
     worst.sort(reverse=True)
     print()
-    print("en kotu bes:", ", ".join(f"{el} {k} %{p:.2f}"
+    print("worst five:", ", ".join(f"{el} {k} %{p:.2f}"
                                     for p, el, k in worst[:5]))
 
 

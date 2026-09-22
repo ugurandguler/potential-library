@@ -50,7 +50,7 @@ identical code:
 | quantity | how it does |
 | --- | --- |
 | elastic constants C_ij | median RMS 1.45 % (UG), 5.83 % (MAU) |
-| vacancy formation energy | **2.25× the published median** for the switched arms over the 21 elements that have a published value, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.06 MAU, 1.54 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
+| vacancy formation energy | **2.25× the median of the published classical potentials** in JARVIS-FF (not DFT) for the switched arms, over the 21 elements that have one, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.05 MAU, 1.55 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
 | thermal expansion | 32 % low; 9 records contract on heating |
@@ -156,7 +156,8 @@ the ceiling should not be moved to accommodate results produced under it.
 
 The caveat above says not to use these parameters for melting. That is now a
 number rather than a caution. Tantalum's force-matched record melts at
-**2250 ± 250 K against an experimental 3290** — about thirty per cent low.
+**2625 ± 125 K against an experimental 3290** — about twenty per cent low, at
+zero pressure. (Release 1.4.3 said 2250 ± 250 K; see below for why that moved.)
 
 It was measured wrongly first, and the failure is worth recording because it
 produced a plausible number. A two-phase coexistence run returned 3438 K, which
@@ -174,19 +175,30 @@ the solid at 1200 K — never at the melting point, where it nucleates at random
 holds them there. `lammps/phase_gate.py` then reads which phase won:
 
 ```
-lmp -in in.coexistence_bracket -var TTRY 2250
+lmp -in in.coexistence_bracket -var TTRY 2500
 python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
 ```
 
-| trial T | S per half | what happened | conclusion |
+| trial T | S per half after 120 ps | what happened | conclusion |
 | --- | --- | --- | --- |
-| 2000 K | 0.695 / 0.875 | the liquid half froze | Tm above 2000 |
-| 2250 K | 0.255 / 0.192 | neither phase won | Tm near 2250 |
-| 2500 K | 0.072 / 0.039 | the solid half melted | Tm below 2500 |
+| 2000 K | 0.760 / 0.802 | the liquid half froze | Tm above 2000 |
+| 2250 K | 0.847 / 0.857 | the liquid half froze | Tm above 2250 |
+| 2500 K | 0.751 / 0.708 | the liquid half froze | Tm above 2500 |
+| 2750 K | 0.068 / 0.098 | the solid half melted | Tm below 2750 |
 
-**That is the whole measurement**: under a thermostat, whether the solid melts
-or the liquid freezes *is* the answer, so it needs no barostatted coexistence
-stage and no temperature reading — the fragile part, and the part that produced
+**Two ways to get a different number, and both happened.** A 40 ps hold is too
+short: from 2000 to 2500 K neither half has won when it ends, and reading that
+as "neither wins" is where 2250 ± 250 K came from; 120 ps decides every trial
+temperature. And holding the *volume* instead of the pressure leaves the cell
+at about 2 GPa near 2500 K, which raises the apparent melting point. The copy of
+`in.coexistence_bracket` in 1.4.3 and 1.4.4 did exactly that — its stages ran
+at fixed volume while the numbers in its own comment came from zero-pressure
+runs. It now runs every stage after the first at zero pressure, with a 120 ps
+hold by default.
+
+**That is the whole measurement**: at a fixed temperature and zero pressure,
+whether the solid melts or the liquid freezes *is* the answer, so it needs no
+interface-settling stage and no temperature reading — the fragile part, and the part that produced
 the void 3438 K. `lammps/in.coexistence` carries that stage for anyone who
 wants the settling temperature as well. Both files default to tantalum's
 force-matched record and take the element, potential file, lattice constant and
@@ -431,7 +443,8 @@ figures, rhenium against its single Raman frequency at Γ.
 Two things make the table readable. The numbers are the **switched** arm
 (`<El>_taper.ugur`), not the hard-truncated root the parameter selector calls
 MAU — a hard cut leaves the pair energy discontinuous and copper drifts
-350 meV per atom per nanosecond under it, so the switched arm is the only one
+176 meV per atom per nanosecond under it (40 ps of NVE from 600 K,
+`lammps/nve_check.py`), so the switched arm is the only one
 that can be run at temperature at all. And every run is scored twice, at q and
 at a symmetry image of q, so it reports **its own noise floor**; the verdict is
 computed from that rather than left to the reader, because 15 of the 27

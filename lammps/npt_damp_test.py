@@ -57,7 +57,7 @@ def alpha(el, tag, td=None, pd=None, label=""):
             "{td}", str(td)).replace("{pd}", str(pd))
         r = M.one((el, tag, T))
         if "error" in r:
-            print(f"  {el} {label} {T:6.1f} K  HATA: {r['error']}")
+            print(f"  {el} {label} {T:6.1f} K  ERROR: {r['error']}")
             return None
         a.append(r["ax"])
         out.append((T, r["ax"], r["Pavg"], r["Tavg"]))
@@ -77,19 +77,19 @@ def alpha(el, tag, td=None, pd=None, label=""):
 
 def main():
     base = dict(td=None, pd=None)
-    runs = [("Cs", "rc", base, "0.1 ps (mevcut)"),
-            ("Cs", "rc", dict(td=1.0, pd=10.0), "1.0 ps (esler)"),
-            ("Cu", "rc", base, "0.1 ps (mevcut)"),
-            ("Cu", "rc", dict(td=1.0, pd=10.0), "1.0 ps (kontrol)")]
+    runs = [("Cs", "rc", base, "0.1 ps (current)"),
+            ("Cs", "rc", dict(td=1.0, pd=10.0), "1.0 ps (test)"),
+            ("Cu", "rc", base, "0.1 ps (current)"),
+            ("Cu", "rc", dict(td=1.0, pd=10.0), "1.0 ps (control)")]
     got = {}
     for el, tag, kw, lab in runs:
-        print(f"\n=== {el} {tag}, sonum {lab} ===", flush=True)
+        print(f"\n=== {el} {tag}, damping {lab} ===", flush=True)
         got[(el, lab)] = alpha(el, tag, label=lab, **kw)
     print("\n" + "=" * 58)
     for k, v in got.items():
         print(f"  {k[0]:3s} {k[1]:18s} {v if v is None else round(v,1)}")
-    print("\nCs isaret degistirir ve Cu yerinde kalirsa sebep sonum sabitidir.")
-    print("Ikisi de kaymazsa sebep baska yerde.")
+    print("\nIf Cs changes sign and Cu stays put, the cause is the damping constant.")
+    print("If neither moves, the cause is elsewhere.")
 
 
 if __name__ == "__main__":

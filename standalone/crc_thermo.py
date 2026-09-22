@@ -84,7 +84,7 @@ def main():
     got = scan(doc)
 
     print(f"{'el':4s}{'S CRC':>9s}{'Cp CRC':>9s}{'S ours':>9s}{'Cp ours':>9s}"
-          f"{'sayfa':>7s}  ")
+          f"{'page':>7s}  ")
     print("-" * 50)
     bad, new = [], []
     for sym in sorted(got):
@@ -101,17 +101,17 @@ def main():
                   f"{page:7d}{mark}")
         else:
             new.append(sym)
-            print(f"{sym:4s}{s:9.1f}{cp:9.1f}{'-':>9s}{'-':>9s}{page:7d}  YENI")
+            print(f"{sym:4s}{s:9.1f}{cp:9.1f}{'-':>9s}{'-':>9s}{page:7d}  NEW")
     missing = sorted(set(NAMES) - set(got))
     json.dump({k: [v[0], v[1]] for k, v in got.items()},
               open(OUT, "w"), indent=1, sort_keys=True)
-    print(f"\n{len(got)}/{len(NAMES)} element okundu")
+    print(f"\n{len(got)}/{len(NAMES)} elements read")
     if missing:
         print(f"not found in the table: {', '.join(missing)}")
     if new:
-        print(f"refdata'da olmayan (eklenecek): {', '.join(new)}")
+        print(f"not in refdata (to be added): {', '.join(new)}")
     print("check: " + ("FAILED, differing: " + ", ".join(bad)
-                           if bad else "mevcut satirlarin hepsi tutuyor"))
+                           if bad else "all existing rows agree"))
     print("written:", OUT)
 
 

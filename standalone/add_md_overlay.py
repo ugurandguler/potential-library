@@ -10,7 +10,7 @@ it.  Two things per element:
               crossing the sphere changes the energy by this much in one step.
               Computed here for all 38.
 
-  drift       energy drift in an NVE run, meV/atom/ps, hard cutoff against the
+  drift       energy drift in an NVE run, meV/atom/ns, hard cutoff against the
               switch.  Measured in lammps/nve_check.py for eight elements
               chosen to span the range of `step`, since running all 38 would
               add nothing - the point is the correlation, not the census.
@@ -30,7 +30,7 @@ import latdyn as L
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-#  lammps/nve_check.py, 600 K start, 2 fs, 40 ps NVE, meV/atom/ps.
+#  lammps/nve_check.py, 600 K start, 2 fs, 40 ps NVE, meV/atom/ns.
 #  Chromium's tapered figure is integrator error and not the potential: it
 #  falls to -1.37 at 0.5 fs, against -1.54 predicted by dt^2, and chromium is
 #  the stiffest element here.  Anything under about ten is in that regime.
@@ -39,7 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 #  drift, they destroy the crystal - the mean potential energy ends below the
 #  static lattice, which is the signature of a structure that has come apart -
 #  and ruthenium, which has the deepest phi2 at its cutoff of any element in
-#  the library at -0.346 eV, drifts by 3376 meV/atom/ps against 0.065 with the
+#  the library at -0.346 eV, drifts by 3376 meV/atom/ns against 0.065 with the
 #  switch.  A ratio of fifty-two thousand.
 NVE = {
     "W":  (581.647, 0.254),
@@ -100,7 +100,7 @@ def main():
         json.dump(lib, fh, indent=1, sort_keys=True, default=str)
     os.replace(tmp, path)
     print(f"\ncutoff step folded into {n} elements, NVE drift into {len(NVE)}")
-    print("birlestirildi:", path)
+    print("merged:", path)
 
 
 if __name__ == "__main__":

@@ -146,7 +146,7 @@ def one(el, tag, struct):
     m = re.search(r"^E\s+([-\d.eE+]+)", t, re.M)
     if not m:
         err = [l for l in t.splitlines() if "ERROR" in l]
-        return {"error": err[0][:70] if err else "enerji cikmadi"}
+        return {"error": err[0][:70] if err else "no energy"}
     box = {}
     for k in ("LX", "LY", "LZ"):
         mm = re.search(rf"^{k}\s+([-\d.eE+]+)", t, re.M)
@@ -204,8 +204,8 @@ def main():
     #  and refuse to write an empty result over a good one
     if not jobs:
         print("0 runs - element or set name not recognised; nothing was written")
-        print(f"  istenen elementler: {els}")
-        print(f"  istenen setler:     {sets}")
+        print(f"  requested elements: {els}")
+        print(f"  requested sets:     {sets}")
         return
     print(f"{len(jobs)} runs, {nw} in parallel", flush=True)
     with ThreadPoolExecutor(max_workers=nw) as ex:
@@ -216,7 +216,7 @@ def main():
 
     print()
     print(f"{'el':4s}{'should be':>15s}{'source':>28s}"
-          f"{'bcc':>9s}{'fcc':>9s}{'hcp':>9s}   en dusuk")
+          f"{'bcc':>9s}{'fcc':>9s}{'hcp':>9s}   lowest")
     print("-" * 92)
     wrong = []
     for (el, tag), d in got.items():
@@ -224,27 +224,27 @@ def main():
         vals = {s: d[s].get("E") for s in CANDIDATES}
         if any(v is None for v in vals.values()):
             bad = [s for s in CANDIDATES if vals[s] is None]
-            print(f"{el:4s}{want:>15s}{tag[:28]:>28s}   eksik: "
+            print(f"{el:4s}{want:>15s}{tag[:28]:>28s}   missing: "
                   f"{', '.join(f'{s}={d[s].get(chr(101)+chr(114)+chr(114)+chr(111)+chr(114))}' for s in bad)[:50]}")
             continue
         low = min(vals, key=vals.get)
         rel = {s: 1000 * (vals[s] - vals[want]) for s in CANDIDATES}
         lab = {"tap": "MAU", "tap_ug": "UG"}.get(tag, tag.replace("base|", ""))
-        mark = "" if low == want else f"  <-- {low.upper()} DAHA DUSUK"
+        mark = "" if low == want else f"  <-- {low.upper()} IS LOWER"
         #  a cell that left its symmetry is not the structure in the heading
         bent = [s for s in CANDIDATES if d[s].get("shape_ok") is False]
         if bent:
-            mark += f"   [simetri bozuldu: {','.join(bent)}]"
+            mark += f"   [symmetry broken: {','.join(bent)}]"
         print(f"{el:4s}{want:>15s}{lab[:28]:>28s}"
               f"{rel['bcc']:9.1f}{rel['fcc']:9.1f}{rel['hcp']:9.1f}"
               f"   {low}{mark}")
         if low != want and not bent:
             wrong.append((el, lab, low, rel[low]))
-    print("\nsayilar meV/atom, olmasi gereken yapiya gore.  "
+    print("\nnumbers in meV/atom, relative to the structure it should have.  "
           "Negative = that structure is lower.")
     print(f"\nwrong ground state: {len(wrong)}/{len(got)}")
     for el, lab, low, dv in sorted(wrong, key=lambda x: x[3]):
-        print(f"  {el:3s} {lab:26s} {low} {dv:+8.1f} meV/atom daha dusuk")
+        print(f"  {el:3s} {lab:26s} {low} {dv:+8.1f} meV/atom lower")
     #  Merge, never overwrite.  A five-element diagnostic run must not erase a
     #  ninety-five-record sweep, and in this project that has now happened to
     #  md_screen.json, compression.json, library.json and this file.  Writing

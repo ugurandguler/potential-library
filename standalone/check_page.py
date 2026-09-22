@@ -130,9 +130,9 @@ def scan(path):
             prev = ch
         i += 1
     if q:
-        return len(stack) + 1, f"kapanmamis dizgi ({q})"
-    return len(stack), (f"kapanmamis: {[f[0] for f in stack]}"
-                        if stack else "dengeli")
+        return len(stack) + 1, f"unclosed string ({q})"
+    return len(stack), (f"unclosed: {[f[0] for f in stack]}"
+                        if stack else "balanced")
 
 
 def main():
@@ -140,7 +140,7 @@ def main():
     bad = 0
     for p in paths:
         n, why = scan(p)
-        print(f"{p[:44]:46s} {'TAMAM' if n == 0 else 'BOZUK'}  {why[:60]}")
+        print(f"{p[:44]:46s} {'OK' if n == 0 else 'BROKEN'}  {why[:60]}")
         bad += (n != 0)
     sys.exit(1 if bad else 0)
 

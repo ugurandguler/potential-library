@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Li_recut.ugur Li
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 23 K to 300 K (x3.108); 300 K elastic error 133.0 % against 32.5 % for the switched set.  For MD on this element use Li_taper.ugur
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 23 K to 300 K (x3.108); 300 K elastic error 133.0 % against 32.5 % for the switched set; and the switched set itself has no barrier against collapse under compression (0.000 eV against k_B T_melt 0.039 eV).  For MD on this element use Li_taper.ugur
 # MD: structure screened - holds its shape at 600 K (349 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

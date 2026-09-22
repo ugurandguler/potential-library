@@ -304,7 +304,7 @@ def check(delta=1.0e-6):
             style, ext, cry = setup(d, sname, cell)
             v = born_static(d, style, ext, delta)
             if v is None:
-                print(f"{cname:6s} {sname:8s}  born/matrix cikmadi")
+                print(f"{cname:6s} {sname:8s}  born/matrix produced no output")
                 continue
             pot = L.Potential.from_record(lib["Ru"][key])
             #  the comparison must be against the FROZEN-ION curvature: that is
@@ -332,14 +332,14 @@ def check(delta=1.0e-6):
                 e = 100 * (got - want) / abs(want) if abs(want) > 1e-9 else 0.0
                 print(f"{nm:6s}{got:13.1f}{want:13.1f}{e:9.2f}{rel:15.1f}")
             print(f"{'':6s}C66 vs (C11-C12)/2: {v[6]:.1f} vs "
-                  f"{0.5*(v[1]-v[7]):.1f}   (altigen ozdesligi)")
+                  f"{0.5*(v[1]-v[7]):.1f}   (hexagonal identity)")
             print()
 
 
 def delta_scan():
     """the sensitivity study the docs say is the only way to pick delta"""
-    print("numdiff delta taramasi (T=0, paper hucresi, MAU_tap).")
-    print("Dokuman: cok kucukse gurultu, cok buyukse yuksek mertebe.\n")
+    print("numdiff delta scan (T=0, paper cell, MAU_tap).")
+    print("Docs: too small gives noise, too large gives higher-order terms.\n")
     print(f"{'delta':>10s}{'C11':>10s}{'C33':>10s}{'C44':>10s}{'C12':>10s}")
     print("-" * 50)
     for dl in (1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8):
@@ -347,7 +347,7 @@ def delta_scan():
         style, ext, cry = setup(d, "MAU_tap", CELLS["paper"])
         v = born_static(d, style, ext, dl)
         if v is None:
-            print(f"{dl:10.0e}   cikmadi"); continue
+            print(f"{dl:10.0e}   no output"); continue
         print(f"{dl:10.0e}{v[1]:10.1f}{v[3]:10.1f}{v[4]:10.1f}{v[7]:10.1f}")
 
 
@@ -379,7 +379,7 @@ def one_md(job):
 def sweep(delta=1.0e-6):
     jobs = [(c, s, T, delta) for c in CELLS for s in SETS for T in TEMPS]
     nw = max(1, (os.cpu_count() or 4) - 2)
-    print(f"hcp Ru, 108 atom, NVT, Born dalgalanma yontemi "
+    print(f"hcp Ru, 108 atom, NVT, Born fluctuation method "
           f"({len(jobs)} runs, {nw} in parallel)\n")
     with ThreadPoolExecutor(max_workers=nw) as ex:
         res = list(ex.map(one_md, jobs))
@@ -390,13 +390,13 @@ def sweep(delta=1.0e-6):
               indent=1, sort_keys=True)
     for k in sorted(out):
         c, s = k.split("|")
-        print(f"=== {c} hucresi, {s} ===  ({CELLS[c]['note']})")
+        print(f"=== {c} cell, {s} ===  ({CELLS[c]['note']})")
         print(f"{'T':>6s}{'C11':>9s}{'C33':>9s}{'C44':>9s}{'C12':>9s}"
-              f"{'C13':>9s}{'C66':>9s}{'(C11-C12)/2':>13s}{'Tolc':>8s}")
+              f"{'C13':>9s}{'C66':>9s}{'(C11-C12)/2':>13s}{'Tmeas':>8s}")
         for T in TEMPS:
             r = out[k][str(T)]
             if r is None:
-                print(f"{T:6d}   hesaplanamadi"); continue
+                print(f"{T:6d}   could not be computed"); continue
             print(f"{T:6d}{r['C11']:9.1f}{r['C33']:9.1f}{r['C44']:9.1f}"
                   f"{r['C12']:9.1f}{r['C13']:9.1f}{r['C66']:9.1f}"
                   f"{0.5*(r['C11']-r['C12']):13.1f}{r['Tavg']:8.0f}")
@@ -430,7 +430,7 @@ def report():
     """our numbers beside the paper's and experiment's"""
     out = json.load(open(os.path.join(HERE, "ru_born.json")))
     ks = ("C11", "C12", "C13", "C33", "C44", "C66")
-    print("hcp Ru, T = 0 K.  Makalenin Tablo 1'i ile yan yana.\n")
+    print("hcp Ru, T = 0 K.  Beside Table 1 of the paper.\n")
     hdr = f"{'':6s}{'expt':>8s}{'FS(pap.)':>10s}"
     for cn in CELLS:
         for sn in SETS:
@@ -479,13 +479,13 @@ def report():
     print()
     for k in sorted(out):
         cn, sn = k.split("|")
-        print(f"=== {sn}, {cn} hucresi ===")
+        print(f"=== {sn}, {cn} cell ===")
         print(f"{'T':>6s}{'C11':>9s}{'C12':>9s}{'C13':>9s}{'C33':>9s}"
-              f"{'C44':>9s}{'C66':>9s}{'B':>9s}{'G':>9s}{'Tolc':>7s}")
+              f"{'C44':>9s}{'C66':>9s}{'B':>9s}{'G':>9s}{'Tmeas':>7s}")
         for T in TEMPS:
             r = out[k].get(str(T))
             if r is None:
-                print(f"{T:6d}   hesaplanamadi")
+                print(f"{T:6d}   could not be computed")
                 continue
             h = hill(r)
             print(f"{T:6d}{r['C11']:9.1f}{r['C12']:9.1f}{r['C13']:9.1f}"
@@ -520,7 +520,7 @@ def hill_selftest():
     got = hill(PAPER_T0)
     want = {"B": 324.7, "G": 232.4, "E": 563.0, "B/G": 1.4,
             "nu": 0.21, "AU": 0.03}
-    print("Hill formullerinin makalenin kendi satirini yeniden vermesi:")
+    print("Do the Hill formulas reproduce the paper's own row:")
     print(f"{'':6s}{'ours':>9s}{'paper':>9s}")
     for k in ("B", "G", "E", "B/G", "nu", "AU"):
         print(f"{k:6s}{got[k]:9.2f}{want[k]:9.2f}")

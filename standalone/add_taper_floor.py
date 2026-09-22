@@ -77,18 +77,18 @@ def main():
         n += 1
         if v["reach"].get("ok") is False and ok:
             flips += 1
-        what = ("olculdu" if gl is False
-                else "KISIT SINIRI" if gl else "belirsiz")
+        what = ("measured" if gl is False
+                else "CONSTRAINT BOUND" if gl else "unclear")
         print(f"{el:4s}{rec['R_exp']:8.2f}{v['reach']['R_floor']:9.3f}"
               f"{rec['R_floor']:9.3f}"
-              f"{('erisilir' if ok else 'FORM DISI'):>12s}   {what}")
+              f"{('reachable' if ok else 'OUTSIDE FORM'):>12s}   {what}")
 
     tmp = path + ".tmp"
     with open(tmp, "w") as fh:
         json.dump(lib, fh, indent=1, sort_keys=True, default=str)
     os.replace(tmp, path)
     print(f"\ntapered floor folded into {n} elements, {flips} verdicts changed")
-    print("birlestirildi:", path)
+    print("merged:", path)
 
 
 if __name__ == "__main__":

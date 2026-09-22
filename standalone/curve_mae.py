@@ -198,14 +198,14 @@ def pick_hcp(f6, vec, qc, label):
     nu1..nu6 are zone-boundary frequencies the paper lists by index with no
     polarisation at all, and they keep the six-way nearest read.
 
-    Returns (value, how) with how in {"etiket", "cift", "yakin"} so the
+    Returns (value, how) with how in {"label", "pair", "nearest"} so the
     caller can report how much of the comparison is actually labelled.
     """
     f6 = np.asarray(f6, float)
     head = label.split("[")[0]
     got = hcp_classes(vec, qc)
     if got is None or head.startswith("nu"):
-        return None, "yakin"
+        return None, "nearest"
     cls, split = got
     #  members of each class, in frequency order: first acoustic, then optic
     band = {}
@@ -222,27 +222,27 @@ def pick_hcp(f6, vec, qc, label):
 
     if head in ("LA", "LO"):
         v = one(L_, head[1])
-        return (v, "etiket") if v is not None else (None, "yakin")
+        return (v, "label") if v is not None else (None, "nearest")
     which = head[1] if len(head) > 1 else "A"
     if head in ("TAperp", "TOperp"):
         v = one(P_, which)
-        return (v, "etiket") if v is not None else (None, "yakin")
+        return (v, "label") if v is not None else (None, "nearest")
     if head in ("TApar", "TOpar"):
         v = one(T_, which)
-        return (v, "etiket") if v is not None else (None, "yakin")
+        return (v, "label") if v is not None else (None, "nearest")
     if head in ("TA", "TO"):
         #  q along c, where the two transverse classes are degenerate; the
         #  paper does not separate them there either
         vs = [x for x in (one(P_, which), one(T_, which)) if x is not None]
         if not vs:
-            return None, "yakin"
-        return float(np.mean(vs)), "etiket" if not split else "cift"
+            return None, "nearest"
+        return float(np.mean(vs)), "label" if not split else "pair"
     if head.startswith("TA_") or head.startswith("TO_"):
         vs = [x for x in (one(P_, which), one(T_, which)) if x is not None]
         if not vs:
-            return None, "yakin"
-        return vs, "cift"
-    return None, "yakin"
+            return None, "nearest"
+        return vs, "pair"
+    return None, "nearest"
 
 
 def pick(f3, label, seg=None):
@@ -403,7 +403,7 @@ def main(only=(), field="exp_curve"):
                         if hcp and not NEAREST and not near_rec:
                             val, how = pick_hcp(f[i], vecs[i], qcart[i], lab)
                             HCPHOW[how] = HCPHOW.get(how, 0) + 1
-                            if how == "cift":
+                            if how == "pair":
                                 got = [min(val, key=lambda x: abs(x - nu))]
                             elif val is None:
                                 got = [min(f[i], key=lambda x: abs(x - nu))]
@@ -466,9 +466,9 @@ def main(only=(), field="exp_curve"):
         print("and G lines and X-W turn direction with zeta and keep the "
               "sorted reading.")
         if any(r.get("hcp") for r in rows) and not NEAREST:
-            n_lab = HCPHOW.get("etiket", 0)
-            n_pair = HCPHOW.get("cift", 0)
-            n_near = HCPHOW.get("yakin", 0)
+            n_lab = HCPHOW.get("label", 0)
+            n_pair = HCPHOW.get("pair", 0)
+            n_near = HCPHOW.get("nearest", 0)
             tot = max(1, n_lab + n_pair + n_near)
             print()
             print("* hcp: six branches, split by polarisation along q and "

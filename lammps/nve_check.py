@@ -15,10 +15,15 @@ integrator meeting a discontinuity.  Two runs per element, same seed, same
 timestep, same everything, and the only difference is the taper flag in the
 potential file.
 
-What is reported is the drift of the total energy in meV/atom/ps, which is the
+What is reported is the drift of the total energy in meV/atom/ns, which is the
 number an MD practitioner judges a potential by.  Below about 1 is fine, tens
 is unusable, and the scale is set by the size of the step the potential has at
-its cutoff, not by the timestep.
+its cutoff, not by the timestep.  Every drift quoted in this docstring - the
+scale just given, palladium's 5 and chromium's 7256, the -24.6/+10.6/-1.37
+chromium series and the "below about ten" noise floor - is in meV/atom/ns as
+well, as are titanium's and yttrium's 17.28/5.73 in the comment in run().  This
+text and the printout used to say /ps; the slope was always taken against
+time in nanoseconds.
 
 Two things to hold on to when reading the numbers.
 
@@ -33,7 +38,7 @@ finding.  It falls to 0.653 over all twelve and 0.787 over the nine whose
 crystal survived, with rhenium the outlier - its step is comparable to
 niobium's and it drifts forty-five times less.  But three of the four hcp runs
 with the hard cutoff do not drift at all in any useful sense: the crystal comes
-apart, which the KRISTAL DAGILDI column reports separately for exactly this
+apart, which the CRYSTAL CAME APART column reports separately for exactly this
 reason.  A categorical failure is worse than a large rate, and averaging the
 two into one regression understates it.
 
@@ -167,7 +172,7 @@ def run(el, rec, e, taper, T=600.0, dt=0.002, neq=2000, nrun=20000,
     #  production.  Those start at 600 K and fall towards 300, which fits a
     #  large positive slope and an average temperature near 355 K.  That is
     #  exactly how titanium and yttrium were first recorded as drifting by
-    #  17.28 and 5.73 meV/atom/ps when they in fact conserve to 0.002; the
+    #  17.28 and 5.73 meV/atom/ns when they in fact conserve to 0.002; the
     #  giveaway was the temperature, since 600 K of initial velocities must
     #  equipartition to 300.
     if "reset_timestep" not in r.stdout:
@@ -187,11 +192,12 @@ def run(el, rec, e, taper, T=600.0, dt=0.002, neq=2000, nrun=20000,
     if len(rows) < 3:
         err = [l for l in r.stdout.splitlines() if "ERROR" in l]
         return None, None, (err[0][:90] if err else "no thermo line"), None
-    #  least-squares slope of total energy against time, meV/atom/ps
+    #  least-squares slope of total energy against time, meV/atom/ns
+    #  (dt is in ps, so step * dt / 1000 is the time in ns)
     import numpy as np
-    ps = np.array([x[0] * dt / 1000.0 for x in rows])
+    ns = np.array([x[0] * dt / 1000.0 for x in rows])
     et = np.array([x[3] * 1000.0 for x in rows])      # toteng, meV/atom
-    slope = float(np.polyfit(ps, et, 1)[0])
+    slope = float(np.polyfit(ns, et, 1)[0])
     Tavg = float(np.mean([x[1] for x in rows]))
     #  A heated crystal sits ABOVE its static lattice energy.  When the
     #  potential energy ends up below it, the run has not drifted - the
@@ -208,7 +214,7 @@ def main():
     lib = json.load(open(os.path.join(ROOT, "standalone", "library.json")))
     els = sys.argv[1:] or DEFAULT
     print("600 K start, 2 fs, 40 ps NVE - total energy drift")
-    print(f"{'el':4s}{'phi2(rc2) eV':>14s}{'SERT':>12s}{'GECISLI':>12s}"
+    print(f"{'el':4s}{'phi2(rc2) eV':>14s}{'HARD':>12s}{'SWITCHED':>12s}"
           f"{'ratio':>9s}{'T avg K':>9s}")
     print("-" * 60)
     #  The runs are independent and there are two per element, so doing them
@@ -246,8 +252,8 @@ def main():
         gone = [t for t, pe in (("hard", peh), ("tapered", pet))
                 if pe is not None and pe < Estat - 0.05]
         print(f"{el:4s}{step:14.4f}{dh:12.3f}{dt_:12.3f}{fac:8.0f}x"
-              f"{Th:9.0f}   {('KRISTAL DAGILDI: ' + ', '.join(gone)) if gone else ''}")
-    print("\nbirim: meV/atom/ps.  1'in alti iyi, onlarca kullanilamaz.")
+              f"{Th:9.0f}   {('CRYSTAL CAME APART: ' + ', '.join(gone)) if gone else ''}")
+    print("\nunit: meV/atom/ns.  Below 1 is fine, tens are unusable.")
 
 
 if __name__ == "__main__":

@@ -180,7 +180,7 @@ def main():
             bad.append(el)
     print()
     if bad:
-        print("uyusmayan:", " ".join(bad))
+        print("mismatched:", " ".join(bad))
         raise SystemExit(1)
     print("pair_style ugur gives latdyn.py's energy AND pressure")
 

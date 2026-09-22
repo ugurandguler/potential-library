@@ -258,7 +258,7 @@ def one(job):
         v = {int(m.group(1)): float(m.group(2))
              for m in re.finditer(r"BORN\s+(\d+)\s+([-\d.eE+]+)", lg)}
         if len(v) < 21:
-            return {"error": "born/matrix cikmadi"}
+            return {"error": "born/matrix produced no output"}
         return {"C11": 0.5 * (v[1] + v[2]), "C33": v[3],
                 "C44": 0.5 * (v[4] + v[5]), "C66": v[6],
                 "C12": v[7], "C13": 0.5 * (v[8] + v[12]),

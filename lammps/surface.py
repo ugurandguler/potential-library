@@ -258,7 +258,7 @@ def cubic_build(el, d, a0, facet, reps):
     vat = a0 ** 3 / (4 if struct == "fcc" else 2)
     want = box.prod() / vat
     if abs(len(coords) - want) > 0.5:
-        raise RuntimeError(f"{facet}: {len(coords)} atom, beklenen {want:.1f}")
+        raise RuntimeError(f"{facet}: {len(coords)} atoms, expected {want:.1f}")
     write_cell(os.path.join(d, "cell.data"), coords, box, refdata.MASSES[el])
     return "read_data       cell.data\n"
 
@@ -298,7 +298,7 @@ def hcp_build(el, d, a0, coa, facet, reps):
     vat = (np.sqrt(3.0) / 2.0) * a0 * a0 * (a0 * float(coa)) / 2.0
     want = box.prod() / vat
     if abs(len(coords) - want) > 0.5:
-        raise RuntimeError(f"{facet}: {len(coords)} atom, beklenen {want:.1f}")
+        raise RuntimeError(f"{facet}: {len(coords)} atoms, expected {want:.1f}")
     write_cell(os.path.join(d, "cell.data"), coords, box, refdata.MASSES[el])
     return "read_data       cell.data\n"
 
@@ -345,14 +345,14 @@ def one(job):
         normal = "z"
 
     if normal != "z":
-        return {"error": f"normal {normal} henuz desteklenmiyor"}
+        return {"error": f"normal {normal} not supported yet"}
 
     lb = run(d, BULK.format(build=build_bulk, style=style, coeff=coeff,
                             skin=SKIN), "in.bulk")
     ebulk = grab(lb, "EBULK")
     if ebulk is None:
         err = [l for l in lb.splitlines() if "ERROR" in l]
-        return {"error": err[0][:80] if err else "bulk kosmadi"}
+        return {"error": err[0][:80] if err else "bulk did not run"}
 
     ls = run(d, SLAB.format(build=build_slab, style=style, coeff=coeff,
                             skin=SKIN, vac=VACUUM), "in.slab")
@@ -360,7 +360,7 @@ def one(job):
     eslab, eunrel = grab(ls, "ESLAB"), grab(ls, "EUNREL")
     if None in (area, nat, eslab):
         err = [l for l in ls.splitlines() if "ERROR" in l]
-        return {"error": err[0][:80] if err else "dilim kosmadi"}
+        return {"error": err[0][:80] if err else "slab did not run"}
     g = (eslab - nat * ebulk) / (2.0 * area)
     g_un = (eunrel - nat * ebulk) / (2.0 * area)
     return {"gamma": g * EV_A2_TO_J_M2, "gamma_unrelaxed": g_un * EV_A2_TO_J_M2,

@@ -114,9 +114,9 @@ def main(els):
                             "--screenshot=" + png,
                             "file:///" + probe.replace("\\", "/")],
                            capture_output=True, timeout=180)
-            print("%-3s %s" % (el, ("%s  %d bayt" % (png,
+            print("%-3s %s" % (el, ("%s  %d bytes" % (png,
                                                      os.path.getsize(png)))
-                               if os.path.exists(png) else "PNG YOK"))
+                               if os.path.exists(png) else "PNG MISSING"))
             os.remove(probe)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

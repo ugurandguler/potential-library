@@ -53,5 +53,5 @@ if __name__ == "__main__":
     took = [e for e in ("Rb","Cs","Yb","Sc","Y","Lu","Hf","Re","Ru","Tl")
             if e in refdata.ELEMENTS]
     print(f"accepted {len(took)}/10: {', '.join(took)}")
-    print(f"alinmayan {len(NOT_ADOPTED)}: " +
+    print(f"not adopted {len(NOT_ADOPTED)}: " +
           ", ".join(f"{k} ({v['why']})" for k, v in NOT_ADOPTED.items()))

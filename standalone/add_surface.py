@@ -151,7 +151,7 @@ def main():
         #  NOT named `ref`: that is the surface-reference dictionary in the
         #  enclosing scope, and shadowing it here emptied every element's
         #  reference without any error being raised.  The script's own count
-        #  line said "referans 0 element" and that is the only reason it was
+        #  line said "reference: 0 elements" and that is the only reason it was
         #  noticed.
         nref = r["surface"].get(PROTO[refdata.ELEMENTS[el]["struct"]])
         if not nref:
@@ -228,8 +228,8 @@ def main():
         nb_tie = sum(1 for s in bs if s.get("order_ok") is None)
         print(f"ratio to DFT, published baselines: median {statistics.median(rb):.2f}, "
               f"range {rb[0]:.2f}-{rb[-1]:.2f}, {len(rb)} records; "
-              f"siralamasi dogru olan {nb_ok}/{len(bs)}"
-              f" ({nb_tie} ayirt edilemez)")
+              f"correctly ordered {nb_ok}/{len(bs)}"
+              f" ({nb_tie} indistinguishable)")
     if dry:
         print("--dry: nothing written")
         return

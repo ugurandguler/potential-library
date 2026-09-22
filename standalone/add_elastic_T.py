@@ -221,7 +221,7 @@ def main():
     for el, series in got.items():
         lib[el]["elasticT"] = series
         n += len(series)
-    print(f"{len(got)} element, {n} egri")
+    print(f"{len(got)} element, {n} curves")
     bad = [f"{el}/{t}" for el, s in got.items() for t, r in s.items()
            if r["nudge_bad"]]
     print(f"failed the nudge test and flagged: {' '.join(bad) or 'none'}")
@@ -229,7 +229,7 @@ def main():
              for q in r["pts"] if q["above_melt"])
     nb = sum(1 for s in got.values() for r in s.values()
              for q in r["pts"] if not q["born_ok"])
-    print(f"erime ustu nokta: {am}   Born olcutunu ihlal eden nokta: {nb}")
+    print(f"points above melting: {am}   points violating the Born criterion: {nb}")
     if dry:
         print("--dry: nothing written")
         return

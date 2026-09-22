@@ -132,10 +132,10 @@ def main():
     ver = {}
     for r in rows.values():
         ver[r["v"]] = ver.get(r["v"], 0) + 1
-    print("finiteT.json: %d element olculdu, %d kapsam disi" % (len(rows),
+    print("finiteT.json: %d elements measured, %d out of scope" % (len(rows),
                                                                 len(why)))
-    print("   hukum:", ver)
-    print("   %d bayt" % os.path.getsize(p))
+    print("   verdicts:", ver)
+    print("   %d bytes" % os.path.getsize(p))
 
 
 if __name__ == "__main__":

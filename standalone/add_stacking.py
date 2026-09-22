@@ -14,7 +14,7 @@ and a negative intrinsic fault energy is not a small error, it is a change of
 sign.  In a real face-centred metal a fault costs energy and heals; at a
 negative value the faulted crystal is LOWER than the perfect one, so any fault
 that forms stays, and the partial dislocations bounding it repel without
-limit.  Copper is the case to quote: experiment +45 mJ/m^2, ours -63.
+limit.  Copper is the case to quote: experiment +41 mJ/m^2, ours -63.
 
 Two controls travel with it, because a wrong sign is exactly the kind of
 result that deserves suspicion of the machinery first.
@@ -50,10 +50,18 @@ import refdata                                        # noqa: E402
 EV_A2_TO_MJ_M2 = 16021.766208
 
 SRC = os.path.join(HERE, "..", "lammps", "stacking.json")
-EXP = {                       # mJ/m^2, intrinsic fault, room temperature
-    "Ag": 16.0, "Al": 166.0, "Au": 32.0, "Cu": 45.0,
+#  mJ/m^2, intrinsic fault, room temperature: the "Expt." column of Table III of
+#  N. M. Rosengaard and H. L. Skriver, Phys. Rev. B 47, 12865 (1993), which
+#  compiles them, and says of all of them that "the experimental
+#  stacking-fault energies are derived in an indirect way".  Ag (Cockayne,
+#  Jenkins and Ray 1971), Au (Jenkins 1972) and Cu (41, Stobbs and Sworn 1971,
+#  taken instead of an unsourced 45) are weak-beam electron-microscopy values;
+#  Al is from Murr (1973) and Ni, Pd, Pt, Rh, Ir from Hirth and Lothe (1982).
+#  Lead is not in the table and no source was found for the 30 once carried
+#  here, so it has none.
+EXP = {
+    "Ag": 16.0, "Al": 166.0, "Au": 32.0, "Cu": 41.0,
     "Ni": 125.0, "Pd": 180.0, "Pt": 322.0, "Rh": 750.0, "Ir": 480.0,
-    "Pb": 30.0,
 }
 
 
@@ -176,7 +184,7 @@ def main():
 
     neg = [x for x in ours if x[0] < 0]
     print(f"\nOURS: intrinsic stacking fault in {len(neg)}/{len(ours)} records "
-          f"NEGATIF")
+          f"NEGATIVE")
     if ours:
         ours.sort()
         print(f"  range {ours[0][0]:.1f} ({ours[0][1]}) .. "
@@ -190,7 +198,7 @@ def main():
     #  particular aluminium potential.
     pos = [x for x in base_rows if x[2] > 0]
     negb = [x for x in base_rows if x[2] <= 0]
-    print(f"TABAN : {len(pos)}/{len(base_rows)} kayitta POZITIF")
+    print(f"BASE : {len(pos)}/{len(base_rows)} records POSITIVE")
     for el, fn, isf, _ in negb:
         print(f"   negative baseline: {el} {fn} {isf:.1f} mJ/m2")
 
@@ -198,7 +206,7 @@ def main():
         sign = sum(1 for p, m, _ in preds if (p < 0) == (m < 0))
         rat = sorted(m / p for p, m, _ in preds if p)
         print(f"\nPREDICTION from the ground-state difference ({len(preds)} records):")
-        print(f"  isaret uyusmasi {sign}/{len(preds)}")
+        print(f"  sign agreement {sign}/{len(preds)}")
         print(f"  measured/predicted: median {statistics.median(rat):.2f}, "
               f"range {rat[0]:.2f}-{rat[-1]:.2f}")
         #  Carry the library-wide figures INTO each record so the page states

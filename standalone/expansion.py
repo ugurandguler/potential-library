@@ -300,7 +300,7 @@ def main():
             print(f"{el:4s}  error: {type(ex).__name__} {str(ex)[:40]}"); continue
         aa = [a_of_T(el, sp, xs, T) for T in TS]
         if any(a is None for a in aa):
-            print(f"{el:4s}  hesaplanamadi (hayali kip?)"); continue
+            print(f"{el:4s}  could not be computed (imaginary mode?)"); continue
         aa = np.array(aa)
         #  alpha near 300 K from a straight line through the whole set; the
         #  curvature over 100-500 K is small enough that this is the number
@@ -320,9 +320,9 @@ def main():
                    "alpha_exp_1e6": exp,
                    "n_imaginary": nbad, "n_volumes": len(sp),
                    "ratio": (alpha / exp) if exp else None}
-        note = "" if 0 < alpha < 200 else "SUPHELI"
+        note = "" if 0 < alpha < 200 else "SUSPECT"
         if nbad:
-            note = (note + f"  {nbad}/{len(sp)} hacimde hayali kip").strip()
+            note = (note + f"  {nbad}/{len(sp)} volumes with an imaginary mode").strip()
         print(f"{el:4s}{aa[0]:10.4f}{aa[i300]:10.4f}{aa[-1]:10.4f}"
               f"{alpha:10.1f}{(exp or 0):9.1f}"
               f"{(alpha / exp if exp else 0):7.2f}"

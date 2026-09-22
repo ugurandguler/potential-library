@@ -141,8 +141,8 @@ def main():
                       f"   {'ok' if ok else 'DIFFERS'}")
         print()
     if bad:
-        raise SystemExit(f"{bad} bilesende kuvvet enerjinin turevi degil")
-    print("kuvvet her yerde enerjinin turevi - uygulama tutarli")
+        raise SystemExit(f"in {bad} components the force is not the derivative of the energy")
+    print("the force is the derivative of the energy everywhere - the implementation is consistent")
 
 
 if __name__ == "__main__":

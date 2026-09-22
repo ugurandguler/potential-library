@@ -123,7 +123,7 @@ def reduce_curve(fr, gm):
     fr = sorted(g)
     i3 = min(fr, key=lambda f: abs(f - ISF_FRAC))
     if abs(i3 - ISF_FRAC) > 1e-3:
-        return {"error": "1/3 noktasi taranmamis"}
+        return {"error": "1/3 point not scanned"}
     win = [f for f in fr if f <= i3 + 1e-9]
     fu = max(win, key=lambda f: g[f])
     out = {"isf": g[i3], "usf": g[fu], "usf_frac": fu,
@@ -253,7 +253,7 @@ def one(job):
     part = base[1] / 3.0
     want = a0 / np.sqrt(3.0 if struct == "hcp" else 6.0)
     assert abs(part - want) < 1e-6, (
-        f"kismi vektor boyu tutmuyor: {part:.6f} != {want:.6f} ({struct})")
+        f"partial vector length does not match: {part:.6f} != {want:.6f} ({struct})")
     #  The partial has a direction as well as a length, and the two structures
     #  need opposite ones in these cells.  Getting it wrong does not fail, it
     #  produces a curve that climbs to a MAXIMUM where the fault should be:
@@ -298,8 +298,8 @@ def redo(fp):
         n += 1
         print(f"{k[:40]:40s}{r['isf']:9.1f}{r['usf']:9.1f}"
               f"{r.get('closure', float('nan')):9.2f}"
-              f"{'  KAPANMA BOZUK' if r.get('closure_ok') is False else ''}"
-              f"{'  1/3 MINIMUM DEGIL' if r.get('is_minimum') is False else ''}")
+              f"{'  CLOSURE BROKEN' if r.get('closure_ok') is False else ''}"
+              f"{'  1/3 NOT A MINIMUM' if r.get('is_minimum') is False else ''}")
     tmp = fp + ".tmp"
     json.dump(d, open(tmp, "w"), indent=1, sort_keys=True)
     os.replace(tmp, fp)
@@ -383,11 +383,11 @@ def main():
         lab = {"tap": "MAU", "tap_ug": "UG",
                "rc": "MAU re-cut", "rc_ug": "UG re-cut"}.get(
                    tag, tag.replace("base|", ""))
-        note = "ISF NEGATIF" if isf is not None and isf < 0 else ""
+        note = "ISF NEGATIVE" if isf is not None and isf < 0 else ""
         if rec.get("closure_ok") is False:
-            note = (note + " KAPANMA BOZUK %.1f" % rec["closure"]).strip()
+            note = (note + " CLOSURE BROKEN %.1f" % rec["closure"]).strip()
         if rec.get("is_minimum") is False:
-            note = (note + " 1/3 MINIMUM DEGIL - YON YANLIS").strip()
+            note = (note + " 1/3 NOT A MINIMUM - WRONG DIRECTION").strip()
         print(f"{el:4s}{lab[:28]:>28s}{isf:11.1f}{usf:11.1f}"
               f"{'':>8s}   {note}")
 

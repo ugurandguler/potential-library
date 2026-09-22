@@ -67,8 +67,8 @@ def main():
         v["tap_ug"] = rec
         n += 1
         gain = (100 * (before - after)) if before is not None else float("nan")
-        what = ("kapali - gerekmedi" if rec["lam_off"]
-                else "ACIK - farki bu yapiyor" if gain > 0.5
+        what = ("off - not needed" if rec["lam_off"]
+                else "ON - this makes the difference" if gain > 0.5
                 else "open but no gain")
         b = f"{100*before:11.2f}" if before is not None else f"{'?':>11s}"
         print(f"{el:4s}{b}{100*after:10.2f}{gain:+9.2f}"

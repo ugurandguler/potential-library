@@ -45,11 +45,11 @@ def main():
     lib = json.load(open(os.path.join(HERE, "library.json")))
     path = os.path.join(HERE, "avol.txt")
     if not os.path.exists(path):
-        print("avol.txt yok - once kumede: bash ~/avol.sh > avol.txt")
+        print("avol.txt missing - first run on the cluster: bash ~/avol.sh > avol.txt")
         return 1
     print()
     print("%-5s%5s%7s%11s%11s%9s  %s"
-          % ("el", "yapi", "T_MD", "V_MD", "V_ref", "fark", "referans"))
+          % ("el", "struct", "T_MD", "V_MD", "V_ref", "diff", "reference"))
     print("-" * 62)
     for ln in open(path):
         p = ln.split()
@@ -62,11 +62,11 @@ def main():
         if am:
             a = am
             coa = (cm / am) if cm else v.get("c_over_a")
-            src = "makalenin a_olcum"
+            src = "paper's a_meas"
         else:
             a = v["a0"]
             coa = v.get("c_over_a")
-            src = "kutuphane a0 (5 K!)" if el in COLD_A0 else "kutuphane a0"
+            src = "library a0 (5 K!)" if el in COLD_A0 else "library a0"
         vr = vprim(v["struct"], a, coa)
         print("%-5s%5s%6.0fK%11.3f%11.3f%8.2f%%  %s"
               % (el, v["struct"], T, V, vr, 100.0 * (V - vr) / vr, src))

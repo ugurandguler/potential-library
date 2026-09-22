@@ -65,7 +65,7 @@ def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
     n = 0
-    print(f"{'el':4s}{'max cm-1':>10s}{'en negatif':>12s}   yol")
+    print(f"{'el':4s}{'max cm-1':>10s}{'most neg.':>12s}   path")
     print("-" * 46)
     for el in sorted(lib):
         v = lib[el]

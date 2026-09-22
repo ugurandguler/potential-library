@@ -95,7 +95,7 @@ def main():
     #  well-studied element land near experiment?  If the whole distribution is
     #  offset, the convention differs and the comparison is void.
     print("RULE CHECK - the potential closest to experiment for each element")
-    print(f"{'el':4s}{'n':>4s}{'en iyi rms %':>14s}{'aile':>16s}  potansiyel")
+    print(f"{'el':4s}{'n':>4s}{'best rms %':>14s}{'family':>16s}  potential")
     print("-" * 74)
     for el in ("Cu", "Ni", "Al", "Fe", "Ta"):
         rows = out.get(el, [])
@@ -120,7 +120,7 @@ def main():
     json.dump(out, open(OUT, "w"), indent=1, sort_keys=True)
     n = sum(len(v) for v in out.values())
     print(f"\n{len(out)} elements, {n} potential records -> {OUT}")
-    print("kapsanmayan:",
+    print("not covered:",
           " ".join(sorted(e for e in lib if e not in out)))
 
 

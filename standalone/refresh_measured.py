@@ -73,12 +73,12 @@ def verdict(r):
     if r is None:
         return None
     if r.get("lost"):
-        return "DAGILDI"
+        return "disintegrated"
     if r.get("collapsed"):
-        return "COKTU"
+        return "collapsed"
     if r.get("T", 300) > 400:
-        return "SUPHELI"
-    return "saglam"
+        return "suspect"
+    return "ok"
 
 
 def main():
@@ -188,7 +188,7 @@ def main():
                                        "reachable": c["reachable"]})
                 n["compression"] += 1
 
-    print(f"yeniden yazilan alanlar: {n}")
+    print(f"fields rewritten: {n}")
     if dry:
         print("--dry: nothing written to the file")
         return

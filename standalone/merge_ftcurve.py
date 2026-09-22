@@ -51,7 +51,7 @@ def reshape_optic(el, f, subs, npt, mesh):
         return 0
     qs = [[float(x) for x in ln.split()]
           for ln in open(os.path.join(HERE, "ftq_%s.txt" % el))]
-    assert len(qs) == len(f), "%s: %d q, %d satir" % (el, len(qs), len(f))
+    assert len(qs) == len(f), "%s: %d q, %d rows" % (el, len(qs), len(f))
     step = 2.0 / mesh
     #  the substituted points of one segment share a Gamma end and a shell
     #  value; group them so each segment is closed with its own pair
@@ -87,21 +87,21 @@ def main():
     out, bad = {}, []
     for el in sorted(cur):
         if el not in ft["rows"]:
-            bad.append((el, "finiteT satiri yok"))
+            bad.append((el, "no finiteT row"))
             continue
         std = ((lib.get(el) or {}).get("ld") or {}).get("std")
         segs, npt = ix[el]["segs"], ix[el]["npt"]
         if not std or len(std) != len(segs):
-            bad.append((el, "segment sayisi %s vs %s"
+            bad.append((el, "segment count %s vs %s"
                         % (len(std or []), len(segs))))
             continue
         if any((s["a"], s["b"]) != (t["a"], t["b"])
                for s, t in zip(std, segs)):
-            bad.append((el, "yol sirasi farkli"))
+            bad.append((el, "path order differs"))
             continue
         f = [list(r) for r in cur[el]["f"]]
         if len(f) != len(segs) * npt:
-            bad.append((el, "%d q, %d beklenen" % (len(f), len(segs) * npt)))
+            bad.append((el, "%d q, %d expected" % (len(f), len(segs) * npt)))
             continue
         #  ONE RUN, or none.  binary() on the cluster takes the largest box it
         #  finds, and fix phonon writes its binary as it goes - so caesium's
@@ -111,23 +111,23 @@ def main():
         #  panel with no picture, and the mesh is what tells them apart.
         want = int(str(ft["rows"][el]["mesh"]).split("x")[0])
         if cur[el]["mesh"] != want:
-            bad.append((el, "egri %d^3, tablo %s - ayri kosular"
+            bad.append((el, "curve %d^3, table %s - separate runs"
                         % (cur[el]["mesh"], ft["rows"][el]["mesh"])))
             continue
         subs = cur[el]["sub"]
         nopt = reshape_optic(el, f, subs, npt, cur[el]["mesh"])
         out[el] = {"f": f, "sub": subs, "npt": npt, "mesh": cur[el]["mesh"]}
-        print("%-3s %2d x %-2d = %4d q, %2d degistirilmis, %d dal%s"
+        print("%-3s %2d x %-2d = %4d q, %2d modified, %d branches%s"
               % (el, len(segs), npt, len(f), len(subs), len(f[0]),
-                 ", %d optik yeniden sekillendirildi" % nopt if nopt else ""))
+                 ", %d optical reshaped" % nopt if nopt else ""))
 
     for el, why in bad:
-        print("%-3s ATLANDI: %s" % (el, why))
+        print("%-3s SKIPPED: %s" % (el, why))
 
     ft["curve"] = out
     p = os.path.join(HERE, "finiteT.json")
     json.dump(ft, open(p, "w"), separators=(",", ":"), sort_keys=True)
-    print("\n%d egri, %s  %d bayt" % (len(out), p, os.path.getsize(p)))
+    print("\n%d curves, %s  %d bytes" % (len(out), p, os.path.getsize(p)))
     return 1 if bad else 0
 
 

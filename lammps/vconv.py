@@ -144,36 +144,36 @@ def main():
 
     print()
     print(f"{'el':4s}{'source':>26s}{'sample':>7s}{'C11':>9s}{'C12':>9s}"
-          f"{'C44':>8s}{'C11-C12':>10s}{'Tolc':>7s}  Born")
+          f"{'C44':>8s}{'C11-C12':>10s}{'Tmeas':>7s}  Born")
     print("-" * 82)
     last = None
     for (el, tag, T_, m), r in zip(jobs, res):
         if el != last:
             print("-" * 82) if last else None
             last = el
-        lab = {"tap": "bizimki (MAU)"}.get(tag, tag.replace("base|", ""))[:26]
+        lab = {"tap": "ours (MAU)"}.get(tag, tag.replace("base|", ""))[:26]
         if "error" in r:
             print(f"{el:4s}{lab:>26s}{m:6d}x   {r['error']}")
             continue
         d1 = r["C11"] - r["C12"]
         ok = "OK" if (d1 > 0 and r["C44"] > 0
-                      and r["C11"] + 2 * r["C12"] > 0) else "IHLAL"
+                      and r["C11"] + 2 * r["C12"] > 0) else "VIOLATED"
         print(f"{el:4s}{lab:>26s}{m:6d}x{r['C11']:9.1f}{r['C12']:9.1f}"
               f"{r['C44']:8.1f}{d1:10.1f}{r['Tavg']:7.0f}  {ok}")
 
-    print("\n--- terimlere ayrilmis (GPa) ---")
+    print("\n--- split into terms (GPa) ---")
     print(f"{'el':4s}{'source':>26s}{'sample':>7s}"
           f"{'B11':>9s}{'F11':>9s}{'B12':>9s}{'F12':>9s}{'kin':>8s}")
     print("-" * 72)
     for (el, tag, T_, m), r in zip(jobs, res):
         if "error" in r or "B11" not in r:
             continue
-        lab = {"tap": "bizimki (MAU)"}.get(tag, tag.replace("base|", ""))[:26]
+        lab = {"tap": "ours (MAU)"}.get(tag, tag.replace("base|", ""))[:26]
         print(f"{el:4s}{lab:>26s}{m:6d}x{r['B11']:9.1f}{r['F11']:9.1f}"
               f"{r['B12']:9.1f}{r['F12']:9.1f}{r['K']:8.2f}")
     print("\nsample: multiple of the baseline run (150 000 steps).")
-    print("B = Born terimi (potansiyelin ikinci turevi), F = dalgalanma "
-          "terimi (gerilme kovaryansi / kT), kin = kinetik terim.")
+    print("B = Born term (second derivative of the potential), F = fluctuation "
+          "term (stress covariance / kT), kin = kinetic term.")
 
 
 if __name__ == "__main__":

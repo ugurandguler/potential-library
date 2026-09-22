@@ -155,8 +155,8 @@ def main():
     els = sys.argv[1:] or [e for e in sorted(lib)
                            if lib[e].get("tap_ug")
                            and not lib[e]["tap_ug"].get("lam_off")]
-    print("pair_style ugur/ang, UG formu: enerji angular/latdyn'e karsi,")
-    print("kuvvet NVE korunumuyla (600 K, 2 fs, 40 ps).\n")
+    print("pair_style ugur/ang, UG form: energy against angular/latdyn,")
+    print("force by NVE conservation (600 K, 2 fs, 40 ps).\n")
     print(f"{'el':4s}{'lam2':>8s}{'lam4':>8s}{'E ref':>12s}{'E lammps':>12s}"
           f"{'dE':>11s}{'drift':>10s}{'T':>6s}   status")
     print("-" * 74)
@@ -171,7 +171,7 @@ def main():
                         mass=refdata.MASSES[el])
         ref, err = reference(el, rec)
         if ref is None:
-            print(f"{el:4s}  referans hatasi: {err}")
+            print(f"{el:4s}  reference error: {err}")
             bad += 1
             continue
         out = run(el, rec, cry, "static", IN_STATIC)
@@ -193,9 +193,9 @@ def main():
               f"   {'ok' if ok else 'FAILED'}")
     print()
     if bad:
-        raise SystemExit(f"{bad} element uyusmadi")
+        raise SystemExit(f"{bad} element(s) disagree")
     print("the angular form matches angular/latdyn on energy, and the force")
-    print("enerjinin turevi - NVE korunumu bunu gosteriyor")
+    print("is the derivative of the energy - NVE conservation shows it")
 
 
 if __name__ == "__main__":

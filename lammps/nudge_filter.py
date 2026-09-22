@@ -209,7 +209,7 @@ def main():
         print("no dense_*.json carrying a pool was found")
         return
     print(f"{'el':4s}{'cand':>6s}{'best rms':>12s}{'first pass':>11s}"
-          f"{'bedeli':>9s}   secilen")
+          f"{'cost':>9s}   chosen")
     print("-" * 62)
     picked = {}
     for el in sorted(out):
@@ -231,13 +231,13 @@ def main():
         hit = next(((r, v) for r, v in zip(cand, res) if v and v["ok"]), None)
         if hit is None:
             print(f"{el:4s}{len(cand):6d}{best0:12.2f}{'-':>11s}{'-':>9s}"
-                  f"   GECEN YOK")
+                  f"   NONE PASSES")
             continue
         r, v = hit
         rank = cand.index(r) + 1
         print(f"{el:4s}{len(cand):6d}{best0:12.2f}{r['score']*100:11.2f}"
-              f"{r['score']*100 - best0:+9.2f}   {rank}. sirada, "
-              f"kalan/sarsma {v['keep']:.2f} ({v['n_pass']}/{v['n']} yon)")
+              f"{r['score']*100 - best0:+9.2f}   ranked {rank}, "
+              f"kept/nudge {v['keep']:.2f} ({v['n_pass']}/{v['n']} directions)")
         picked[el] = dict(r, nudge=v, rank=rank, best_rms=best0)
     json.dump(picked, open(os.path.join(src, "nudge_picked.json"), "w"),
               indent=1, sort_keys=True)

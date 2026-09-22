@@ -521,9 +521,11 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
         </div>
         <p class="note">&theta;<sub><i>jik</i></sub> is the angle between the two
           legs at the central atom. <i>P</i><sub>2</sub> and
-          <i>P</i><sub>4</sub> average to zero over the sphere, so the cohesive
-          energy, pressure and bulk modulus &mdash; imposed exactly as
-          constraints &mdash; are untouched and only the anisotropy moves.
+          <i>P</i><sub>4</sub> average to zero over the sphere, but not over
+          the discrete bond angles of a lattice: at the fitted &lambda; the
+          factor shifts tungsten's lattice energy by 1.07&nbsp;eV. The cohesive
+          energy, pressure and bulk modulus stay exact because the constraints
+          are solved with the factor included.
           &lambda;<sub>2</sub> = &lambda;<sub>4</sub> = 0 recovers MAU.</p>
       </div>
 
@@ -2363,6 +2365,15 @@ function recutNote(d){
       not a dispersion, so that comparison is not made here.`
     : `${el} has no measured dispersion, so that comparison cannot be made
       here.`;
+  if((d.md_recommended||{}).set === "none"){
+    return `<p class="plotnote"><strong>${el}: no record here is fit for
+      molecular dynamics.</strong> The re-cut fails the warm screens:
+      ${rcWarm(d)}. And the switched set it would fall back to has no barrier
+      against collapse under compression &mdash; squeezed uniformly, its
+      energy falls without limit, which <code>fit.py</code> now rejects and
+      which a constrained refit could not avoid in either form. ${num} Use
+      ${el}'s records for static and harmonic properties only.</p>`;
+  }
   if(RC_BROKEN.indexOf(el) >= 0){
     return `<p class="plotnote"><strong>${el}: do not use the re-cut at finite
       temperature.</strong> ${num} And it fails the warm screens:
@@ -2416,8 +2427,8 @@ function recutNote(d){
     parameter-set selector's "MAU" is the hard-truncated root record.  The
     switched arm is used because it is the only one that can be run at
     temperature: a hard cut leaves the pair energy discontinuous and copper
-    drifts 350 meV/atom/ns in constant-energy dynamics, reaching 1100 K from
-    a 296 K start inside 200 ps.
+    drifts 176 meV/atom/ns in constant-energy dynamics (nve_check.py, 40 ps
+    from 600 K, heating from 306 K to 389 K).
 
     THE FLOOR decides what may be read.  fix phonon imposes no symmetry on
     what it inverts, so two wavevectors the crystal forces to be equal do not
@@ -2724,7 +2735,7 @@ function finiteTBlock(d){
     selector above calls MAU &mdash; that is the hard-truncated root record.
     The switched arm is the only one that can be run at temperature at all:
     a hard cut leaves the pair energy discontinuous, and copper drifts
-    350 meV per atom per nanosecond under it.${r.note?`
+    176 meV per atom per nanosecond under it.${r.note?`
     <br>${r.note}`:""}${RCREC(d)?`
     <br><strong>For ${el} the recommended set for molecular dynamics is now
     the re-cut</strong>, <code>${el}_recut.ugur</code>, and this study has not
@@ -2744,8 +2755,8 @@ function lammpsBlock(d){
       9.7 % over the 33 elements that have a curve and the switched ones
       12.6 %, hard being closer in 25 of the 33 - and no hard set can be run
       at temperature, because phi2 does not vanish at the cutoff.  Copper
-      drifts 350 meV per atom per nanosecond in NVE with the hard set and 0.4
-      with the switched one, a factor of 876.  Each file's own header carries
+      drifts 176 meV per atom per nanosecond in NVE with the hard set and
+      0.002 - within noise - with the switched one (nve_check.py, 2026-09-22).  Each file's own header carries
       its own discontinuity, which runs from 0.25 meV for palladium to 123 for
       yttrium, so "not for dynamics" is not equally true across the library.  */
   const SETS = [
@@ -3117,8 +3128,9 @@ function paramText(d,el,fmtSel,u){
   s+=`              x = r1 + r2,  both legs inside rcut3\n`;
   if(ug){
     s+=`  f(t)        = 1 + lam2 P2(cos t) + lam4 P4(cos t),  t the apex angle\n`;
-    s+=`              P2 and P4 average to zero over the sphere, so f only\n`;
-    s+=`              redistributes the three-body energy between geometries.\n`;
+    s+=`              P2 and P4 average to zero over the sphere, not over a\n`;
+    s+=`              lattice; Ecoh, P and B are exact because the fit solves\n`;
+    s+=`              its constraints with f included.\n`;
     s+=`              lam2 = lam4 = 0 gives MAU back exactly.\n`;
   }
   s+="\n";

@@ -149,7 +149,7 @@ def one(job):
                    capture_output=True, text=True)
     lg = os.path.join(d, "log.lammps")
     if not os.path.exists(lg):
-        return {"err": "kosmadi"}
+        return {"err": "did not run"}
     t = io.open(lg, errors="ignore").read()
     g = {k: float(m.group(1)) for k, m in
          ((k, re.search(rf"{k}\s+([-\d.eE+]+)", t))
@@ -184,7 +184,7 @@ def main():
     with ThreadPoolExecutor(max_workers=nw) as ex:
         res = list(ex.map(one, jobs))
     out, bad = {}, []
-    print(f"{'el':4s}{'set':9s}{'kalan/sarsma':>14s}{'dE meV/atom':>13s}   verdict")
+    print(f"{'el':4s}{'set':9s}{'kept/nudge':>14s}{'dE meV/atom':>13s}   verdict")
     print("-" * 52)
     for (el, k), r in zip(jobs, res):
         if r is None:
@@ -196,7 +196,7 @@ def main():
         if not r["ok"]:
             bad.append(f"{el}/{k}")
         print(f"{el:4s}{k:9s}{r['keep']:14.3f}{r['dE'] * 1000:13.4f}   "
-              f"{'saglam' if r['ok'] else 'DONMUYOR'}")
+              f"{'ok' if r['ok'] else 'DOES NOT RETURN'}")
     p = os.path.join(HERE, "jiggle_test.json")
     all_ = {}
     if os.path.exists(p):

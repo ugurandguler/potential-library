@@ -51,7 +51,7 @@ def build():
     r = subprocess.run(["wsl", "-e", "bash", "-lc", cmd],
                        capture_output=True, text=True)
     if r.returncode:
-        raise SystemExit("derleme basarisiz:\n" + r.stdout + r.stderr)
+        raise SystemExit("build failed:\n" + r.stdout + r.stderr)
 
 
 def probe(par, lines):
@@ -61,7 +61,7 @@ def probe(par, lines):
                         f"cd {wsl(HERE)} && ./kernel_probe"],
                        input=inp, capture_output=True, text=True)
     if r.returncode:
-        raise SystemExit("probe hatasi:\n" + r.stderr)
+        raise SystemExit("probe error:\n" + r.stderr)
     return [[float(x) for x in ln.split()]
             for ln in r.stdout.strip().splitlines()]
 

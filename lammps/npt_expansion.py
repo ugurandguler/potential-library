@@ -226,7 +226,7 @@ def main():
     out = {}
     print()
     print(f"{'el':4s}{'source':>28s}{'alpha':>9s}{'expt':>8s}{'ratio':>7s}"
-          f"{'P ort':>9s}   not")
+          f"{'P avg':>9s}   note")
     print("-" * 72)
     for key, series in sorted(got.items()):
         el, tag = key.split("|", 1)
@@ -240,8 +240,8 @@ def main():
             #  named the problem exactly.
             errs = [r["error"] for r in series.values() if "error" in r]
             why = errs[0] if errs else (
-                "korumalar eledi" if bad else "sebep bilinmiyor")
-            print(f"{el:4s}{tag[:28]:>28s}   yetersiz nokta "
+                "rejected by the guards" if bad else "cause unknown")
+            print(f"{el:4s}{tag[:28]:>28s}   too few points "
                   f"({len(pts)}/{len(series)}): {why[:46]}")
             #  Record the failure instead of writing nothing.  An absent key
             #  is indistinguishable from a key that was never asked for, and
@@ -273,7 +273,7 @@ def main():
         print(f"{el:4s}{lab[:28]:>28s}{alpha:9.1f}{(exp or 0):8.1f}"
               f"{(alpha / exp if exp else 0):7.2f}"
               f"{np.mean([p[1]['Pavg'] for p in pts]):9.1f}"
-              f"   {('%d nokta atildi' % len(bad)) if bad else ''}")
+              f"   {('%d points dropped' % len(bad)) if bad else ''}")
 
     fp = os.path.join(HERE, "npt_expansion.json")
     old = {}

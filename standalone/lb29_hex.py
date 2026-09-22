@@ -161,9 +161,9 @@ def main():
 
     json.dump(found, open(OUT, "w"), indent=1, sort_keys=True)
     print(f"{len(found)} element, "
-          f"{sum(len(v) for v in found.values())} belirleme\n")
+          f"{sum(len(v) for v in found.values())} determinations\n")
     print(f"{'el':4s}{'C11':>8s}{'C12':>8s}{'C13':>8s}{'C33':>8s}{'C44':>8s}"
-          f"{'B(Cij)':>9s}  sayfa  etiket")
+          f"{'B(Cij)':>9s}  page   label")
     print("-" * 76)
     for sym in sorted(found):
         for r in found[sym]:

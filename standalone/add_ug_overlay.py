@@ -62,7 +62,7 @@ def main():
 
     ug = json.load(open(SRC))
     print(f"{'el':4s}{'MAU rms':>10s}{'UG rms':>9s}{'gain':>9s}"
-          f"{'MAU kar.':>10s}{'UG kar.':>9s}{'rcut3':>18s}")
+          f"{'MAU char.':>10s}{'UG char.':>9s}{'rcut3':>18s}")
     print("-" * 66)
 
     merged = comparable = 0

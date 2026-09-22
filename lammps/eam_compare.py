@@ -187,7 +187,7 @@ def main():
               f"{g['rms']:8.2f}{v['rms']:10.2f}{tap:11.2f}")
     json.dump(out, open(os.path.join(HERE, "eam_results.json"), "w"),
               indent=1, sort_keys=True)
-    print("\nyazildi:", os.path.join(HERE, "eam_results.json"))
+    print("\nwritten:", os.path.join(HERE, "eam_results.json"))
 
 
 if __name__ == "__main__":

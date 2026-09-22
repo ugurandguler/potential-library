@@ -21,7 +21,7 @@ SRC = os.path.join(ROOT, "angular", "recut_ug_ld.json")
 def main():
     path = os.path.join(HERE, "library.json")
     if not os.path.exists(SRC):
-        print(f"{SRC} yok - atlandi")
+        print(f"{SRC} missing - skipped")
         return
     src = json.load(open(SRC))
     lib = json.load(open(path))

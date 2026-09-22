@@ -170,7 +170,7 @@ def err(got, exp):
 def main():
     lib = json.load(open(os.path.join(ROOT, "standalone", "library.json")))
     els = sys.argv[1:] or sorted(SETS)
-    print("hcp esneklik sabitleri (GPa) - EAM kutusunu gevsetiyor (couple xy),")
+    print("hcp elastic constants (GPa) - EAM relaxes its box (couple xy),")
     print("ours is fixed at the experimental cell, because that is where it was fitted.\n")
     for el in els:
         e = refdata.ELEMENTS[el]

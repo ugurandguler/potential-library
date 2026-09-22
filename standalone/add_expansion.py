@@ -148,10 +148,10 @@ def main():
            and (v.get("alpha_1e6") is None
                 or v["alpha_1e6"] != v["alpha_1e6"])]
     if bad:
-        print(f"  SAYI OLMAYAN {len(bad)}: {bad[:6]}")
+        print(f"  NOT A NUMBER {len(bad)}: {bad[:6]}")
     died = [(k, v["failed"]) for k, v in sorted(npt.items()) if v.get("failed")]
     if died:
-        print(f"  KOSU COKEN {len(died)}:")
+        print(f"  RUNS THAT CRASHED {len(died)}:")
         for k, why in died:
             print(f"     {k:14s} {why[:58]}")
 
@@ -176,9 +176,9 @@ def main():
     never = sorted({t for d in lib.values() if isinstance(d, dict)
                     for t in arms(d) if t not in covered})
     if never:
-        print(f"  bu taramanin hic olcmedigi kol: {' '.join(never)}")
+        print(f"  arms this sweep never measured: {' '.join(never)}")
     if gone:
-        print(f"  SONUC DONMEYEN {len(gone)}: {' '.join(gone)}")
+        print(f"  NO RESULT RETURNED {len(gone)}: {' '.join(gone)}")
         print("   (the run collapsed or the guards rejected it - see the npt output)")
 
     def report(name, rows):
@@ -193,17 +193,17 @@ def main():
               f"range {r[0]:.2f}..{r[-1]:.2f}")
         print(f"   NEGATIVE expansion {len(neg)}/{len(rows)}"
               + (f"  {[f'{e}|{t}' for _, e, t in neg]}" if neg else ""))
-        print(f"   %25'ten dusuk {len(lo)}, %25'ten yuksek {len(hi)}")
+        print(f"   more than 25% low {len(lo)}, more than 25% high {len(hi)}")
         return med
 
-    m_ours = report("BIZIM", ours)
-    m_base = report("TABAN", base)
+    m_ours = report("OURS", ours)
+    m_base = report("BASE", base)
     #  the baselines are the scale.  Without them "median 0.68" is a number
     #  with nothing to be 0.68 of - the same argument the surface and stacking
     #  fault sections rest on.
     if m_ours and m_base:
         print(f"\nscale: published potentials through the same code {m_base:.2f}, "
-              f"biz {m_ours:.2f}")
+              f"ours {m_ours:.2f}")
 
     #  which structures the negatives belong to: a failure that sorts by
     #  crystal is a different statement from one scattered at random
@@ -213,7 +213,7 @@ def main():
         for e, t in neg:
             by.setdefault(refdata.ELEMENTS.get(e, {}).get("struct", "?"),
                           []).append(e)
-        print("   negatiflerin yapisi: "
+        print("   structures of the negatives: "
               + ", ".join(f"{k} {sorted(set(v))}" for k, v in sorted(by.items())))
 
     #  every arm with an expansion record, keyed on the payload - the two-name
@@ -228,7 +228,7 @@ def main():
         odd = [g for g in gs if not 0.5 < g < 4.0]
         print(f"\nGruneisen: median {statistics.median(gs):.2f}, "
               f"range {gs[0]:.2f}..{gs[-1]:.2f}; "
-              f"fiziksel araligin disinda {len(odd)}/{len(gs)}")
+              f"outside the physical range {len(odd)}/{len(gs)}")
 
     if dry:
         print("\n--dry: nothing written")

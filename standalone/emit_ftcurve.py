@@ -59,7 +59,7 @@ def main():
                      "struct": v["struct"]}
         print("%-3s %2d segment x %d = %4d q" % (el, len(segs), NPT, len(qs)))
     json.dump(index, open(os.path.join(HERE, "ftq_index.json"), "w"), indent=0)
-    print("\n%d element, ftq_index.json yazildi" % len(index))
+    print("\n%d elements, ftq_index.json written" % len(index))
 
 
 if __name__ == "__main__":

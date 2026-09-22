@@ -52,7 +52,7 @@ class AlloyPotential:
         missing = [(a, b, c) for a in range(n) for b in range(n)
                    for c in range(n) if (a, b, c) not in self.tri]
         if missing:
-            raise ValueError(f"dosyada eksik ucluler: {missing[:4]}")
+            raise ValueError(f"triplets missing from the file: {missing[:4]}")
         tapers = {v["taper"] for v in self.tri.values()}
         if len(tapers) > 1:
             raise ValueError(f"the file carries different taper values: {tapers}")
@@ -130,7 +130,7 @@ def energy(cry, pot, species):
     """
     sp = list(species)
     if len(sp) != len(cry.frac):
-        raise ValueError(f"{len(sp)} tur, {len(cry.frac)} atom")
+        raise ValueError(f"{len(sp)} species, {len(cry.frac)} atoms")
 
     e = 0.0
     for (i, j, R, d, r) in L.neighbours(cry, pot.rcut2):
@@ -183,7 +183,7 @@ def selftest():
     os.remove(tmp)
     print()
     print("alloy.py matches latdyn on a single element" if not bad
-          else f"{bad} element uyusmadi")
+          else f"{bad} element(s) disagree")
     return bad
 
 

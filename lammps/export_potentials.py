@@ -227,8 +227,8 @@ def main():
                     "hard sets average 9.7 % over the 33 elements that have "
                     "one, against 12.6 % for the switched sets, and are closer "
                     "in 25 of them.  DO NOT use for molecular dynamics: "
-                    "copper, whose step is 8.4 meV, drifts 350 meV/atom/ns in "
-                    "NVE and climbs from 296 K to over 1100 K in 200 ps")
+                    "copper, whose step is 8.4 meV, drifts 176 meV/atom/ns in "
+                    "NVE and heats from 306 K to 389 K in 40 ps")
                 if name == "disp":
                     trunc += (
                         ".  CANDIDATE, not part of the published library: the "
@@ -288,14 +288,26 @@ def main():
                 trunc = (
                     f"switched from {taper:g} of each cutoff to the cutoff, "
                     "quintic, C2 - energy is conserved in MD: measured drift "
-                    "0.4 meV/atom/ns for copper, 876x less than its hard "
-                    "twin.  USE for molecular dynamics, which no hard set "
+                    "within noise for copper (0.002 meV/atom/ns against 176 "
+                    "for its hard twin).  USE for molecular dynamics, which no hard set "
                     "can do.  It pays for that on the dispersion: the "
                     "switched sets average 12.6 % against the hard sets' "
                     "9.7 %, because switching the pair term off over the "
                     "outer 15 % moves the force constants at the largest "
                     "separations, which is the short-wavelength end, and "
                     "nothing in the fit sees it")
+                #  recommend_recut.py found no record of this element fit for
+                #  MD - the switched set has no barrier against collapse under
+                #  compression - so the file must not say "USE for MD"
+                if (lib[el].get("md_recommended") or {}).get("set") == "none":
+                    trunc = (
+                        f"switched from {taper:g} of each cutoff to the cutoff, "
+                        "quintic, C2.  NOT FIT FOR MOLECULAR DYNAMICS: squeezed "
+                        "uniformly, this record's energy falls without a "
+                        "barrier (fit.py's compression test, barrier below "
+                        "k_B T_melt), and its re-cut fails the warm screens, "
+                        f"so no {el} record in this library is recommended for "
+                        "MD.  Static and harmonic properties only")
             #  the measured verdict, which is not the same question as whether
             #  the fit reproduced its targets
             #  the export labels the sets mau/mau_taper/ug/ug_taper and the

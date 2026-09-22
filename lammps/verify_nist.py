@@ -68,7 +68,7 @@ def one(job):
     v={int(m.group(1)):float(m.group(2)) for m in re.finditer(r"BORN\s+(\d+)\s+([-\d.eE+]+)",t)}
     if len(v)<21:
         err=[l for l in t.splitlines() if "ERROR" in l]
-        return (el,pid,ps,fn,None, err[0][:60] if err else "born cikmadi")
+        return (el,pid,ps,fn,None, err[0][:60] if err else "no born output")
     c={"C11":0.5*(v[1]+v[2]),"C12":v[7],"C13":0.5*(v[8]+v[12]),
        "C33":v[3],"C44":0.5*(v[4]+v[5])}
     return (el,pid,ps,fn,c,None)
@@ -82,7 +82,7 @@ for el in sorted(cand):
         for f in x["files"]:
             jobs.append((el, x["id"], x["pair_style"], f["name"]))
 nw=max(1,(os.cpu_count() or 4)-2)
-print(f"{len(jobs)} aday sinaniyor\n")
+print(f"{len(jobs)} candidates under test\n")
 with ThreadPoolExecutor(max_workers=nw) as ex: res=list(ex.map(one, jobs))
 
 good={}
@@ -91,7 +91,7 @@ print("-"*84)
 for el,pid,ps,fn,c,err in res:
     ex_=refdata.ELEMENTS[el]["Cij"]
     if c is None:
-        print(f"{el:4s}{ps:12s}{fn[:25]:26s}{'':>24s}   DUSTU: {err}"); continue
+        print(f"{el:4s}{ps:12s}{fn[:25]:26s}{'':>24s}   DROPPED: {err}"); continue
     st=refdata.ELEMENTS[el]["struct"]
     born = ((c["C11"]>abs(c["C12"]) and (c["C11"]+c["C12"])*c["C33"]>2*c["C13"]**2
              and c["C44"]>0) if st=="hcp" else
@@ -101,6 +101,6 @@ for el,pid,ps,fn,c,err in res:
     if ok: good.setdefault(el,[]).append([fn,ps])
     print(f"{el:4s}{ps:12s}{fn[:25]:26s}{c['C11']:8.1f}{c['C12']:8.1f}{c['C44']:8.1f}"
           f"   {'accept' if ok else 'REJECT'}  (expt C11={ex_['C11']:.0f}, dev {dev:.0f} %"
-          f"{', Born IHLAL' if not born else ''})")
+          f"{', Born VIOLATED' if not born else ''})")
 json.dump(good, open("../standalone/nist_verified.json","w"), indent=1, sort_keys=True)
-print(f"\nkabul edilen: {sum(len(v) for v in good.values())} potansiyel, {len(good)} element")
+print(f"\naccepted: {sum(len(v) for v in good.values())} potentials, {len(good)} elements")

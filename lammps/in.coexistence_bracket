@@ -1,6 +1,7 @@
 #  The melting bracket - the measurement that stands, and the cheap one.
 #
-#  It needs NO barostatted coexistence stage and NO temperature reading.
+#  It needs NO interface-settling stage and NO temperature reading, and it
+#  holds ZERO PRESSURE throughout: every stage after the first is NPT.
 #  Build a solid half and a liquid half, hold BOTH at a trial temperature,
 #  and ask what happened: if the solid melts, Tm is below the trial
 #  temperature; if the liquid freezes, Tm is above it; if neither wins, the
@@ -14,14 +15,24 @@
 #
 #      python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
 #
-#  Measured this way for tantalum's force-matched record, with a perfect
-#  crystal returning S = 1.000 at every step as the control:
+#  Measured this way for tantalum's force-matched record (2026-09-22), with a
+#  perfect crystal returning S = 1.000 as the control; S of the two halves at
+#  the end of a 120 ps hold:
 #
-#      2000 K   0.695 / 0.875   all solid    the liquid froze   -> Tm > 2000
-#      2250 K   0.255 / 0.192   both midway  neither wins       -> Tm ~ 2250
-#      2500 K   0.072 / 0.039   all liquid   the solid melted   -> Tm < 2500
+#      2000 K   0.760 / 0.802   all solid    the liquid froze   -> Tm > 2000
+#      2250 K   0.847 / 0.857   all solid    the liquid froze   -> Tm > 2250
+#      2500 K   0.751 / 0.708   all solid    the liquid froze   -> Tm > 2500
+#      2750 K   0.068 / 0.098   all liquid   the solid melted   -> Tm < 2750
 #
-#  so Tm = 2250 +/- 250 K against an experimental 3290 K.
+#  so Tm = 2625 +/- 125 K against an experimental 3290 K, 20 per cent low.
+#
+#  TWO WAYS TO GET A DIFFERENT NUMBER, both of which happened.  A 40 ps hold
+#  (NHOLD 20000) is too short: from 2000 to 2500 K neither half had won when it
+#  ended, and reading those as "neither wins" gave 2250 +/- 250 K, which the
+#  first version of this file reported.  And holding the VOLUME instead of the
+#  pressure (nvt in stages B, C and C2) leaves the cell at about 2 GPa near
+#  2500 K and raises the apparent melting point; the first published copy of
+#  this file did that, while the numbers in its comment came from NPT runs.
 #
 #  RUN one trial temperature per invocation, in its own directory:
 #
@@ -40,7 +51,7 @@ variable NZ    index 30                               # cells along z, the long 
 variable TCOLD index 1200                             # where the solid is built
 variable THOT  index 6000                             # where the liquid half is melted
 variable NEQ   index 20000                            # steps per stage
-variable NHOLD index 20000                            # steps of competition at TTRY
+variable NHOLD index 60000                            # steps of competition at TTRY (120 ps)
 
 units metal
 boundary p p p
@@ -79,20 +90,20 @@ unfix 1
 write_dump all custom A_solid.dump id type x y z
 
 #  --- B: melt the liquid half only; the solid half is not integrated ------
-fix 1 liq nvt temp ${THOT} ${THOT} 0.1
+fix 1 liq npt temp ${THOT} ${THOT} 0.1 z 0 0 2.0
 run ${NEQ}
 unfix 1
 write_dump all custom B_halfmelt.dump id type x y z
 
 #  --- C: bring the liquid half to the trial temperature ------------------
-fix 1 liq nvt temp ${TTRY} ${TTRY} 0.1
+fix 1 liq npt temp ${TTRY} ${TTRY} 0.1 z 0 0 2.0
 run ${NEQ}
 unfix 1
 write_dump all custom C_cooled.dump id type x y z
 
 #  --- C2: hold BOTH halves at the trial temperature.  THIS is the
 #  measurement: whichever phase wins says which side of Tm we are on.
-fix 1 all nvt temp ${TTRY} ${TTRY} 0.1
+fix 1 all npt temp ${TTRY} ${TTRY} 0.1 iso 0 0 2.0
 run ${NHOLD}
 unfix 1
 write_dump all custom C2_both.dump id type x y z

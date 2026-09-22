@@ -4,9 +4,9 @@ side, so the question the finite-temperature runs were made to answer can be
 read off one table.
 
     0 K @ a0        the harmonic dispersion at the library's lattice constant
-    0 K @ a_olcum   the same, at the lattice constant of the crystal the
+    0 K @ a_meas    the same, at the lattice constant of the crystal the
                     paper actually measured, where the paper states it
-    sonlu T         the dispersion LAMMPS measures by displacement correlation
+    finite T        the dispersion LAMMPS measures by displacement correlation
                     during equilibrium MD at the paper's temperature, in a box
                     the barostat set itself
 
@@ -87,8 +87,8 @@ def main():
 
     print()
     print("%-6s%5s%6s%11s%12s%14s%11s%16s"
-          % ("el", "T", "nokta", "kutu", "0 K @ a0", "0 K @ a_olcum",
-             "sonlu T", "simetri tabani"))
+          % ("el", "T", "points", "box", "0 K @ a0", "0 K @ a_meas",
+             "finite T", "symmetry floor"))
     print("-" * 85)
     part = False
     for el in els:

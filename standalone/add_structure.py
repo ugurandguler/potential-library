@@ -140,10 +140,10 @@ def main():
                              "ok": v["ok"], "verified": True}
             if not v["ok"]:
                 rec["withdrawn"] = (
-                    "sarsma sinavini yerelde gecemiyor: {}/{} yonde kaliyor. "
+                    "fails the nudge test locally: stays in {}/{} directions. "
                     "The cluster verdict belonged to a different solution (nudge_filter "
                     "was reading log.lammps even when the run had failed). "
-                    "Duzeltilmis suzgec yeniden kosuyor.".format(
+                    "The corrected filter is being re-run.".format(
                         v["n_pass"], v["n"]))
                 nfail += 1
         else:
@@ -157,7 +157,7 @@ def main():
     print(f"ground state: ours {ours} records ({bad} wrong), "
           f"baseline {base_ours} records ({base_bad} wrong)")
     print(f"Bain curve: {nb} records")
-    print(f"sarsma adayi: {npick} element, {nfail} tanesi yerel dogrulamayi gecemedi ve geri cekildi")
+    print(f"nudge candidates: {npick} elements, {nfail} of them failed local verification and were withdrawn")
     if dry:
         print("--dry: nothing written")
         return

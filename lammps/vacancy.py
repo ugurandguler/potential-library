@@ -154,19 +154,19 @@ def main():
         if rec and "m" in rec:
             jobs.append((el, dict(rec)))
     nw = max(1, (os.cpu_count() or 4) - 2)
-    print(f"Bosluk olusum enerjisi, {which} seti  ({len(jobs)} element, "
+    print(f"Vacancy formation energy, {which} set  ({len(jobs)} elements, "
           f"{nw} in parallel)")
     print("Positions relax, cell volume fixed.\n")
     with ThreadPoolExecutor(max_workers=nw) as ex:
         res = list(ex.map(lambda j: evac(j[0], j[1], style), jobs))
 
     print(f"{'el':4s}{'ours':>9s}{'pub. lowest':>15s}{'median':>10s}"
-          f"{'en yuksek':>11s}{'n':>4s}   konum")
+          f"{'highest':>11s}{'n':>4s}   position")
     print("-" * 60)
     out = {}
     for (el, rec), v in zip(jobs, res):
         if v is None:
-            print(f"{el:4s}   hesaplanamadi")
+            print(f"{el:4s}   could not be computed")
             continue
         out[el] = v
         pub = sorted(x["Ev"] for x in ref.get(el, []))
@@ -176,8 +176,8 @@ def main():
             continue
         import statistics as st
         below = sum(1 for x in pub if x < v)
-        where = ("dagilimin ICINDE" if pub[0] <= v <= pub[-1]
-                 else "ALTINDA" if v < pub[0] else "USTUNDE")
+        where = ("INSIDE the spread" if pub[0] <= v <= pub[-1]
+                 else "BELOW" if v < pub[0] else "ABOVE")
         print(f"{el:4s}{v:9.2f}{pub[0]:15.2f}{st.median(pub):10.2f}"
               f"{pub[-1]:11.2f}{len(pub):4d}   {where}")
     json.dump(out, open(os.path.join(HERE, f"vacancy_{which}.json"), "w"),

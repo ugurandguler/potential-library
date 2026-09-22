@@ -93,7 +93,7 @@ def main():
               f"{v['rms'] - rec['rms']:+9.2f}"
               f"{(rec.get('R_exp') or float('nan')):9.2f}"
               f"{(rec.get('R') or float('nan')):9.2f}"
-              f"  {'evet' if rec['stable'] else 'HAYIR'}")
+              f"  {'yes' if rec['stable'] else 'NO'}")
 
     tmp = path + ".tmp"
     with open(tmp, "w") as fh:
@@ -101,7 +101,7 @@ def main():
     os.replace(tmp, path)
     print(f"\ntapered fit added to {len(new)} elements, "
           f"{n_stable} of them dynamically stable")
-    print("birlestirildi:", path)
+    print("merged:", path)
 
 
 if __name__ == "__main__":

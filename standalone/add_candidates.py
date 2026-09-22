@@ -80,9 +80,9 @@ def main():
             el, arm = k.split("|")
             ground[(el, arm.lower())] = v["verdict"]
     else:
-        print("UYARI: %s yok - 'ground' sutunu BOS kalacak. Kayitlardaki "
-              "mevcut hukumler etkilenmez; yalnizca bu yeniden kurulum "
-              "onlari uretemiyor." % os.path.relpath(gp, ROOT), flush=True)
+        print("WARNING: %s missing - the 'ground' column will stay EMPTY. The "
+              "verdicts already in the records are unaffected; only this rebuild "
+              "cannot produce them." % os.path.relpath(gp, ROOT), flush=True)
 
     print(f"{'el':4s}{'set':7s}{'rms':>8s}{'shipped':>9s}{'min cm-1':>10s}"
           f"{'ground':>9s}  stable")

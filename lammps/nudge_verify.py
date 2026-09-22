@@ -56,7 +56,7 @@ def main():
     #  the same direction, and five identical numbers were reported as five
     #  independent agreements.  A verification that cannot fail is not one.
     if "{seed}" not in NF.IN:
-        raise SystemExit("nudge_filter.IN artik {seed} tasimiyor - "
+        raise SystemExit("nudge_filter.IN no longer carries {seed} - "
                          "the check may not be changing direction")
     print(f"{'el':4s}{'record':8s}" + "".join(f"{s:>11d}" for s in seeds)
           + "   passing")

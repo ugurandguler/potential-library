@@ -250,7 +250,7 @@ def main():
     tapers = {r.get("taper") or -1.0 for r in recs.values()}
     if len(tapers) > 1:
         raise SystemExit(f"the elements carry different tapers: {tapers}; "
-                         "pencere modelin parcasi, bag basina parametre degil")
+                         "the window is part of the model, not a per-bond parameter")
     taper = tapers.pop()
 
     if auto:

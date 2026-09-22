@@ -176,20 +176,21 @@ def run(script, *args, optional=False):
 
 
 
-#  Anahtarlar ki bu zincir onlari URETMEZ.  Elle yazilmis bir liste degil:
-#  build_library.py'nin uretttigi alanlar ile mevcut kutuphanede duranlar
-#  karsilastiriliyor, yani zincire bir adim eklendigi gun liste kendiliginden
-#  kisalir.  Sabit bir liste o gun yanlis alarm vermeye baslar.
+#  Keys this chain does NOT produce.  Not a hand-written list: the fields
+#  build_library.py produces are compared with what is in the current
+#  library, so the day a step is added to the chain the list shrinks by
+#  itself.  A fixed list would start raising false alarms that day.
 def would_lose(path):
-    """(kayip anahtar -> kac element) - zincirin geri getiremeyecegi her sey
+    """(lost key -> how many elements) - everything the chain cannot restore
 
-    `build_library.py` her calismada sozlugu sifirdan kurar ve oncekinden
-    yalnizca `mp` tasir, cunku geri kalan her sey fit'in bir ozelligi sayilir.
-    Bu dogruydu, zincir her seyi ureten tek yer oldugu surece.  Bugun agacta
-    yirmi sekiz uretici var ve zincir on birini kosuyor; gerisi kume ciktisi
-    ister ve o ciktilar yayimlanan agacta yoktur.  Yani zincir artik bir
-    yeniden kurulum degil, KISMI bir yeniden kurulum, ve farki bilmeyen biri
-    icin bu sessiz bir silme islemidir.
+    `build_library.py` builds the dictionary from scratch on every run and
+    carries over only `mp` from the previous one, because everything else is
+    taken to be a property of the fit.  That was true as long as the chain
+    was the only place that produced everything.  Today the tree has
+    twenty-eight producers and the chain runs eleven of them; the rest need
+    cluster output, and that output is not in the published tree.  So the
+    chain is no longer a rebuild but a PARTIAL rebuild, and for someone who
+    does not know the difference it is a silent deletion.
     """
     import json as _json
     if not os.path.exists(path):
@@ -198,7 +199,7 @@ def would_lose(path):
         lib = _json.load(open(path, encoding="utf-8"))
     except ValueError:
         return {}
-    #  zincirin yazdigi ust duzey alanlar (build_library + 11 adim)
+    #  top-level fields the chain writes (build_library + 11 steps)
     #  MEASURED, not guessed from reading the code: this is exactly the key
     #  set a from-scratch chain run produces, taken from one - the public tree
     #  cloned into an empty directory with no library.json, `refresh.py`, and
@@ -229,23 +230,23 @@ def would_lose(path):
 def main(merge_dirs, force=False):
     lost = would_lose(os.path.join(HERE, "library.json"))
     if lost and not force:
-        print("DUR.  Mevcut library.json'da bu zincirin GERI GETIREMEYECEGI")
-        print("kayitlar var.  build_library.py sozlugu sifirdan kurar ve")
-        print("oncekinden yalniz `mp` tasir, yani asagidakiler silinir:")
+        print("STOP.  The current library.json holds records this chain")
+        print("CANNOT RESTORE.  build_library.py builds the dictionary from")
+        print("scratch and carries over only `mp`, so the following are deleted:")
         print()
         for k, n in sorted(lost.items(), key=lambda x: -x[1]):
             print("    %-22s %d element" % (k, n))
         print()
-        print("Bunlari ureten ureticiler bu zincirde YOK - cogu kume ciktisi")
-        print("ister ve o ciktilar yayimlanan agacta bulunmaz.  Yayimlanan")
-        print("sayfayi bu zincirle yeniden uretemezsiniz; uretilen sayfa")
-        print("daha kucuk ve daha az sey soyleyen baska bir sayfadir.")
+        print("The producers of these are NOT in this chain - most need cluster")
+        print("output, and that output is not in the published tree.  You cannot")
+        print("regenerate the published page with this chain; the page it makes")
+        print("is a different, smaller page that says less.")
         print()
-        print("Bunun bir de asagi akis sonucu var: kollar gidince")
-        print("export_potentials.py 213 yerine 76 dosya yazar.")
+        print("There is a downstream consequence as well: with the arms gone,")
+        print("export_potentials.py writes 76 files instead of 213.")
         print()
-        print("Yalnizca 0 K analitik kismi istiyorsaniz:  refresh.py --force")
-        print("Yayimlanan sayfanin tamami zaten docs/index.html'dedir.")
+        print("If you only want the 0 K analytic part:  refresh.py --force")
+        print("The complete published page is already in docs/index.html.")
         raise SystemExit(1)
     if merge_dirs:
         print(f"[0/{len(CHAIN)}] merge_fits.py  <- {', '.join(merge_dirs)}")

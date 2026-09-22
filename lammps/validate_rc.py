@@ -46,7 +46,7 @@ def main():
     lib = json.load(open(os.path.join(ROOT, "standalone", "library.json")))
     els = sys.argv[1:] or ["Cs", "Rb", "K", "Na", "Li", "Cu", "Mo"]
     print(f"{'el':4s}{'arm':7s}{'m':>8s}{'E latdyn':>11s}{'E lammps':>11s}"
-          f"{'dE':>11s}{'P latdyn':>10s}{'P lammps':>10s}   durum")
+          f"{'dE':>11s}{'P latdyn':>10s}{'P lammps':>10s}   status")
     print("-" * 79)
     for el in els:
         e = refdata.ELEMENTS[el]
@@ -60,7 +60,7 @@ def main():
             E_ref = L.energy(cry, pot)
             g = V.lammps(el, rec, e, cry)
             if "E" not in g:
-                print(f"{el:4s}{arm:7s}{rec['m']:8.2f}   LAMMPS hata: "
+                print(f"{el:4s}{arm:7s}{rec['m']:8.2f}   LAMMPS error: "
                       f"{g.get('err','?')[:40]}")
                 continue
             h = 1e-5
@@ -74,7 +74,7 @@ def main():
             ok = abs(dE) < 1e-5 * max(abs(E_ref), 1.0) and abs(P_lmp - P_ref) < 0.05
             print(f"{el:4s}{arm:7s}{rec['m']:8.2f}{E_ref:11.5f}{g['E']:11.5f}"
                   f"{dE:11.2e}{P_ref:10.4f}{P_lmp:10.4f}   "
-                  + ("tamam" if ok else "AYRISIYOR"))
+                  + ("ok" if ok else "DISAGREES"))
 
 
 if __name__ == "__main__":

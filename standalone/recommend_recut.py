@@ -6,8 +6,8 @@ The shell-gap re-cut (`rc`, shipped as <El>_recut.ugur) moves the pair cutoff
 into a gap between neighbour shells.  It exists for 23 elements, and the
 evidence has been one-sided for the ones it suits: the intrinsic stacking
 fault comes out NEGATIVE in all 15 fcc/hcp tapered records that also have a
-re-cut, and POSITIVE in all 15 re-cut ones, closer to experiment in all 9
-where a measurement exists.  It is also a per-element question, not a global
+re-cut, and POSITIVE in all 15 re-cut ones, closer to experiment in all 8
+that have a compiled value (Rosengaard and Skriver 1993).  It is also a per-element question, not a global
 switch: the same re-cut makes sodium, potassium, rubidium, caesium and lithium
 expand NEGATIVELY on heating and stiffen instead of softening.
 
@@ -32,6 +32,17 @@ Otherwise the published switched set, <El>_taper.ugur, stays the
 recommendation, and the reason is recorded.  Nothing is deleted: both files
 keep shipping, and the field only says which one to use.
 
+THE FALLBACK IS CHECKED TOO.  Falling back to the switched set used to be
+unconditional, and for lithium that recommended a record with no barrier
+against collapse: squeezed uniformly, its energy falls without limit
+(-434 eV/atom by 0.92 a0).  fit.py rejects exactly that - a compression basin
+whose barrier is below k_B T_melt, the threshold calibrated against the MD
+screen on 30 of 30 parameter sets - but the shipped records were fitted before
+the constraint existed, and a constrained refit of lithium's switched set has
+no solution in either form (MAU or UG).  So when the re-cut is rejected and the
+switched set fails that same test, the recommendation is "none": no record of
+this element is fit for molecular dynamics, and the files say so.
+
 THE STIFFENING CONDITION USES MOLECULAR-DYNAMICS POINTS ONLY.  Its first
 version divided C11 at 300 K by the elasticT table's T = 0 row, and that row is
 not a measurement: it is the fit's static target (barium reads exactly 12.600
@@ -44,7 +55,7 @@ Between MD points barium's re-cut softens by 2 % from 50 to 300 K.  The
 corrected condition changed no other element's verdict: the alkalis still
 stiffen x2.4-3.1 and ytterbium x1.055 between MD points.
 
-Writes lib[el]["md_recommended"] = {"set": "rc" | "tap", "why": [...],
+Writes lib[el]["md_recommended"] = {"set": "rc" | "tap" | "none", "why": [...],
 "rule": RULE, "facts": {...}}.  Elements with no re-cut get nothing.
 
     python recommend_recut.py
@@ -57,6 +68,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import refdata                                       # noqa: E402
+
+KB = 8.617333262e-5                                  # eV/K, as fit.py
 
 WORSE_PTS = 2.0
 C11_RATIO_MAX = 1.00
@@ -141,13 +154,25 @@ def decide(el, v):
              "e300_rc": er, "e300_tap": et, "disp": d,
              "isf_rc": (r.get("stacking") or {}).get("isf"),
              "isf_tap": (t.get("stacking") or {}).get("isf")}
-    return ("tap" if why else "rc"), why, facts
+    if not why:
+        return "rc", why, facts
+    #  the fallback has to pass fit.py's compression test itself
+    cp = t.get("compression") or {}
+    tm = refdata.MELTING.get(el)
+    if cp.get("basin") and tm and (cp.get("barrier") or 0.0) < KB * tm:
+        facts["tap_compression"] = {"barrier_eV": cp.get("barrier"),
+                                    "kT_melt_eV": KB * tm, "depth_eV": cp.get("depth")}
+        why = why + ["and the switched set itself has no barrier against collapse "
+                     f"under compression ({cp.get('barrier', 0):.3f} eV against "
+                     f"k_B T_melt {KB * tm:.3f} eV)"]
+        return "none", why, facts
+    return "tap", why, facts
 
 
 def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
-    rec, keep = [], []
+    rec, keep, none = [], [], []
     for el in sorted(lib):
         v = lib[el]
         if not (isinstance(v, dict) and isinstance(v.get("rc"), dict)
@@ -156,7 +181,7 @@ def main():
         s, why, facts = decide(el, v)
         v["md_recommended"] = {"set": s, "why": why, "rule": RULE,
                                "facts": facts}
-        (rec if s == "rc" else keep).append((el, why))
+        (rec if s == "rc" else none if s == "none" else keep).append((el, why))
     tmp = path + ".tmp"
     with open(tmp, "w") as fh:
         json.dump(lib, fh, indent=1, sort_keys=True, default=str)
@@ -165,6 +190,9 @@ def main():
           + " ".join(e for e, _ in rec))
     print(f"switched set stays ({len(keep)}):")
     for el, why in keep:
+        print(f"   {el:3s} {'; '.join(why)}")
+    print(f"NO record fit for MD ({len(none)}):")
+    for el, why in none:
         print(f"   {el:3s} {'; '.join(why)}")
 
 
