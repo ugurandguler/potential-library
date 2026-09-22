@@ -553,6 +553,12 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
 <div class="panel" id="panel"></div>
 
 <footer>
+  <strong style="color:var(--ink)">A separate study</strong><br>
+  <a href="forms.html">forms.html</a> compares the published form with two
+  variants that replace or extend its three-body term by an embedding, on five
+  bcc metals and on their alloys. Those variants are not offered for use and are
+  not in the menu above; that page says why, and what they do and do not show.
+  <br><br>
   <strong style="color:var(--ink)">How to cite</strong><br>
   The <em>functional form</em> is not ours to claim &mdash; it is
   &#304;. Akg&uuml;n and G. U&#287;ur, <i>Phys. Rev. B</i>

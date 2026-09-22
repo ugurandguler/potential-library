@@ -273,7 +273,9 @@ lammps/       pair_ugur.cpp, the pair style, and the drivers that measured
               potentials/ holds our own .ugur files; the published baselines
               are not redistributed.
 docs/         index.html, the interactive library.  GitHub Pages serves from
-              here.
+              here.  forms.html beside it is a separate study page: the
+              published form against two embedding variants on five bcc
+              metals and their alloys, not offered for use (make_forms.py).
 provenance/   how the reference numbers were read out of the source volumes.
               Not runnable from a clean checkout - the volumes are publisher
               copyright and are not in this repository.
