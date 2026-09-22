@@ -3893,8 +3893,16 @@ function render(){
     <code>examples/ELASTIC_T/BORN_MATRIX</code>.
     ${Object.values(d.elasticT).some(r=>r.pts.some(q=>q.above_melt||!q.born_ok))?`
       <strong>Hollow markers</strong> sit above the melting point or violate the
-      Born criteria: a small perfect crystal has nowhere to nucleate from and
-      superheats, so those points describe a metastable solid, not the metal.`:""}
+      Born criteria. Above the melting point a small perfect crystal has nowhere
+      to nucleate from and superheats, so those points describe a metastable
+      solid, not the metal.`:""}
+    ${Object.values(d.elasticT).some(r=>r.kind!=="base"&&r.pts.some(q=>!q.born_ok&&!q.above_melt&&q.T>0&&q.T<0.2*r.Tmelt))?`
+      <strong style="color:var(--bad)">Hollow well below the melting point</strong>
+      is something else: this record loses a Born condition &mdash; here
+      ${Object.entries(d.elasticT).filter(([,r])=>r.kind!=="base"&&r.pts.some(q=>!q.born_ok&&!q.above_melt&&q.T>0&&q.T<0.2*r.Tmelt))
+        .map(([k,r])=>k+" by "+(100*Math.min(...r.pts.filter(q=>!q.born_ok&&q.T>0).map(q=>q.T/r.Tmelt))).toFixed(0)+" % of T<sub>m</sub>").join(", ")}
+      &mdash; while the 0 K screen and the molecular-dynamics screen both pass it.
+      Warm use of that set needs this curve, not those screens.`:""}
     ${Object.values(d.elasticT).some(r=>r.nudge_bad)?`
       <strong style="color:var(--bad)">Dashed red</strong>: this lattice does not
       survive a 1e-5 &Aring; displacement, and thermal motion here is ten

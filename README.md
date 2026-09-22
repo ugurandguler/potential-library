@@ -59,6 +59,13 @@ identical code:
 diffusion barriers or melting.** Use them for elastic and vibrational
 properties near the fitted volume.
 
+**And check the finite-temperature panel before running one warm.** Passing the
+0 K screen and holding the crystal in the molecular-dynamics screen is not the
+same as staying stable on heating: the switched records of Cs, Fe, K, Mo, Rb, V
+and W lose C′ = (C₁₁ − C₁₂)/2 between 5 and 10 per cent of their melting
+point, measured with the Born stress-fluctuation method. The page marks those
+points hollow and now says so in the panel note.
+
 The surface row carries a criterion, not just a count. Most disagreements about
 facet ordering are near-ties: where the closest two faces differ by less than
 five per cent neither this potential nor the reference resolves them, so the
