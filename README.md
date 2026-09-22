@@ -363,6 +363,15 @@ came back exact either way, but magnesium went from 13.1 to 15.0 % RMS — it is
 hexagonal, its γ sits on a bound, and it is the kind of element a short search
 loses. Use `dense_fit.py <el> <restarts>` when the number matters.
 
+There is a second thing to know before re-fitting. The admissibility test in
+`fit.py` — the ceiling on the three-body share of the cohesive energy — was
+tightened *after* the hard-cut library had been fitted, and it was derived from
+the switched sets. Re-evaluating a shipped record through the current file
+therefore returns nothing for **22 of the 36 hard-cut fits** (the list is in
+`fit.py`, measured 2026-08-29). No parameter changed; the acceptance test in
+front of them did. Without this note a reader re-fitting has no way to tell a
+version difference from a defect.
+
 One thing to know before running `refresh.py`: it **overwrites
 `standalone/potential.html` with what your checkout can compute**, which is
 less than the shipped page. This was measured, not estimated — the repository
