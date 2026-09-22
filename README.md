@@ -50,6 +50,7 @@ identical code:
 | quantity | how it does |
 | --- | --- |
 | elastic constants C_ij | median RMS 1.45 % (UG), 5.83 % (MAU) |
+| ground state of the model | the fitted structure is the lowest of bcc, fcc and hcp in **0 of 38** switched MAU records and 4 of 38 switched UG; the structure the model prefers sits a median 29 meV/atom lower (chromium 412). The re-cut arm is the exception, 21 of 23, and its selection rule screens for it. Nineteen published potentials run through the same code: 18 right. The hard-cut arms cannot be asked — their pair term does not vanish at the cutoff and the three structures hold different neighbour counts inside it, so the differences reach 19 eV/atom (iridium) and are truncation, not energy. `lammps/struct_rank.py`, in `library.json` as `<arm>.ground` |
 | vacancy formation energy | **2.25× the median of the published classical potentials** in JARVIS-FF (not DFT) for the switched arms, over the 21 elements that have one, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.05 MAU, 1.55 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |

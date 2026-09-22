@@ -68,6 +68,17 @@ def main():
         low = min(vals, key=vals.get)
         rec = {"want": want, "lowest": low, "ok": bool(low == want),
                "rel": {s: 1000.0 * (vals[s] - vals[want]) for s in CAND}}
+        #  the hard-cut arms live at a different depth: MAU at the top of the
+        #  element record, UG under "ug".  Their numbers are dominated by the
+        #  step at the cutoff - the structures hold different neighbour counts
+        #  inside r_c2 - so they are stored with that flag on them.
+        if tag in ("hard", "ug"):
+            rec["truncation_dominated"] = True
+            (lib[el] if tag == "hard" else lib[el].get("ug", {}))["ground"] = rec
+            ours += 1
+            bad += 0 if rec["ok"] else 1
+            added += 1
+            continue
         if tag.startswith("base|"):
             lib[el].setdefault("baseline_ground", {})[tag.split("|", 1)[1]] = rec
             base_ours += 1

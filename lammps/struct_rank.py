@@ -21,6 +21,17 @@ belongs to no minimum.
 
     python struct_rank.py                # every element in the library
     python struct_rank.py V Nb Fe --sets tap,tap_ug
+    python struct_rank.py --sets hard,ug # the hard-cut arms, static only
+
+THE HARD-CUT ARMS.  elastic_T.py's PACK carries only the arms that can be run
+in molecular dynamics, because that is what its sweep does.  This question is
+static - three minimisations, no trajectory - so the hard-cut records can
+answer it too, and they are the arm the elastic constants and the phonons of
+the paper come from.  They are read straight out of library.json when the set
+is named, with taper < 0, which is what the pair style calls hard truncation.
+The pair term does not vanish at its cutoff, so a minimisation can end with a
+neighbour sitting on the sphere; the shape check below still applies, and the
+energies are compared at each structure's own relaxed lattice as before.
 """
 import io
 import json
@@ -107,6 +118,30 @@ def potential_for(d, el, tag):
     return style, fn
 
 
+def add_hard_arms(sets):
+    """register 'hard' (MAU) and 'ug' (angular), both with the pair term cut
+    hard, from library.json - elastic_T.PACK has only the tapered arms"""
+    want = [t for t in sets if t in ("hard", "ug")]
+    if not want:
+        return
+    lib = json.load(io.open(os.path.join(ROOT, "standalone", "library.json"),
+                            encoding="utf-8"))
+    keys = ("m", "D", "alpha", "r0", "gamma", "C", "alpha3", "rcut2", "rcut3")
+    for tag in want:
+        E.OURS[tag] = ("ugur", "ugur") if tag == "hard" else ("ugur/ang", "ugur.ang")
+        for el, v in lib.items():
+            rec = v if tag == "hard" else v.get("ug")
+            if el not in E.PACK or not isinstance(rec, dict):
+                continue
+            if any(rec.get(k) is None for k in keys):
+                continue
+            q = {k: rec[k] for k in keys}
+            q["lam2"] = rec.get("lam2", 0.0) or 0.0
+            q["lam4"] = rec.get("lam4", 0.0) or 0.0
+            q["taper"] = -1.0                      # hard truncation
+            E.PACK[el][tag] = q
+
+
 def one(el, tag, struct):
     safe = tag.replace("|", "_").replace("/", "-").replace(".", "")
     d = os.path.join(HERE, "structrank", f"{el}_{safe}_{struct}")
@@ -185,6 +220,7 @@ def main():
         i = argv.index("--sets")
         sets = argv[i + 1].split(",")
         del argv[i:i + 2]
+    add_hard_arms(sets)
     with_base = "--nobase" not in argv
     args = [a for a in argv if not a.startswith("--")]
     els = args or sorted(E.PACK)
@@ -229,7 +265,8 @@ def main():
             continue
         low = min(vals, key=vals.get)
         rel = {s: 1000 * (vals[s] - vals[want]) for s in CANDIDATES}
-        lab = {"tap": "MAU", "tap_ug": "UG"}.get(tag, tag.replace("base|", ""))
+        lab = {"tap": "MAU switched", "tap_ug": "UG switched", "hard": "MAU hard",
+               "ug": "UG hard"}.get(tag, tag.replace("base|", ""))
         mark = "" if low == want else f"  <-- {low.upper()} IS LOWER"
         #  a cell that left its symmetry is not the structure in the heading
         bent = [s for s in CANDIDATES if d[s].get("shape_ok") is False]
