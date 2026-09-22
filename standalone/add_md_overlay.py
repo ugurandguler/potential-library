@@ -11,12 +11,13 @@ it.  Two things per element:
               Computed here for all 38.
 
   drift       energy drift in an NVE run, meV/atom/ns, hard cutoff against the
-              switch.  Measured in lammps/nve_check.py for eight elements
+              switch.  Measured in lammps/nve_check.py for twelve elements
               chosen to span the range of `step`, since running all 38 would
               add nothing - the point is the correlation, not the census.
 
-Over those eight, log(step) against log(drift) correlates at 0.944.  That is
-what makes the cutoff the cause rather than a coincidence: palladium's step is
+Over the nine whose crystal survived, log(step) against log(drift) correlates
+at 0.79 (NVE_R below; 0.944 was the first eight, all cubic).  That is what
+makes the cutoff the cause rather than a coincidence: palladium's step is
 0.0002 eV and it drifts by 5, chromium's is 0.129 and it drifts by 7256.
 
     python add_md_overlay.py
@@ -45,7 +46,7 @@ NVE = {
     "W":  (581.647, 0.254),
     "Fe": (6343.944, 0.278),
     "Cr": (7256.342, -24.612),
-    "Cu": (161.796, 0.131),
+    "Cu": (175.5, -0.002),      # re-measured 2026-09-22 (was 161.796, 0.131)
     "Al": (724.390, 0.232),
     "Nb": (1643.222, 0.038),
     "Pd": (4.967, 0.065),

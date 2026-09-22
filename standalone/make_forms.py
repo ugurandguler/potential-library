@@ -361,8 +361,8 @@ PRICE = dict(
     source="Derived from the table above.",
     cols=["Element", "MAU", "UG", "FS", "UG-2"],
     rows=[["Nb", "+64 %", "+74 %", "+97 %", "+21 %"],
-          ["Mo", "+48 %", "+40 %", "+18 %", "+3 %"]],
-    best=[None, None, None, None, 4])
+          ["Mo", "+48 %", "+40 %", "+0 %", "+3 %"]],
+    best=[None, None, None, None, None])
 
 BINARIES = dict(
     caption="Five-fold cross-validation of the ten bcc binaries: every one of a "
@@ -738,8 +738,10 @@ this&rdquo; is supported. What survives is a statement about compactness.</p>
 <p><b>The advantage is about the anchors, not about forces.</b> Refit the same
 four forms with the experimental anchors switched off and they come within ten
 per cent of one another, with UG-2 third rather than first. The embedding with
-Legendre densities satisfies the anchors nearly for free; every other form pays
-between a fifth and all of its force accuracy for them. Carrying the anchors is
+Legendre densities satisfies the anchors nearly for free on both elements
+tested (a fifth on niobium, 3 % on molybdenum); the angle-free and angular
+three-body forms pay two fifths to three quarters, and the plain embedding
+pays all of it on niobium and almost nothing on molybdenum. Carrying the anchors is
 what an empirical potential is for, so this is the narrower and more useful
 claim.</p>
 

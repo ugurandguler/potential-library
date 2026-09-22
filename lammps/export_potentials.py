@@ -647,7 +647,8 @@ named above, <El>_recut.ugur, which is recommended there instead.
 The hard-truncated potentials do not conserve energy: phi2 does not vanish at
 the cutoff, so a neighbour crossing it changes the energy in one step.
 Measured, that is a drift of 5 to
-7256 meV/atom/ps against 0.03 to 0.28 for the switched sets, and on three of
+7256 meV/atom/ns (lammps/nve_check.py, twelve elements) against at most 0.3
+for the switched sets apart from chromium's integrator error, and on three of
 the hexagonal metals the crystal does not merely drift but comes apart.
 
 For static elastic constants and phonons the hard-truncated sets are the

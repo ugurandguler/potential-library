@@ -147,9 +147,11 @@ cent for niobium, 13.4 to 7.4 for nickel and 10.0 to 5.3 for copper, on curves
 that are in no objective. What does not improve is the facet ordering of the
 body-centred fits, which stays wrong.
 
-Two of the nine sit strictly inside every constraint; the other seven exceed
-the three-body ceiling by 0.0002 to 0.0013 eV/atom, which the shipped fitting
-script rejects on with no tolerance. That is a decision still to be taken, and
+Seven of them ship, as the `tap_force` records (Cu, Mo, Nb, Ni, Ta, V, W).
+Three of those - niobium, tantalum and vanadium - sit strictly inside every
+constraint; the other four sit on the three-body ceiling E3/E2 = 0.30 and
+exceed it by at most 0.0002 in that ratio, which the shipped fitting script
+rejects on with no tolerance. That is a decision still to be taken, and
 the ceiling should not be moved to accommodate results produced under it.
 
 ## The melting point, measured for the first time
@@ -357,7 +359,7 @@ is too large to carry:
 | Materials Project, MC3D, JARVIS overlays | fetched data. Set `MP_API_KEY` for the first; the other two need their own downloads |
 | the switched arms `tap` and `tap_ug` | written by `add_taper_overlay.py` from the `dense_*.json` search output, which is gigabytes and is not carried |
 | the re-cut candidate arms | `add_candidates.py` reads `refit/`, which is not published |
-| *nothing else* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 24 rows and 24 curves appear. Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
+| *nothing else* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 27 rows and 26 curves appear (rhenium has one measured frequency, not a curve). Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
 
 Every one of those steps says what it could not do and continues, rather than
 failing. **The shipped `docs/index.html` is the complete page** and carries all

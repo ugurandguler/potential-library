@@ -2433,8 +2433,8 @@ function recutNote(d){
     THE FLOOR decides what may be read.  fix phonon imposes no symmetry on
     what it inverts, so two wavevectors the crystal forces to be equal do not
     come out equal; every q is scored twice and the spread is the run's
-    resolution.  The verdict column is computed from it, because twelve of
-    the twenty-four differences are smaller than it and a reader subtracting
+    resolution.  The verdict column is computed from it, because fifteen of
+    the twenty-seven differences are smaller than it and a reader subtracting
     two printed numbers would rank the library on noise.                    */
 const FT_WHY = {
   cold: T => `measured at ${T} K, far below the Debye temperature &mdash; `
@@ -2757,8 +2757,8 @@ function lammpsBlock(d){
       at temperature, because phi2 does not vanish at the cutoff.  Copper
       drifts 176 meV per atom per nanosecond in NVE with the hard set and
       0.002 - within noise - with the switched one (nve_check.py, 2026-09-22).  Each file's own header carries
-      its own discontinuity, which runs from 0.25 meV for palladium to 123 for
-      yttrium, so "not for dynamics" is not equally true across the library.  */
+      its own discontinuity, which runs from 0.25 meV for palladium to 346 for
+      ruthenium, so "not for dynamics" is not equally true across the library.  */
   const SETS = [
     ["hard", d,        d.sym+".ugur",             "ugur",
      "hard truncation &mdash; static properties and lattice dynamics, "
@@ -3374,16 +3374,22 @@ function render(){
         neighbour crossing the sphere changes the energy by that much in one
         step. At a fixed geometry that is consistent, which is why every number
         on this page is sound; in dynamics energy is simply not conserved.
-        ${(d.md&&d.md.drift_hard!==undefined)?`Measured: an NVE run at 600 K
-          drifts by <strong>${d.md.drift_hard.toFixed(0)} meV/atom/ps</strong>
+        ${(d.md&&d.md.drift_hard!==undefined)?`Measured: an NVE run started at
+          600 K drifts by <strong>${d.md.drift_hard.toFixed(0)} meV/atom/ns</strong>
           with the cutoff truncated, against
-          <strong>${Math.abs(d.md.drift_taper).toFixed(2)}</strong> with it
-          switched off smoothly &mdash; a factor of
-          ${(Math.abs(d.md.drift_hard/d.md.drift_taper)).toFixed(0)}.`:
-          `Measured on eight elements spanning the range: the drift runs from
-           5 to 7256 meV/atom/ps truncated, and 0.03 to 0.28 switched.`}
+          <strong>${Math.abs(d.md.drift_taper).toFixed(3)}</strong> with it
+          switched off smoothly${Math.abs(d.md.drift_taper) < 0.01
+            ? ` &mdash; within the run's noise`
+            : ` &mdash; a factor of
+          ${(Math.abs(d.md.drift_hard/d.md.drift_taper)).toFixed(0)}`}.`:
+          `Measured on twelve elements spanning the range: with the cutoff
+           truncated the drift runs from 5 meV/atom/ns (palladium) to 7256
+           (chromium), and three hexagonal crystals come apart outright;
+           switched, every run stays below 0.3 except chromium's, which is
+           integrator error at a 2 fs step.`}
         The drift tracks the step rather than anything else &mdash;
-        log&ndash;log correlation 0.944 over those eight, palladium stepping by
+        log&ndash;log correlation ${(d.md&&d.md.r)?d.md.r.toFixed(2):"0.79"}
+        over the nine elements whose crystal survived, palladium stepping by
         0.0002 eV and drifting by 5, chromium by 0.129 and drifting by 7256.
         <br><br>Shifting is not a way out: &phi;<sub>2</sub> carries real
         binding out to r<sub>cut</sub>, and subtracting its value there moves
@@ -4414,7 +4420,7 @@ function render(){
   E<sub>3</sub>/E<sub>2</sub>&nbsp;&le;&nbsp;0.30 &mdash; the three-body term
   may correct the pair term but may not cancel it &mdash; and a compression
   guard. Both were tightened for the tapered sets and never applied back to
-  the hard-cutoff library, so 22 of its 36 records are above the first and the
+  the hard-cutoff library, so 22 of its 38 records are above the first and the
   shipped record here fails both. This one is at
   ${d.hard_disp.evidence.E3_over_E2_here.toFixed(3)} against the shipped
   ${d.hard_disp.evidence.E3_over_E2_published.toFixed(3)}, and passes the

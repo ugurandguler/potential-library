@@ -2,7 +2,7 @@
 """
 Is the tapered drift on the light hcp metals the potential or the timestep?
 
-Titanium switched drifts 17.28 meV/atom/ps at 2 fs and yttrium 5.73, against
+Titanium switched drifts 17.28 meV/atom/ns at 2 fs and yttrium 5.73, against
 0.03 to 0.28 for the cubic set.  Read as a property of the potential that would
 say the switch works badly on hcp.  But the four hcp elements order by mass -
 Ti 47.9, Y 88.9, Ru 101.1, Re 186.2 - and so does the drift, which is what
