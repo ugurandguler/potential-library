@@ -283,6 +283,33 @@ REFS = [
    "t<sub>2</sub>Q<sub>2</sub> + t<sub>4</sub>Q<sub>4</sub> follows the same "
    "construction, with Q<sub>l</sub> a sum of squares by the addition theorem."),
  ]),
+ ("Published potentials compared", [
+  ("Second-neighbour MEAM for W, Mo, Nb, Ta and V.",
+   "B.-J. Lee, M. I. Baskes, H. Kim and Y. K. Cho, <i>Second nearest-neighbor "
+   "modified embedded atom method potentials for bcc transition metals</i>, "
+   "Phys. Rev. B <b>64</b>, 184102 (2001).", "10.1103/PhysRevB.64.184102", ""),
+  ("Molybdenum MEAM-spline.",
+   "H. Park, M. R. Fellinger, T. J. Lenosky et al., <i>Ab initio based empirical "
+   "potential used to study the mechanical properties of molybdenum</i>, Phys. "
+   "Rev. B <b>85</b>, 214121 (2012).", "10.1103/PhysRevB.85.214121", ""),
+  ("The EAM database whose cross terms come from a mixing rule.",
+   "X. W. Zhou, R. A. Johnson and H. N. G. Wadley, Phys. Rev. B <b>69</b>, "
+   "144113 (2004).", "10.1103/PhysRevB.69.144113", ""),
+  ("V-Nb-Ta-Ti-Zr MEAM.",
+   "M. S. Nitol, M. J. Echeverria, K. Dang, M. I. Baskes and S. J. Fensin, "
+   "Comput. Mater. Sci. <b>237</b>, 112886 (2024).", "10.1016/j.commatsci.2024.112886", ""),
+  ("W-Ta, W-V and W-Mo Finnis-Sinclair.",
+   "Y. Chen et al., Comput. Mater. Sci. <b>163</b>, 91 (2019); J. Nucl. Mater. "
+   "<b>531</b>, 152020 (2020).", "10.1016/j.commatsci.2019.03.021", ""),
+  ("The UF3 method; the niobium file ships with LAMMPS (A. C. Hire, 2024).",
+   "S. R. Xie, M. Rupp and R. G. Hennig, <i>Ultra-fast interpretable "
+   "machine-learning potentials</i>, npj Comput. Mater. <b>9</b>, 162 (2023).",
+   "10.1038/s41524-023-01092-7", ""),
+  ("Where the files come from.",
+   "C. A. Becker, F. Tavazza, Z. T. Trautt and R. A. Buarque de Macedo, Curr. "
+   "Opin. Solid State Mater. Sci. <b>17</b>, 277 (2013) - the NIST Interatomic "
+   "Potentials Repository.", "10.1016/j.cossms.2013.10.001", ""),
+ ]),
  ("Comparison targets and method", [
   ("The ceiling of the two- and three-body class.",
    "S. Pozdnyakov, A. R. Oganov, E. Mazhnik, A. Mazitov and I. Kruglov, "
@@ -457,6 +484,37 @@ DEFECTS = dict(
           ["vacancy collapsed", "—", "0", "0", "5/15", "0"]],
     best=[None, None, None, None, None, None])
 
+PUBLISHED = dict(
+    caption="Hold-out force error, eV/Å, on exactly the configurations of the ceiling "
+            "table: the best of the four forms fitted here against published "
+            "potentials that never saw these data. The last column counts the "
+            "published potentials better than the best form.",
+    source="Files from the NIST Interatomic Potentials Repository, run zero-shot in "
+           "LAMMPS through the same cell conversion, neighbour filter and per-atom "
+           "energy shift as the four forms; the pipeline was first checked by "
+           "reproducing the MAU and UG hold-out numbers to the last printed digit. "
+           "Every published potential predates the reference data. The niobium UF3 "
+           "file ships with LAMMPS without a record of its training data, so an "
+           "overlap with this hold-out cannot be excluded.",
+    cols=["Element", "best of the four", "best published", "Lee 2001 MEAM",
+          "published better"],
+    rows=[["W (240)", "UG-2 0.294", "Lee 2001 MEAM 0.266", "0.266", "1 of 5"], ["Mo (380)", "UG-2 0.308", "Park 2012 MEAM-spline 0.114", "0.235", "2 of 4"], ["Nb (272)", "UG-2 0.236", "UF3 (machine-learned) 0.131", "0.221", "4 of 4"], ["Ta (385)", "UG-2 0.248", "Lee 2001 MEAM 0.152", "0.152", "4 of 4"], ["V (248)", "FS 0.238", "Lee 2001 MEAM 0.160", "0.160", "2 of 3"]],
+    best=[None, None, None, None, None])
+
+ALLOY_PUB = dict(
+    caption="Binary pairs with a published potential that covers them: the best "
+            "fitted cross term of the four forms (cross-validated hold-out, as in "
+            "the binaries table) against the best published potential, zero-shot, "
+            "on the same configurations. Force error in eV/Å.",
+    source="Zhou 2004 builds every cross interaction from the elements by a "
+           "universal mixing rule - nothing is fitted to the alloy; Nitol 2024 "
+           "fits its pairs to density-functional data; Chen 2019/2020 fit theirs to "
+           "dilute-solute data. Mo-Nb, Mo-V and Nb-W have no published potential "
+           "that could be run here.",
+    cols=["Pair", "best fitted here", "best published", "better"],
+    rows=[["Mo-Ta", "MAU 0.549", "Zhou 2004 EAM 0.528", "published"], ["Mo-W", "UG-2 0.664", "Zhou 2004 EAM 0.448", "published"], ["Nb-Ta", "UG-2 0.463", "Nitol 2024 MEAM 0.812", "fitted here"], ["Nb-V", "UG 0.408", "Nitol 2024 MEAM 0.625", "fitted here"], ["Ta-V", "UG-2 0.422", "Nitol 2024 MEAM 0.496", "fitted here"], ["Ta-W", "UG-2 0.689", "Zhou 2004 EAM 0.540", "published"], ["V-W", "UG-2 0.675", "Chen 2019/2020 FS 0.824", "fitted here"]],
+    best=[None, None, None, None])
+
 TABLES = [("The ceiling of the form class", CEILING),
           ("What the anchors cost", ANCHOR),
           ("The same numbers as a price", PRICE),
@@ -464,7 +522,9 @@ TABLES = [("The ceiling of the form class", CEILING),
           ("Transfer to three, four and five species", TRANSFER),
           ("Mechanical stability", STABILITY),
           ("Against a published table", EXTERNAL),
-          ("Point defects against published values", DEFECTS)]
+          ("Point defects against published values", DEFECTS),
+          ("Against published potentials, single elements", PUBLISHED),
+          ("Against published potentials, binaries", ALLOY_PUB)]
 
 FORMS_DEF = [
     ("MAU", "phi2 + phi3(r1 + r2)", "9",
@@ -753,6 +813,19 @@ three-body forms is ahead of it. The cross terms then
 transfer, unchanged and with no free parameter, to three, four and five species.
 Mechanical stability agrees: with a fitted cross term UG-2 has no violation
 deeper than relaxation noise anywhere.</p>
+
+<p><b>Established potentials do better on the same data.</b> Run on exactly
+the same hold-out configurations, published potentials that never saw these
+data beat the best of the four forms on every element. The second-neighbour
+MEAM of Lee and co-workers, fitted to measured elastic constants, vacancy and
+surface energies with thirteen or fourteen parameters per element, beats UG-2
+on 5 of 5 and is the best published potential on 3; the gap is mostly
+in the free surfaces. For alloys the picture is mixed: on Mo-Ta, Mo-W, Ta-W
+Zhou's 2004 database is better, although its cross terms are not fitted at all
+but built by a mixing rule, while on Nb-Ta, Nb-V, Ta-V, V-W a cross term fitted
+here beats every published potential that covers the pair. So the forms on this
+page are a study of what an embedding changes, not a replacement for an
+established potential.</p>
 
 <p><b>Chemical energetics do not transfer.</b> Where the density-functional
 energy differences between arrangements of the same composition are small, every
