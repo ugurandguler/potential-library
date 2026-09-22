@@ -244,6 +244,15 @@ def temps(el):
     tm = PACK[el]["Tmelt"]
     ts = sorted({0} | {round(f * tm) for f in FRACS}
                 | ({300} if 300 < 0.9 * tm else set()))
+    #  EXTRA_T adds absolute temperatures to the grid.  The default grid is
+    #  fractions of the melting point, which for a refractory metal puts only
+    #  one or two points below room temperature - too few to take a slope
+    #  against a measured dc/dT, which is quoted over 100-300 K.  Points above
+    #  0.9 T_melt are refused: the sweep's own guard reads them as melted.
+    extra = os.environ.get("EXTRA_T", "")
+    if extra:
+        ts = sorted(set(ts) | {int(float(x)) for x in extra.split(",")
+                               if 0 < float(x) < 0.9 * tm})
     return ts
 
 
