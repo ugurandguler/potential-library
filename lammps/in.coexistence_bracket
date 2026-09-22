@@ -26,13 +26,14 @@
 #
 #  so Tm = 2625 +/- 125 K against an experimental 3290 K, 20 per cent low.
 #
-#  TWO WAYS TO GET A DIFFERENT NUMBER, both of which happened.  A 40 ps hold
-#  (NHOLD 20000) is too short: from 2000 to 2500 K neither half had won when it
-#  ended, and reading those as "neither wins" gave 2250 +/- 250 K, which the
-#  first version of this file reported.  And holding the VOLUME instead of the
-#  pressure (nvt in stages B, C and C2) leaves the cell at about 2 GPa near
-#  2500 K and raises the apparent melting point; the first published copy of
-#  this file did that, while the numbers in its comment came from NPT runs.
+#  WHAT CHANGED THE NUMBER.  The first published copy of this file held the
+#  VOLUME instead of the pressure (nvt in stages B, C and C2), which leaves the
+#  cell at about 2 GPa near 2500 K and raises the apparent melting point, while
+#  the numbers in its comment came from NPT runs.  A 40 ps hold (NHOLD 20000)
+#  does not decide: from 2000 to 2750 K the two halves still differ when it
+#  ends.  The 2250 +/- 250 K that the first version reported came from runs
+#  started from a different cell; this file reproduces neither that run nor the
+#  number, at either hold time, and why is not known.
 #
 #  RUN one trial temperature per invocation, in its own directory:
 #

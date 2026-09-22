@@ -80,9 +80,17 @@ expansion, with density-functional values and 51 published EAM and MEAM
 potentials — run through this same code — beside them. The drivers that
 produced those numbers are in `lammps/`.
 
-Two of these limits are limits of the *functional form*, established by
-scanning the parameter space rather than inferred from one fit: Cd and Zn's
-axial anisotropy, and the C₄₄/C′ floor for eight cubic metals. The rest are
+Two limits were established by scanning the parameter space rather than
+inferred from one fit. Cd and Zn's axial anisotropy has no solution in any of
+the three forms as parameterised here. The C₄₄/C′ floor that keeps eight cubic
+metals out of reach of the MAU form is a property of the **hard cut-off**, not of
+the form (the angular factor already lowers it for Al, Cr, Nb, V and W): with
+the switched cut-off all eight are within reach, and aluminium, iron, niobium,
+tantalum and vanadium fit exactly — but only aluminium and tantalum keep that
+fit through the later checks (iron and niobium leave the bcc lattice when the
+atoms are displaced and relaxed, and vanadium's C′ turns negative at 5 % of its
+melting point). Chromium, molybdenum and tungsten would need a repulsive first
+neighbour shell, which the fit forbids. The rest are
 limits of the **fitting data** rather than of the form. These parameters were
 fitted to seven derived numbers of one bulk structure at one volume and never
 saw a vacancy or a surface. Published work on the same two- plus three-body
@@ -188,15 +196,17 @@ python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
 | 2500 K | 0.751 / 0.708 | the liquid half froze | Tm above 2500 |
 | 2750 K | 0.068 / 0.098 | the solid half melted | Tm below 2750 |
 
-**Two ways to get a different number, and both happened.** A 40 ps hold is too
-short: from 2000 to 2500 K neither half has won when it ends, and reading that
-as "neither wins" is where 2250 ± 250 K came from; 120 ps decides every trial
-temperature. And holding the *volume* instead of the pressure leaves the cell
-at about 2 GPa near 2500 K, which raises the apparent melting point. The copy of
-`in.coexistence_bracket` in 1.4.3 and 1.4.4 did exactly that — its stages ran
-at fixed volume while the numbers in its own comment came from zero-pressure
-runs. It now runs every stage after the first at zero pressure, with a 120 ps
-hold by default.
+**What changed the number, and what is not known.** The copy of
+`in.coexistence_bracket` in 1.4.3 and 1.4.4 held the *volume* instead of the
+pressure in its last three stages, which leaves the cell at about 2 GPa near
+2500 K and raises the apparent melting point, while the numbers in its own
+comment came from zero-pressure runs; it now runs every stage after the first
+at zero pressure. A 40 ps hold does not decide: at every trial temperature from
+2000 to 2750 K the two halves still differ when it ends, so the default is now
+120 ps, which decides all four. The earlier 2250 ± 250 K came from
+zero-pressure runs started from a different cell, one of which ended at 2250 K
+with both halves disordered; the released file reproduces neither that run nor
+its number at either hold time, and why is not known.
 
 **That is the whole measurement**: at a fixed temperature and zero pressure,
 whether the solid melts or the liquid freezes *is* the answer, so it needs no
@@ -321,7 +331,8 @@ work had moved them ahead of the screen copies.
 
 Two independent implementations of the same potential exist on purpose.
 `standalone/latdyn.py` is analytic and lattice-based; `lammps/pair_ugur.cpp`
-is a molecular-dynamics kernel. They agree on energy and pressure to 10⁻¹¹,
+is a molecular-dynamics kernel. They agree on the energy to 10⁻¹¹ eV/atom and on
+the pressure to 10⁻⁶ GPa (`lammps/validate_pair.py`),
 which is what makes a disagreement anywhere else a real result rather than a
 bug in one of them.
 
@@ -382,7 +393,7 @@ sum rule to machine precision, the Dulong–Petit limit of the heat capacity, th
 frozen and relaxed elastic constants agreeing for one-atom cells, analytic
 forces against finite differences (2.6 × 10⁻¹⁰ eV/Å), the numerical angular
 force constants against the analytic ones (~10⁻⁸), and the pair style against
-the analytic code on energy and pressure (10⁻¹¹). `python selftest.py` and
+the analytic code on energy (10⁻¹¹ eV/atom) and pressure (10⁻⁶ GPa). `python selftest.py` and
 `lammps/validate_*.py` run them.
 
 The comparisons against published potentials are checked from outside as well:
