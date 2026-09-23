@@ -48,22 +48,32 @@ T0 = 298.15
 MESH = 8
 
 
-def mode_gamma(el, rec, mass, n=MESH, T=T0):
-    """heat-capacity-weighted mode Grueneisen parameter at T"""
+WINDOWS = (0.005, 0.01, 0.02, 0.03)
+
+
+def mode_gamma(el, rec, mass, n=MESH, T=T0, d=0.01):
+    """heat-capacity-weighted mode Grueneisen parameter at T
+
+    d is the half-width of the volume window the derivative is taken over.
+    It is an argument because the answer depends on it: for the body-centred
+    refractories the frequencies are not smooth in volume on the per-cent
+    scale - the same wiggle the equation-of-state scan shows - and gamma
+    changes sign between a one and a three per cent window.  main() therefore
+    reports the whole set rather than one number."""
     e = refdata.ELEMENTS[el]
     pot = L.Potential.from_record(rec)
     q = L.mesh(n)
     f = {}
-    for s in (0.99, 1.0, 1.01):
+    for s in (1 - d, 1.0, 1 + d):
         cry = L.Crystal(e["struct"], s * e["a0"], e.get("c_over_a"), mass=mass)
         f[s] = np.asarray(L.frequencies_many(cry, pot, q))      # THz, (nq, nbranch)
     w0 = f[1.0]
-    dlnV = 3 * np.log(1.01 / 0.99)
+    dlnV = 3 * np.log((1 + d) / (1 - d))
     with np.errstate(divide="ignore", invalid="ignore"):
-        g = -(np.log(np.abs(f[1.01])) - np.log(np.abs(f[0.99]))) / dlnV
+        g = -(np.log(np.abs(f[1 + d])) - np.log(np.abs(f[1 - d]))) / dlnV
     #  the acoustic modes at Gamma are zero and their gamma is undefined; so
     #  is any imaginary branch, which is not a mode of a stable crystal
-    ok = (w0 > 0.05) & np.isfinite(g) & (f[1.01] > 0) & (f[0.99] > 0)
+    ok = (w0 > 0.05) & np.isfinite(g) & (f[1 + d] > 0) & (f[1 - d] > 0)
     x = THZ_TO_EV * w0[ok] / (KB * T)
     c = KB * x ** 2 * np.exp(x) / (np.exp(x) - 1.0) ** 2          # per mode, eV/K
     return float(np.sum(c * g[ok]) / np.sum(c)), int(ok.sum()), int(ok.size)
@@ -108,12 +118,16 @@ def main():
                 break
         if not (aL_meas and B and cv):
             continue
+        gw = {d: mode_gamma(el, rec, lib[el]["mass"], d=d)[0] for d in WINDOWS}
         g, nok, ntot = mode_gamma(el, rec, lib[el]["mass"])
         Vm = molar_volume(el)
         #  alpha_V = gamma C_V / (B V), with B in Pa and V in m^3/mol
         a_pred = g * cv / (B * 1e9 * Vm)
         g_exp = (3 * aL_meas * 1e-6) * (B * 1e9) * Vm / cv
         out[el] = dict(gamma=g, gamma_exp=g_exp, modes_used=nok, modes=ntot,
+                       gamma_windows={str(k): v for k, v in gw.items()},
+                       window_spread=max(gw.values()) - min(gw.values()),
+                       sign_changes=min(gw.values()) < 0 < max(gw.values()),
                        alpha_V_pred_1e6=1e6 * a_pred, alpha_V_meas_1e6=3 * aL_meas,
                        alpha_V_model_1e6=3 * aL_model if aL_model else None,
                        Cv_298=cv, B_GPa=B, Vm_m3=Vm)

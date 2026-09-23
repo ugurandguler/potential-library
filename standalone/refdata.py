@@ -369,8 +369,26 @@ ELEMENTS = {
 }
 
 #  Standard molar entropy S° and heat capacity Cp° at 298.15 K, J/(mol.K).
-#  Source: CRC Handbook of Chemistry and Physics, standard thermodynamic tables.
-#  >>> Same provenance warning as above: hand-entered, verify before publishing. <<<
+#
+#  Source, in the publisher's recommended form and the SAME printing as the
+#  expansion coefficients of expansion.py:
+#
+#    David R. Lide, ed., CRC Handbook of Chemistry and Physics, Internet
+#    Version 2005, <http://www.hbcpnetbase.com>, CRC Press, Boca Raton, FL,
+#    section 5, "Standard Thermodynamic Properties of Chemical Substances".
+#
+#  VERIFIED 2026-09-23, which closes the hand-entered warning this block used
+#  to carry.  crc_thermo.py reads all 38 element rows out of the PDF in the
+#  repository; 36 agree with the values below to the one decimal the volume
+#  prints, and two did not, by more than rounding:
+#
+#      Al  Cp  was 24.20, volume prints 24.4
+#      Sr  Cp  was 26.40, volume prints 26.8
+#
+#  Both are corrected below.  The extra digit on the other entries is kept -
+#  it agrees with the volume wherever the volume can resolve it - but nothing
+#  in the library needs it, and a reader checking against the printed table
+#  will find one decimal.
 #
 #  These are NOT fit targets.  They are here purely so the phonon thermodynamics
 #  computed from the potential can be scored against experiment - a genuine test,
@@ -380,10 +398,10 @@ ELEMENTS = {
 #  Cp - Cv = T V alpha^2 B is roughly 1-2 J/(mol.K), so a calculated Cv a little
 #  below the tabulated Cp is the expected behaviour, not an error.
 THERMO_298 = {
-    "Al": (28.30, 24.20), "Ni": (29.87, 26.07), "Cu": (33.15, 24.44),
+    "Al": (28.30, 24.40), "Ni": (29.87, 26.07), "Cu": (33.15, 24.44),
     "Pd": (37.57, 25.98), "Ag": (42.55, 25.35), "Pt": (41.63, 25.86),
     "Au": (47.49, 25.42), "Pb": (64.81, 26.44), "Rh": (31.51, 24.98),
-    "Ir": (35.48, 25.10), "Ca": (41.59, 25.93), "Sr": (55.00, 26.40),
+    "Ir": (35.48, 25.10), "Ca": (41.59, 25.93), "Sr": (55.00, 26.80),
     "Fe": (27.28, 25.10), "Cr": (23.77, 23.35), "Mo": (28.66, 24.06),
     "W":  (32.64, 24.27), "V":  (28.94, 24.89), "Nb": (36.40, 24.60),
     "Ta": (41.51, 25.36), "Li": (29.12, 24.86), "Na": (51.30, 28.23),
