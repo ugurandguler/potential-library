@@ -85,10 +85,8 @@ C_MAX = 60.0
 #  crystals come apart in molecular dynamics.
 #
 #  IT WAS TIGHTENED AFTER THE LIBRARY WAS FITTED, AND MOST OF THE LIBRARY IS
-#  ABOVE IT.  Measured 2026-08-29: re-evaluating a shipped record through this
-#  file returns nothing for 22 of the 36 hard-cut fits - the two the run does
-#  not cover are Lu and Zr, which is where 36 rather than 38 comes from - and
-#  this is the
+#  ABOVE IT.  Re-evaluating a shipped record through this file returns nothing
+#  for 22 of the 38 hard-cut fits, and this is the
 #  constraint they fail.  Copper sits at 0.531 - phi2 supplies -7.43 eV/atom
 #  and phi3 gives +3.94 back.
 #
@@ -96,7 +94,13 @@ C_MAX = 60.0
 #               Tl .629  Yb .621  Pt .570  Cu .531  Mg .519  Y  .502
 #               Pd .496  Ag .487  Au .417  Hf .393  Al .388  Ni .372
 #               Be .362  Ba .361  Ti .328  Sc .320
-#      within:  Li Sr W Mo Ca Ta Re Rb Co V Cs Na K Nb
+#      within:  Ca Co Cs K Li Lu Mo Na Nb Rb Re Sr Ta V W Zr
+#
+#  The lists are no longer typed: e3_over_e2.py recomputes the ratio for every
+#  shipped record and writes e3_over_e2.json, which the manuscript and the page
+#  both read.  They are reproduced here because a reader of this file wants
+#  them here.  (The 2026-08-29 measurement gave the same 22 violators but left
+#  Lu and Zr out of the "within" list, so it was quoted for years as 22 of 36.)
 #
 #  The justification above comes from the TAPERED sets, and the constraint was
 #  never applied back to the hard-cut library that had already been fitted.
