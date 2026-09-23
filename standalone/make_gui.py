@@ -4443,7 +4443,8 @@ function render(){
   E<sub>3</sub>/E<sub>2</sub>&nbsp;&le;&nbsp;0.30 &mdash; the three-body term
   may correct the pair term but may not cancel it &mdash; and a compression
   guard. Both were tightened for the tapered sets and never applied back to
-  the hard-cutoff library, so 22 of its 38 records are above the first and the
+  the hard-cutoff library, so 22 of the 36 records the test was re-evaluated
+  on are above the first (Lu and Zr are not in that measurement) and the
   shipped record here fails both. This one is at
   ${d.hard_disp.evidence.E3_over_E2_here.toFixed(3)} against the shipped
   ${d.hard_disp.evidence.E3_over_E2_published.toFixed(3)}, and passes the

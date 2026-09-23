@@ -86,7 +86,9 @@ C_MAX = 60.0
 #
 #  IT WAS TIGHTENED AFTER THE LIBRARY WAS FITTED, AND MOST OF THE LIBRARY IS
 #  ABOVE IT.  Measured 2026-08-29: re-evaluating a shipped record through this
-#  file returns nothing for 22 of the 36 hard-cut fits, and this is the
+#  file returns nothing for 22 of the 36 hard-cut fits - the two the run does
+#  not cover are Lu and Zr, which is where 36 rather than 38 comes from - and
+#  this is the
 #  constraint they fail.  Copper sits at 0.531 - phi2 supplies -7.43 eV/atom
 #  and phi3 gives +3.94 back.
 #
