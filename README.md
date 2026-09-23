@@ -380,10 +380,10 @@ version difference from a defect.
 One thing to know before running `refresh.py`: it **overwrites
 `standalone/potential.html` with what your checkout can compute**, which is
 less than the shipped page. This was measured, not estimated — the repository
-was cloned into an empty directory and run. All 129 Python files compile,
-`selftest.py` passes every check, and `refresh.py` completes its fifteen steps
-in about a hundred seconds. The page it writes is about 3.3 MB against the
-shipped 7 MB, and what is missing is data that is not ours to redistribute or
+was cloned into an empty directory and run, most recently on 2026-09-23. All
+148 Python files compile, `selftest.py` passes every check, and `refresh.py`
+completes its nineteen steps in under two minutes. The page it writes is about
+3.3 MB against the shipped 7.6 MB, and what is missing is data that is not ours to redistribute or
 is too large to carry:
 
 | missing from a rebuild | why |
