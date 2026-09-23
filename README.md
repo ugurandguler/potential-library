@@ -213,8 +213,12 @@ at zero pressure. A 40 ps hold does not decide: at every trial temperature from
 2000 to 2750 K the two halves still differ when it ends, so the default is now
 120 ps, which decides all four. The earlier 2250 ± 250 K came from
 zero-pressure runs started from a different cell, one of which ended at 2250 K
-with both halves disordered; the released file reproduces neither that run nor
-its number at either hold time, and why is not known.
+with both halves disordered; that cell was not archived, the released file
+reproduces neither that run nor its number at either hold time, and why is not
+known. **The value to use is 2625 ± 125 K** — it is the one this input
+reproduces, its four trial temperatures are all decided and its trajectory
+ships with the release. The earlier figure is kept here so that nobody meeting
+it in 1.4.3 mistakes it for an independent confirmation.
 
 **That is the whole measurement**: at a fixed temperature and zero pressure,
 whether the solid melts or the liquid freezes *is* the answer, so it needs no
