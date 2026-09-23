@@ -41,6 +41,15 @@ authors:
 version: "1.4.5"
 date-released: "2026-09-23"
 license: GPL-2.0-only
+#  The concept DOI.  Zenodo mints it once and keeps it pointing at the newest
+#  release, so it is the one that can live in a file that ships inside the
+#  release: a release's OWN doi cannot, because Zenodo does not mint it until
+#  after that release has been published.  Every release's own doi is on the
+#  Zenodo record, and a reported result should name that one.
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.22924195"
+    description: "The concept DOI, which always resolves to the newest release"
 repository-code: "https://github.com/ugurandguler/potential-library"
 url: "https://ugurandguler.github.io/potential-library/"
 keywords:

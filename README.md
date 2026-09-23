@@ -512,6 +512,16 @@ numbers move as the fits improve, and a reader who cannot tell which release a
 result came from cannot reproduce it. `CITATION.cff` carries the machine-
 readable form.
 
+Every release is archived at Zenodo and gets its own DOI, and there is a second
+DOI for the library as a whole:
+[10.5281/zenodo.22924195](https://doi.org/10.5281/zenodo.22924195), which always
+resolves to the newest release. Point a reader at that one; **name the
+release's own DOI when you report a result** — v1.4.5 is
+[10.5281/zenodo.22924196](https://doi.org/10.5281/zenodo.22924196), and the
+later ones are listed on the Zenodo record. `CITATION.cff` carries the
+all-versions DOI rather than a release's own, because Zenodo does not mint a
+release's DOI until after that release is published, so it cannot be inside it.
+
 ## Licence
 
 **GPL-2.0** for the code, forced by the LAMMPS pair style and taken across the
