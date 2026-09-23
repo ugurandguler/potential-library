@@ -4430,8 +4430,8 @@ function render(){
          +AGG.int_nfcc+" fcc records"
        : "&lang;111&rang; in "+AGG.int_bcc_111+" of "+AGG.int_nbcc+" bcc records")}
     ${cell3("as a fraction of E<sub>coh</sub>",
-       (I.E_I/(Array.isArray(d.Ecoh)?d.Ecoh[0]:d.Ecoh)).toFixed(2),
-       "an interstitial normally costs about half the cohesive energy")}
+       (I.E_I/Math.abs(Array.isArray(d.Ecoh)?d.Ecoh[0]:d.Ecoh)).toFixed(2),
+       "library median "+AGG.int_ecoh_ratio.toFixed(2))}
   </div>
 
   <p class="note"><b>The ordering is the part worth reading.</b> The three
@@ -4997,6 +4997,12 @@ AGG = dict(
     #  counted, not inferred by subtracting two unrelated totals
     int_hcp=sum(1 for e, v in DATA.items()
                 if isinstance(v, dict) and v.get("struct") == "hcp"),
+    #  E_coh is stored NEGATIVE here (a binding energy), so the ratio is taken
+    #  on the magnitude - printed raw it comes out as a minus sign on the page
+    int_ecoh_ratio=_med(
+        v["E_I"] / abs(DATA[e]["Ecoh"][0] if isinstance(DATA[e]["Ecoh"], list)
+                       else DATA[e]["Ecoh"])
+        for e, v in _Iok.items()),
 )
 
 #  B': the reference is Li et al.'s experiment-fitted table, and the switched
