@@ -3966,7 +3966,9 @@ function render(){
     Published potentials for ${d.name} run through the identical test:
     ${Object.entries(d.baseline_ground).map(([f,r])=>
       "<code>"+f+"</code> &rarr; "+r.lowest
-      +(r.ok?"":" <strong>(also wrong)</strong>")).join("; ")}.`:""}</p>
+      +(r.ok?"":" <strong>(also wrong, by "
+        +Math.abs(Math.min(...Object.values(r.rel))).toFixed(1)
+        +"&nbsp;meV/atom)</strong>")).join("; ")}.`:""}</p>
 
   <canvas id="bain"></canvas>
   <p class="plotnote">
