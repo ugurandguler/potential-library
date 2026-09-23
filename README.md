@@ -54,7 +54,7 @@ identical code:
 | vacancy formation energy | **2.25× the median of the published classical potentials** in JARVIS-FF (not DFT) for the switched arms, over the 21 elements that have one, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.05 MAU, 1.55 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
-| thermal expansion | 32 % low; 9 records contract on heating |
+| thermal expansion | 32 % low; 9 records (6 elements) contract on heating |
 
 **So: do not use these parameters for defect energies, surface energies,
 diffusion barriers or melting.** Use them for elastic and vibrational
