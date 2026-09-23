@@ -426,12 +426,15 @@ published forms:
 | `meam` | 7.9 | 78 |
 | `eam/alloy` | 1.2 | 70 |
 
-So **about 41× an EAM potential and 6× MEAM**. Almost all of that is the
-neighbour count, not the arithmetic: the three-body sum runs over pairs of
+So **about 41× an EAM potential and 6.5× MEAM**. Almost all of that is the
+neighbour count, not the arithmetic: the three-body sum runs over *pairs* of
 neighbours inside r_c3, and this form keeps 530 of them per atom where an
-embedded-atom potential keeps 70. It is the price of an explicit angular term
-with no density to hide it in, and it is the reason the melting and expansion
-runs here are small.
+embedded-atom potential keeps 70. Note what the table says about the angular
+term — `ugur/ang` is no slower than `ugur`, and if anything slightly faster on
+the same node. The Legendre factor is cheap. What costs is having an explicit
+three-body sum at all, instead of folding the many-body part into a density
+the way an embedded-atom form does, and it is the reason the melting and
+expansion runs here are small.
 
 Two cautions about those numbers. They were measured on one core with threads
 off, so they compare the styles and not the throughput you will get; and
