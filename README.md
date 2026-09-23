@@ -372,9 +372,9 @@ There is a second thing to know before re-fitting. The admissibility test in
 `fit.py` — the ceiling on the three-body share of the cohesive energy — was
 tightened *after* the hard-cut library had been fitted, and it was derived from
 the switched sets. Re-evaluating a shipped record through the current file
-therefore returns nothing for **22 of the 36 hard-cut fits** (the list is in
-`fit.py`, measured 2026-08-29). No parameter changed; the acceptance test in
-front of them did. Without this note a reader re-fitting has no way to tell a
+therefore returns nothing for **22 of the 38 hard-cut fits** (`e3_over_e2.py`
+recomputes the ratio for every shipped record and writes the two lists). No
+parameter changed; the acceptance test in front of them did. Without this note a reader re-fitting has no way to tell a
 version difference from a defect.
 
 One thing to know before running `refresh.py`: it **overwrites
