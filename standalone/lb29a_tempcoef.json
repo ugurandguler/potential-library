@@ -1,0 +1,379 @@
+{
+ "Ag": {
+  "T": "50-300",
+  "Tc11": -2.3,
+  "Tc12": -1.5,
+  "Tc44": -4.0,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Al": {
+  "T": "80-300",
+  "Tc11": -3.1,
+  "Tc12": -1.2,
+  "Tc44": -4.7,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Au": {
+  "T": "50-300",
+  "Tc11": -1.9,
+  "Tc12": -1.6,
+  "Tc44": -3.1,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Ba": {
+  "T": "100-293",
+  "Tc11": -1.6,
+  "Tc12": 2.6,
+  "Tc44": -12.5,
+  "Tcp": -9.3,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Be": {
+  "T": "300-600",
+  "Tc11": -3.8,
+  "Tc12": -10.0,
+  "Tc13": -8.1,
+  "Tc33": -3.0,
+  "Tc44": -2.2,
+  "system": "hexagonal",
+  "uncertain": []
+ },
+ "Ca": {
+  "T": "100-300",
+  "Tc44": -3.6,
+  "Tcp": -2.9,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Co": {
+  "T": "300-500",
+  "Tc11": -2.2,
+  "Tc12": -0.9,
+  "Tc13": -0.7,
+  "Tc33": -2.3,
+  "Tc44": -4.6,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc11",
+   "Tc33",
+   "Tc44",
+   "Tc12",
+   "Tc13"
+  ]
+ },
+ "Cr": {
+  "T": "77-300",
+  "Tc11": -5.0,
+  "Tc12": -15.0,
+  "Tc44": -1.0,
+  "system": "cubic",
+  "uncertain": [
+   "Tc11",
+   "Tc44",
+   "Tc12"
+  ]
+ },
+ "Cs": {
+  "T": "78",
+  "Tc11": -5.0,
+  "Tc12": -13.0,
+  "Tc44": -4.0,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Cu": {
+  "T": "80-300",
+  "Tc11": -2.02,
+  "Tc12": -1.26,
+  "Tc44": -3.32,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Fe": {
+  "T": "100-300",
+  "Tc11": -1.7,
+  "Tc12": -0.8,
+  "Tc44": -1.5,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Hf": {
+  "T": "150-300",
+  "Tc11": -2.1,
+  "Tc12": 1.6,
+  "Tc13": 0.2,
+  "Tc33": -1.6,
+  "Tc44": -3.0,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc12",
+   "Tc13"
+  ]
+ },
+ "Ir": {
+  "T": "50-300",
+  "Tc11": -1.0,
+  "Tc12": -1.0,
+  "Tc44": -2.0,
+  "system": "cubic",
+  "uncertain": [
+   "Tc11",
+   "Tc12"
+  ]
+ },
+ "K": {
+  "T": "293-336",
+  "Tc11": -11.0,
+  "Tc12": -7.0,
+  "Tc44": -25.0,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Li": {
+  "T": "90-195",
+  "Tc11": -3.5,
+  "Tc12": -3.6,
+  "Tc44": -10.5,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Lu": {
+  "T": "100-300",
+  "Tc11": -2.1,
+  "Tc12": 0.0,
+  "Tc13": 0.0,
+  "Tc33": -1.3,
+  "Tc44": -2.4,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc33",
+   "Tc44",
+   "Tc12",
+   "Tc13"
+  ]
+ },
+ "Mg": {
+  "T": "80-300",
+  "Tc11": -3.03,
+  "Tc12": -0.7,
+  "Tc13": -0.4,
+  "Tc33": -3.24,
+  "Tc44": -5.1,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc13"
+  ]
+ },
+ "Mo": {
+  "T": "100-300",
+  "Tc11": -1.15,
+  "Tc12": 0.35,
+  "Tc44": -0.87,
+  "system": "cubic",
+  "uncertain": [
+   "Tc12"
+  ]
+ },
+ "Na": {
+  "T": "80-300",
+  "Tc11": -6.3,
+  "Tc12": -5.6,
+  "Tc44": -17.0,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Nb": {
+  "T": "50-2500",
+  "Tc11": 0.89,
+  "comment": "the volume prints 0.89 with no sign where every neighbouring row carries a minus; the sign is doubtful in this scan, so the value is marked uncertain and is not used",
+  "system": "cubic",
+  "uncertain": [
+   "Tc11"
+  ]
+ },
+ "Ni": {
+  "T": "80-300",
+  "Tc11": -1.8,
+  "Tc12": -0.3,
+  "Tc44": -2.6,
+  "system": "cubic",
+  "uncertain": [
+   "Tc11",
+   "Tc44",
+   "Tc12"
+  ]
+ },
+ "Pb": {
+  "T": "100-300",
+  "Tc11": -4.4,
+  "Tc12": -2.8,
+  "Tc44": -10.6,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Pd": {
+  "T": "295",
+  "Tc11": -1.66,
+  "Tc12": -1.12,
+  "Tc44": 0.91,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Pt": {
+  "T": "50-300",
+  "Tc11": -1.0,
+  "Tc44": -0.3,
+  "system": "cubic",
+  "uncertain": [
+   "Tc11",
+   "Tc44"
+  ]
+ },
+ "Rb": {
+  "T": "80-170",
+  "Tc11": -12.0,
+  "Tc12": -11.0,
+  "Tc44": -23.0,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Re": {
+  "T": "100-300",
+  "Tc11": -1.3,
+  "Tc33": -1.2,
+  "Tc44": -1.7,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc33",
+   "Tc44"
+  ]
+ },
+ "Rh": {
+  "T": "100-300",
+  "Tc11": -1.2,
+  "Tc12": 0.0,
+  "Tc44": -2.3,
+  "system": "cubic",
+  "uncertain": [
+   "Tc12"
+  ]
+ },
+ "Ru": {
+  "T": "300-900",
+  "Tc11": -1.2,
+  "Tc12": 0.0,
+  "Tc13": 0.8,
+  "Tc33": -1.4,
+  "Tc44": -2.4,
+  "system": "hexagonal",
+  "uncertain": []
+ },
+ "Sr": {
+  "T": "100-293",
+  "Tc11": -1.0,
+  "Tc12": 0.7,
+  "Tc44": -11.5,
+  "Tcp": -4.6,
+  "system": "cubic",
+  "uncertain": []
+ },
+ "Ta": {
+  "T": "100-300",
+  "Tc11": -0.89,
+  "Tc12": -0.4,
+  "Tc44": -2.45,
+  "system": "cubic",
+  "uncertain": [
+   "Tc12"
+  ]
+ },
+ "Ti": {
+  "T": "200-1200",
+  "Tc11": -3.2,
+  "Tc13": 0.0,
+  "Tc33": -2.3,
+  "Tc44": -4.4,
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc11",
+   "Tc33",
+   "Tc44",
+   "Tc13"
+  ]
+ },
+ "Tl": {
+  "T": "100-300",
+  "Tc12": -2.0,
+  "Tc33": -5.1,
+  "comment": "Table 35; the cubic beta-Tl row of Table 28 is kept as Tl_cubic and is a different phase from the library's record",
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc12"
+  ]
+ },
+ "Tl_cubic": {
+  "T": "100-600",
+  "Tc11": -5.6,
+  "Tc12": -3.8,
+  "Tc44": -7.7,
+  "comment": "beta-Tl; the volume's footnote a) says these were obtained by extrapolation of In-Tl alloy data",
+  "system": "cubic (beta-Tl)",
+  "uncertain": []
+ },
+ "V": {
+  "T": "300",
+  "Tc11": -1.03,
+  "Tc12": -0.46,
+  "Tc44": -2.52,
+  "comment": "the 71B2 series gives firm values at single temperatures; the 100-300 K row of 60A1 is parenthesised throughout",
+  "system": "cubic",
+  "uncertain": []
+ },
+ "W": {
+  "T": "100-2000",
+  "Tc11": -1.01,
+  "Tc12": 0.0,
+  "Tc44": -0.78,
+  "system": "cubic",
+  "uncertain": [
+   "Tc12"
+  ]
+ },
+ "Y": {
+  "T": "100-300",
+  "Tc11": -1.9,
+  "Tc12": 1.1,
+  "Tc13": 1.3,
+  "Tc33": -1.7,
+  "Tc44": -3.6,
+  "comment": "the 80S3 determination; the 60S3/63S2 row above it is parenthesised throughout",
+  "system": "hexagonal",
+  "uncertain": [
+   "Tc12",
+   "Tc13"
+  ]
+ },
+ "Zr": {
+  "T": "298",
+  "Tc11": -3.49,
+  "Tc33": -1.94,
+  "Tc44": -5.02,
+  "comment": "the 70F5 single-temperature determination; the 200-1200 K row of 64F1 is parenthesised",
+  "system": "hexagonal",
+  "uncertain": []
+ },
+ "_columns": [
+  "Tc11",
+  "Tc33",
+  "Tc44",
+  "Tc12",
+  "Tc13"
+ ],
+ "_definition": "Tc_ij = (1/c_ij) dc_ij/dT in 10^-4 / K, at constant pressure, over the temperature range T.",
+ "_note": "Read from the page images of the scanned volume, not from its OCR: the OCR of these pages loses minus signs and reads reference codes as numbers (an earlier automatic extraction gave Ni a coefficient of 7383). Values the volume prints in parentheses are its own mark for an estimate and are listed under 'uncertain'; a '?' in the volume is omitted here. Where the volume gives several determinations the first firm one is taken, and its range is recorded. lb29_tempcoef.py reproduces the same rows automatically and is kept as a cross-check, not as the source. Scandium has no coefficient in either table. Thallium appears in both: the hexagonal row is the one that matches the library's record.",
+ "_source": "A. G. Every and A. K. McCurdy, Landolt-Bornstein III/29a (Springer, 1992): Table 28, 'Temperature coefficients Tc_rho_sigma. Cubic system. Elements' (pages 224-226), and Table 35, 'Hexagonal system' (pages 247-250)."
+}

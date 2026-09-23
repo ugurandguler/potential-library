@@ -61,6 +61,12 @@ The order is not arbitrary:
                   rule over the warm and cold screens; needs `rc` and `tap`,
                   so it too does nothing on a clean clone
   add_electronic  the electronic heat-capacity coefficient gamma per element
+  add_interstitial / add_eos / add_gruneisen / add_tempcoef
+                  the four out-of-fit quantities: the self-interstitial, B',
+                  the Grueneisen parameter and the temperature coefficients of
+                  the elastic constants.  Each folds in a result file rather
+                  than computing anything, and each skips if that file is not
+                  in this checkout
                   (Kittel Table 2), which the thermodynamics note subtracts
   add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
                   contain no member of <111>, which for a cubic crystal is
@@ -140,6 +146,15 @@ CHAIN = [
     ("add_ld_tap.py", "the switched arm's own 0 K dispersion", False),
     ("recommend_recut.py", "which switched set to recommend for MD", False),
     ("add_electronic.py", "electronic heat-capacity coefficients", False),
+    #  the four quantities the fit was never shown.  Each reads a result file
+    #  produced by a run that is not part of this chain - the scans are minutes
+    #  to hours of molecular dynamics and static sweeps - so each is optional
+    #  and says so if its input is not in this checkout.  They must come before
+    #  make_gui.py, which is where they are displayed.
+    ("add_interstitial.py", "self-interstitial formation energies", True),
+    ("add_eos.py", "the equation-of-state scan and B'", True),
+    ("add_gruneisen.py", "the Grueneisen parameter and its window scan", True),
+    ("add_tempcoef.py", "measured dC_ij/dT beside the sweep's own", True),
     ("make_gui.py", "potential.html", False),
 ]
 

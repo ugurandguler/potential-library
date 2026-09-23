@@ -1,0 +1,664 @@
+{
+ "Ag": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": -4.4500218457024765,
+   "experiment": -2.3,
+   "model_P": -3.7628169181517594,
+   "model_V": -1.2396545316384562
+  },
+  "Tc12": {
+   "dlnC_dlnV": -5.43961589912773,
+   "experiment": -1.5,
+   "model_P": -2.8381367372713138,
+   "model_V": 0.24612547753410882
+  },
+  "Tc44": {
+   "dlnC_dlnV": -4.001330919203502,
+   "experiment": -4.0,
+   "model_P": -2.2217209957069053,
+   "model_V": 0.04703363548147978
+  },
+  "alpha_exp_1e6": 18.9,
+  "system": "cubic"
+ },
+ "Al": {
+  "T_max": 300.0,
+  "T_points": 5,
+  "Tc11": {
+   "dlnC_dlnV": 6.939465319921615,
+   "experiment": -3.1,
+   "model_P": -1.3029004305809666,
+   "model_V": -6.111949897286645
+  },
+  "Tc12": {
+   "dlnC_dlnV": -3.8417160162942836,
+   "experiment": -1.2,
+   "model_P": -1.4201676085167723,
+   "model_V": 1.2421415907751663
+  },
+  "Tc44": {
+   "dlnC_dlnV": -0.5923364584694625,
+   "experiment": -4.7,
+   "model_P": 1.7122765485816274,
+   "model_V": 2.122765714300965
+  },
+  "alpha_exp_1e6": 23.1,
+  "system": "cubic"
+ },
+ "Au": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": -2.921788364325168,
+   "experiment": -1.9,
+   "model_P": -1.8960467153011855,
+   "model_V": -0.651364872098664
+  },
+  "Tc12": {
+   "dlnC_dlnV": -6.492842062174518,
+   "experiment": -1.6,
+   "model_P": -2.1672455456105126,
+   "model_V": 0.5987051728758321
+  },
+  "Tc44": {
+   "dlnC_dlnV": -5.899415048945418,
+   "experiment": -3.1,
+   "model_P": -0.09751279151886161,
+   "model_V": 2.4156380193318863
+  },
+  "alpha_exp_1e6": 14.2,
+  "system": "cubic"
+ },
+ "Ba": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": 7.396005095341934,
+   "experiment": -1.6,
+   "model_P": -0.9298924816040515,
+   "model_V": -5.500623630525367
+  },
+  "Tc12": {
+   "dlnC_dlnV": 1.2489179105161161,
+   "experiment": 2.6,
+   "model_P": -0.4981361035658105,
+   "model_V": -1.2699673722647702
+  },
+  "Tc44": {
+   "dlnC_dlnV": 0.09554377867130504,
+   "experiment": -12.5,
+   "model_P": -1.6648047742135184,
+   "model_V": -1.7238508294323849
+  },
+  "alpha_exp_1e6": 20.6,
+  "system": "cubic"
+ },
+ "Be": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": 6.5673851655367335,
+   "experiment": -3.8,
+   "model_P": -0.019645463230029137,
+   "model_V": -2.245989034346982
+  },
+  "Tc12": {
+   "dlnC_dlnV": -4.685991008136734,
+   "experiment": -10.0,
+   "model_P": 8.810684933430831,
+   "model_V": 10.399235885189185
+  },
+  "Tc13": {
+   "dlnC_dlnV": 6.742662692158987,
+   "experiment": -8.1,
+   "model_P": 6.8145815203579225,
+   "model_V": 4.528818867716026
+  },
+  "Tc33": {
+   "dlnC_dlnV": -13.027982544097084,
+   "experiment": -3.0,
+   "model_P": -5.227061160410544,
+   "model_V": -0.8105750779616323
+  },
+  "Tc44": {
+   "dlnC_dlnV": -1.3808643788504635,
+   "experiment": -2.2,
+   "model_P": -0.011122270740758833,
+   "model_V": 0.45699075368954833
+  },
+  "alpha_exp_1e6": 11.3,
+  "system": "hexagonal"
+ },
+ "Ca": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc44": {
+   "dlnC_dlnV": -3.07564981354884,
+   "experiment": -3.6,
+   "model_P": -2.8458803318232273,
+   "model_V": -0.788270606559053
+  },
+  "alpha_exp_1e6": 22.3,
+  "system": "cubic"
+ },
+ "Co": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "alpha_exp_1e6": 13.0,
+  "system": "hexagonal"
+ },
+ "Cr": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "alpha_exp_1e6": 4.9,
+  "system": "cubic"
+ },
+ "Cs": {
+  "skipped": "only 2 stable points at or below 300 K"
+ },
+ "Cu": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": -0.9187884785903284,
+   "experiment": -2.02,
+   "model_P": -1.974400537440606,
+   "model_V": -1.5196002405383935
+  },
+  "Tc12": {
+   "dlnC_dlnV": -4.519685905501108,
+   "experiment": -1.26,
+   "model_P": -1.7506255293350872,
+   "model_V": 0.48661899388796126
+  },
+  "Tc44": {
+   "dlnC_dlnV": -2.979269686503785,
+   "experiment": -3.32,
+   "model_P": -1.3426412350494037,
+   "model_V": 0.13209725976996997
+  },
+  "alpha_exp_1e6": 16.5,
+  "system": "cubic"
+ },
+ "Fe": {
+  "skipped": "only 1 stable points at or below 300 K"
+ },
+ "Hf": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": 2.170260278149121,
+   "experiment": -2.1,
+   "model_P": -0.9734808920408331,
+   "model_V": -1.3576169612732274
+  },
+  "Tc33": {
+   "dlnC_dlnV": -10.803061206201953,
+   "experiment": -1.6,
+   "model_P": -0.8700057016414415,
+   "model_V": 1.042136131856304
+  },
+  "Tc44": {
+   "dlnC_dlnV": -1.0796388172847273,
+   "experiment": -3.0,
+   "model_P": -1.1986940707473275,
+   "model_V": -1.0075980000879308
+  },
+  "alpha_exp_1e6": 5.9,
+  "system": "hexagonal"
+ },
+ "Ir": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc44": {
+   "dlnC_dlnV": -4.872021101917928,
+   "experiment": -2.0,
+   "model_P": -0.7935740920348665,
+   "model_V": 0.14185395953337565
+  },
+  "alpha_exp_1e6": 6.4,
+  "system": "cubic"
+ },
+ "K": {
+  "T_max": 253.0,
+  "T_points": 5,
+  "Tc11": {
+   "dlnC_dlnV": 11.017702017600142,
+   "experiment": -11.0,
+   "model_P": 31.32578222769809,
+   "model_V": 3.8917042038737404
+  },
+  "Tc12": {
+   "dlnC_dlnV": 1.4160698885257996,
+   "experiment": -7.0,
+   "model_P": 5.527939744383768,
+   "model_V": 2.0019257219545272
+  },
+  "Tc44": {
+   "dlnC_dlnV": 3.485020574277496,
+   "experiment": -25.0,
+   "model_P": -6.788618803998164,
+   "model_V": -15.466320033949128
+  },
+  "alpha_exp_1e6": 83.0,
+  "system": "cubic"
+ },
+ "Li": {
+  "T_max": 100.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": 20.591904121853375,
+   "experiment": -3.5,
+   "model_P": -14.515280826591916,
+   "model_V": -42.93210851474957
+  },
+  "Tc12": {
+   "dlnC_dlnV": 24.30255620836328,
+   "experiment": -3.6,
+   "model_P": -15.67812877562858,
+   "model_V": -49.215656343169904
+  },
+  "Tc44": {
+   "dlnC_dlnV": 6.496178908860694,
+   "experiment": -10.5,
+   "model_P": -1.2898631354521441,
+   "model_V": -10.2545900296799
+  },
+  "alpha_exp_1e6": 46.0,
+  "system": "cubic"
+ },
+ "Lu": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": 3.8359775135681473,
+   "experiment": -2.1,
+   "model_P": -1.3287565521692106,
+   "model_V": -2.4680418736989505
+  },
+  "alpha_exp_1e6": 9.9,
+  "system": "hexagonal"
+ },
+ "Mg": {
+  "T_max": 300.0,
+  "T_points": 5,
+  "Tc11": {
+   "dlnC_dlnV": -0.6489106699394035,
+   "experiment": -3.03,
+   "model_P": -5.3820003741134785,
+   "model_V": -4.899210835678562
+  },
+  "Tc12": {
+   "dlnC_dlnV": -2.798691932327008,
+   "experiment": -0.7,
+   "model_P": -3.1891322543543286,
+   "model_V": -1.106905456703035
+  },
+  "Tc33": {
+   "dlnC_dlnV": -2.904245509073206,
+   "experiment": -3.24,
+   "model_P": -2.928020133402323,
+   "model_V": -0.7672614746518573
+  },
+  "Tc44": {
+   "dlnC_dlnV": 0.3583548799266304,
+   "experiment": -5.1,
+   "model_P": -7.561573351198392,
+   "model_V": -7.8281893818638055
+  },
+  "alpha_exp_1e6": 24.8,
+  "system": "hexagonal"
+ },
+ "Mo": {
+  "T_max": 145.0,
+  "T_points": 3,
+  "Tc11": {
+   "dlnC_dlnV": 13.436497927966979,
+   "experiment": -1.15,
+   "model_P": -23.101121804488997,
+   "model_V": -25.035977506116243
+  },
+  "Tc44": {
+   "dlnC_dlnV": 2.5767854988633747,
+   "experiment": -0.87,
+   "model_P": -7.525908019689201,
+   "model_V": -7.896965131525526
+  },
+  "alpha_exp_1e6": 4.8,
+  "system": "cubic"
+ },
+ "Na": {
+  "T_max": 300.0,
+  "T_points": 8,
+  "Tc11": {
+   "dlnC_dlnV": 14.408485432473102,
+   "experiment": -6.3,
+   "model_P": 21.050659261714394,
+   "model_V": -9.639414709453312
+  },
+  "Tc12": {
+   "dlnC_dlnV": 5.224068643836919,
+   "experiment": -5.6,
+   "model_P": 12.648303931371858,
+   "model_V": 1.5210377199992224
+  },
+  "Tc44": {
+   "dlnC_dlnV": 4.221043700798162,
+   "experiment": -17.0,
+   "model_P": 7.887058945566096,
+   "model_V": -1.1037641371339857
+  },
+  "alpha_exp_1e6": 71.0,
+  "system": "cubic"
+ },
+ "Nb": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "alpha_exp_1e6": 7.3,
+  "system": "cubic"
+ },
+ "Ni": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "alpha_exp_1e6": 13.4,
+  "system": "cubic"
+ },
+ "Pb": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": -0.6723894295054669,
+   "experiment": -4.4,
+   "model_P": -0.7686903623082397,
+   "model_V": -0.18572872692700002
+  },
+  "Tc12": {
+   "dlnC_dlnV": -6.086618436057054,
+   "experiment": -2.8,
+   "model_P": -3.7487923565153545,
+   "model_V": 1.5283058275461108
+  },
+  "Tc44": {
+   "dlnC_dlnV": -5.051379778675773,
+   "experiment": -10.6,
+   "model_P": -0.8004604824000423,
+   "model_V": 3.5790857857118525
+  },
+  "alpha_exp_1e6": 28.9,
+  "system": "cubic"
+ },
+ "Pd": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": -2.8009312391514585,
+   "experiment": -1.66,
+   "model_P": -1.589993067172775,
+   "model_V": -0.5984634085131588
+  },
+  "Tc12": {
+   "dlnC_dlnV": -6.057060541163956,
+   "experiment": -1.12,
+   "model_P": -1.7072561084913478,
+   "model_V": 0.43694332308069256
+  },
+  "Tc44": {
+   "dlnC_dlnV": -5.0102753144675525,
+   "experiment": 0.91,
+   "model_P": -0.7526699605935376,
+   "model_V": 1.020967500727976
+  },
+  "alpha_exp_1e6": 11.8,
+  "system": "cubic"
+ },
+ "Pt": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "alpha_exp_1e6": 8.8,
+  "system": "cubic"
+ },
+ "Rb": {
+  "T_max": 188.0,
+  "T_points": 3,
+  "Tc11": {
+   "dlnC_dlnV": 6.283653768991643,
+   "experiment": -12.0,
+   "model_P": 13.051461983730631,
+   "model_V": -3.9144031925468057
+  },
+  "Tc12": {
+   "dlnC_dlnV": -0.2674927807943687,
+   "experiment": -11.0,
+   "model_P": -40.769480454531276,
+   "model_V": -40.04724994638648
+  },
+  "Tc44": {
+   "dlnC_dlnV": 0.8474915140020566,
+   "experiment": -23.0,
+   "model_P": -29.325072124400464,
+   "model_V": -31.613299212206016
+  },
+  "alpha_exp_1e6": 90.0,
+  "system": "cubic"
+ },
+ "Re": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": -1.5330188936316684,
+   "experiment": -1.3,
+   "model_P": -1.4333988781430194,
+   "model_V": -1.148257363927529
+  },
+  "alpha_exp_1e6": 6.2,
+  "system": "hexagonal"
+ },
+ "Rh": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": 0.8219149365914099,
+   "experiment": -1.2,
+   "model_P": -1.0357954599317265,
+   "model_V": -1.2379865343332133
+  },
+  "Tc44": {
+   "dlnC_dlnV": -4.287941554878624,
+   "experiment": -2.3,
+   "model_P": -0.9756033858004433,
+   "model_V": 0.07923023669969805
+  },
+  "alpha_exp_1e6": 8.2,
+  "system": "cubic"
+ },
+ "Ru": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": 0.5294862741583416,
+   "experiment": -1.2,
+   "model_P": -0.9084838312332378,
+   "model_V": -1.0101451958716394
+  },
+  "Tc12": {
+   "dlnC_dlnV": -5.213104677224156,
+   "experiment": 0.0,
+   "model_P": 3.47332910818767,
+   "model_V": 4.474245206214708
+  },
+  "Tc13": {
+   "dlnC_dlnV": -3.910974590104534,
+   "experiment": 0.8,
+   "model_P": -0.2266925551721699,
+   "model_V": 0.5242145661279006
+  },
+  "Tc33": {
+   "dlnC_dlnV": -12.438126939198288,
+   "experiment": -1.4,
+   "model_P": -2.0710179401454476,
+   "model_V": 0.3171024321806236
+  },
+  "Tc44": {
+   "dlnC_dlnV": -3.65912505833207,
+   "experiment": -2.4,
+   "model_P": -0.29128340682790504,
+   "model_V": 0.41126860437185236
+  },
+  "alpha_exp_1e6": 6.4,
+  "system": "hexagonal"
+ },
+ "Sr": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": -2.6705182795488587,
+   "experiment": -1.0,
+   "model_P": -3.6306450194425617,
+   "model_V": -1.828045180747082
+  },
+  "Tc12": {
+   "dlnC_dlnV": -3.549997177377738,
+   "experiment": 0.7,
+   "model_P": -1.9516426403973333,
+   "model_V": 0.4446054543326395
+  },
+  "Tc44": {
+   "dlnC_dlnV": -2.8581697648325206,
+   "experiment": -11.5,
+   "model_P": -2.777357205216557,
+   "model_V": -0.8480926139546056
+  },
+  "alpha_exp_1e6": 22.5,
+  "system": "cubic"
+ },
+ "Ta": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": 10.940519208548759,
+   "experiment": -0.89,
+   "model_P": -5.632053015469577,
+   "model_V": -7.699811145885293
+  },
+  "Tc44": {
+   "dlnC_dlnV": 4.037371243180963,
+   "experiment": -2.45,
+   "model_P": -1.5912875403676008,
+   "model_V": -2.3543507053288026
+  },
+  "alpha_exp_1e6": 6.3,
+  "system": "cubic"
+ },
+ "Ti": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "alpha_exp_1e6": 8.6,
+  "system": "hexagonal"
+ },
+ "Tl": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc33": {
+   "dlnC_dlnV": -8.87141613113075,
+   "experiment": -5.1,
+   "model_P": -4.9983126299015765,
+   "model_V": 2.9593476397227056
+  },
+  "alpha_exp_1e6": 29.9,
+  "system": "hexagonal"
+ },
+ "V": {
+  "T_max": 175.0,
+  "T_points": 3,
+  "Tc11": {
+   "dlnC_dlnV": 19.385466738908125,
+   "experiment": -1.03,
+   "model_P": -30.384798139784625,
+   "model_V": -35.26993575798947
+  },
+  "Tc12": {
+   "dlnC_dlnV": 1.5625805430094735,
+   "experiment": -0.46,
+   "model_P": -14.083766539612228,
+   "model_V": -14.477536836450614
+  },
+  "Tc44": {
+   "dlnC_dlnV": 13.445993225912714,
+   "experiment": -2.52,
+   "model_P": -8.044910711676081,
+   "model_V": -11.433301004606085
+  },
+  "alpha_exp_1e6": 8.4,
+  "system": "cubic"
+ },
+ "W": {
+  "T_max": 185.0,
+  "T_points": 3,
+  "Tc11": {
+   "dlnC_dlnV": 14.942309063532566,
+   "experiment": -1.01,
+   "model_P": -17.317234761155493,
+   "model_V": -19.33444648473239
+  },
+  "Tc44": {
+   "dlnC_dlnV": 2.2109628598299014,
+   "experiment": -0.78,
+   "model_P": -5.645958677514587,
+   "model_V": -5.944438663591623
+  },
+  "alpha_exp_1e6": 4.5,
+  "system": "cubic"
+ },
+ "Y": {
+  "T_max": 300.0,
+  "T_points": 4,
+  "Tc11": {
+   "dlnC_dlnV": 4.450009116249877,
+   "experiment": -1.9,
+   "model_P": -0.5562535394687922,
+   "model_V": -1.971356438436253
+  },
+  "Tc33": {
+   "dlnC_dlnV": -13.121484254152167,
+   "experiment": -1.7,
+   "model_P": -4.324986400647488,
+   "model_V": -0.15235440782709783
+  },
+  "Tc44": {
+   "dlnC_dlnV": -1.811722724952524,
+   "experiment": -3.6,
+   "model_P": -0.8089821370133918,
+   "model_V": -0.2328543104784893
+  },
+  "alpha_exp_1e6": 10.6,
+  "system": "hexagonal"
+ },
+ "Zr": {
+  "T_max": 300.0,
+  "T_points": 6,
+  "Tc11": {
+   "dlnC_dlnV": 2.068067993869683,
+   "experiment": -3.49,
+   "model_P": -1.457579396006854,
+   "model_V": -1.8112190229585696
+  },
+  "Tc33": {
+   "dlnC_dlnV": -8.923250666713514,
+   "experiment": -1.94,
+   "model_P": 0.4576092354796468,
+   "model_V": 1.9834850994876576
+  },
+  "Tc44": {
+   "dlnC_dlnV": -1.1227546494091387,
+   "experiment": -5.02,
+   "model_P": -0.9056513212031301,
+   "model_V": -0.7136602761541674
+  },
+  "alpha_exp_1e6": 5.7,
+  "system": "hexagonal"
+ },
+ "_note": "Tc in 10^-4/K. model_V is the constant-volume derivative the finite-temperature sweep measures; model_P adds (dlnC/dlnV) * 3 alpha_L with the MEASURED expansion coefficient, which is what the experiment reports. Coefficients the volume prints as estimates are skipped.",
+ "_source": "library.json elasticT.tap (lammps/elastic_T.py) + latdyn.elastic at +/-1 % of a + lb29a_tempcoef.json"
+}

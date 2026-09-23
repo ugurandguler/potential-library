@@ -8,7 +8,7 @@ potential's own derivatives - no external code is involved anywhere in the chain
 Source is deliberately pure ASCII; Greek letters go in as HTML entities.
 """
 import datetime as _dt
-import json, math, os
+import json, math, os, statistics
 
 import refdata
 import refdata_electronic
@@ -711,6 +711,10 @@ addEventListener("error", e => {
 });
 
 const DATA = __DATA__;
+//  library-wide reductions, computed in make_gui.py from library.json and
+//  never typed here: a count inside a template literal cannot be tested, and
+//  this page has twice published one that the data had already outgrown
+const AGG = __AGG__;
 const FT = __FT__;
 const $ = (s,r=document)=>r.querySelector(s);
 const fmt=(x,n=4)=>(x===null||x===undefined||isNaN(x))?"&mdash;":Number(x).toFixed(n);
@@ -3642,6 +3646,81 @@ function render(){
     </div>
   </div>`:""}
 
+  ${(()=>{const Q=d.eos; if(!Q||!Q.sets) return "";
+    const ORD=[["tap","switched MAU"],["tap_ug","switched UG"],
+               ["hard","hard cut MAU"],["ug","hard cut UG"]];
+    const rows=ORD.filter(a=>Q.sets[a[0]]);
+    if(!rows.length) return "";
+    const ref=Q.ref;
+    const pub=Object.entries(Q.published||{});
+    const mine=Q.sets.tap||Q.sets[rows[0][0]];
+    return `<h3>The equation of state, and B&prime;</h3>
+  <p class="note">Everything above is taken at one volume. This scans the
+  volume: the energy is computed on a grid of lattice constants either side of
+  the fitted one and a Birch&ndash;Murnaghan form is fitted through it, which
+  returns V<sub>0</sub>, the bulk modulus B<sub>0</sub>, and its pressure
+  derivative <b>B&prime;</b>.
+  <b>B&prime; is the point.</b> B<sub>0</sub> is a fitted target, so agreeing
+  with it says nothing about the model &mdash; it says the fit converged. Its
+  pressure derivative is not fitted anywhere and is measured for most metals,
+  which makes it the first quantity here that the fit was never shown and that
+  still has an answer to be right or wrong about.</p>
+
+  <table><thead><tr><th></th><th>V<sub>0</sub> (&Aring;&sup3;)</th>
+    <th>B<sub>0</sub> (GPa)</th><th>B&prime;</th>
+    <th>fit residual</th></tr></thead><tbody>
+  ${rows.map(([k,label])=>{const s=Q.sets[k];
+     const bad=s.Bp<0, noisy=s.rms_meV>1;
+     return `<tr><td>${label}</td><td>${s.V0.toFixed(2)}</td>
+       <td>${s.B0_GPa.toFixed(1)}</td>
+       <td${bad?' style="color:var(--bad)"':""}>${s.Bp.toFixed(2)}</td>
+       <td style="opacity:.7"${noisy?' class="warnish"':""}>${
+         s.rms_meV<0.01?"&lt;0.01":s.rms_meV.toFixed(2)} meV</td></tr>`;}).join("")}
+  ${pub.map(([f,s])=>`<tr style="opacity:.75"><td>${f}</td>
+     <td>${s.V0.toFixed(2)}</td><td>${s.B0_GPa.toFixed(1)}</td>
+     <td>${s.Bp.toFixed(2)}</td><td>${s.rms_meV<0.01?"&lt;0.01"
+       :s.rms_meV.toFixed(2)} meV</td></tr>`).join("")}
+  ${ref?`<tr><td><b>experiment</b></td><td>${ref.V0.toFixed(2)}</td>
+     <td>${ref.B0_GPa.toFixed(1)}</td><td><b>${ref.Bp.toFixed(2)}</b></td>
+     <td>&mdash;</td></tr>`:""}
+  </tbody></table>
+  <p class="plotnote">
+    ${ref?`Measured values from the four-parameter equation of state of Li,
+      Liang, Guo and Liu, <em>Appl. Phys. Lett.</em> <strong>87</strong>,
+      194111 (2005), Table I, fitted to experiment.`
+     :`<b>No measured B&prime; for ${d.name}</b> in the reference table, so the
+      model values here stand without one.`}
+    ${pub.length?` The published potential${pub.length>1?"s are":" is"} put
+      through the identical scan.`:""}
+    <b>Read the residual column first.</b> The hard-cut sets step at the
+    cut-off, the step falls inside the scanned range, and a curve fitted
+    through it returns a B&prime; belonging to the discontinuity rather than to
+    the metal &mdash; which is why their residual runs two to three orders of
+    magnitude above the switched sets' and their B&prime; should not be read as
+    a prediction at all.</p>
+
+  ${(ref&&mine)?`<p class="note">${Math.abs(mine.Bp-ref.Bp)<1
+    ?`<b>For ${d.name} the switched record is within 1 of the measured
+      B&prime;</b> (${mine.Bp.toFixed(2)} against ${ref.Bp.toFixed(2)}).`
+    :`<b>For ${d.name} the switched record misses by
+      ${Math.abs(mine.Bp-ref.Bp).toFixed(1)}</b> (${mine.Bp.toFixed(2)} against
+      ${ref.Bp.toFixed(2)}).`}
+    ${mine.Bp<0?` It is also <span style="color:var(--bad)">negative</span>,
+      which no metal is: it says the crystal gets easier to compress as it is
+      compressed. ${AGG.bp_negative.length} of the library's records do this
+      (${AGG.bp_negative.join(", ")}), and they are the same records whose
+      phonon Gr&uuml;neisen parameter comes out negative &mdash; the energy and
+      the spectrum soften together, which is one defect seen twice, not
+      two.`:""}
+    Across the ${AGG.bp_n} elements that have a measured value, the switched
+    arm's B&prime; has a median ${AGG.bp_median.toFixed(2)} against
+    ${AGG.bp_ref_median.toFixed(2)} measured over those same elements, and
+    lands within 1 for ${AGG.bp_within_one} of them; the published potentials
+    run through the same scan manage ${AGG.bp_pub_within_one} of
+    ${AGG.bp_pub_n}. That gap is the honest measure of what is lost by fitting
+    the curvature at a single volume.</p>`:""}
+  `;})()}
+
   ${g.std?`<div class="grid2" style="margin-top:26px">
     <div>
       <h3>Phonon dispersion</h3>
@@ -3930,6 +4009,61 @@ function render(){
       Grid: fixed 0&ndash;1200 K, as in the ruthenium study this reproduces.`:`
       Grid: fractions of this element's own melting point, so the curve spans
       the same physical range for every element.`}</p>`:""}
+
+  ${(()=>{const W=d.tempcoef; if(!W) return "";
+    if(W.none) return `<h3>How fast they soften, against measurement</h3>
+      <p class="note"><strong>No comparison for this element.</strong>
+      ${W.why}. The curve above still stands &mdash; what is missing is
+      something measured to hold it against, not a number of ours. Of the
+      library's 38 elements ${AGG.tc_nel} have at least one coefficient that
+      can be compared; the rest are in this position.</p>`;
+    const KS=["Tc11","Tc12","Tc13","Tc33","Tc44"].filter(k=>W[k]);
+    const nm=k=>"dlnC<sub>"+k.slice(2)+"</sub>/dT";
+    return `<h3>How fast they soften, against measurement</h3>
+  <p class="note">The curve above is a slope, and the slope is measurable. It
+  is also the first place on this page where the model and the experiment are
+  not measuring quite the same thing, so the comparison is made in two steps
+  rather than one.
+  <b>The sweep holds the volume.</b> An experiment does not &mdash; the sample
+  expands as it is heated, and part of the softening it reports is the elastic
+  constants following that expansion rather than the temperature. So the
+  constant-volume derivative the sweep measures is shown as
+  <b>model V</b>, and <b>model P</b> adds the expansion term
+  (dlnC/dlnV)&nbsp;&times;&nbsp;3&alpha;<sub>L</sub> back using the
+  <em>measured</em> expansion coefficient${W.alpha_exp_1e6?`
+  (${W.alpha_exp_1e6.toFixed(1)}&nbsp;&times;10<sup>&minus;6</sup>/K for
+  ${d.name})`:""}, not this record's own. That choice is deliberate: the
+  library already reports its expansion separately and it is 30&nbsp;% low, so
+  using it here would fold one failure into the test of another. <b>model P is
+  the column to compare with experiment.</b></p>
+
+  <table><thead><tr><th>10<sup>&minus;4</sup>/K</th><th>experiment</th>
+    <th>model P</th><th>model V</th><th>dlnC/dlnV</th></tr></thead><tbody>
+  ${KS.map(k=>{const c=W[k];
+     const sign=(c.model_P<0)===(c.experiment<0);
+     return `<tr><td>${nm(k)}</td>
+       <td>${c.experiment.toFixed(2)}</td>
+       <td${sign?"":' style="color:var(--bad)"'}>${c.model_P.toFixed(2)}</td>
+       <td style="opacity:.7">${c.model_V.toFixed(2)}</td>
+       <td style="opacity:.7">${c.dlnC_dlnV.toFixed(2)}</td></tr>`;}).join("")}
+  </tbody></table>
+  <p class="plotnote">Measured coefficients: Landolt&ndash;B&ouml;rnstein
+  III/29a, Tables 28 and 35${W.T_points?`; the model values are fitted over
+  ${W.T_points} points up to ${W.T_max.toFixed(0)}&nbsp;K`:""}. A figure in red
+  has the wrong sign &mdash; it stiffens where the metal softens.</p>
+
+  <p class="note"><b>Across the library the sign is mostly right and the size
+  is not.</b> With the expansion added back, model P has the right sign for
+  ${AGG.tc11_sign} of ${AGG.tc11_n} measured values of dC<sub>11</sub>/dT and
+  ${AGG.tc44_sign} of ${AGG.tc44_n} of dC<sub>44</sub>/dT, over
+  ${AGG.tc_nel} elements and ${AGG.tc_n} coefficients in all. But the rate is
+  ${AGG.tc11_ratio.toFixed(2)} of the measured one for C<sub>11</sub> and
+  ${AGG.tc44_ratio.toFixed(2)} for C<sub>44</sub> (alkalis excluded, whose
+  measured values are small enough that the ratio stops meaning anything).
+  C<sub>11</sub> softens at very nearly the right rate and C<sub>44</sub> at
+  less than half of it: the shear constant is the one the form struggles with
+  at 0&nbsp;K as well, and heating does not change which constant is the
+  difficult one.</p>`;})()}
 
   ${(d.tap&&d.tap.ground)?`<h3>Is the fitted structure the ground state?</h3>
   <div class="cols3">
@@ -4254,6 +4388,75 @@ function render(){
     ${uf3Note(DATA.Nb, d.name==="Niobium")}</p>`;})()}
   `:""}
 
+  ${(()=>{const I=d.interstitial;
+    if(!I && d.struct!=="hcp") return "";
+    if(!I) return `<h3>The self-interstitial</h3>
+      <p class="note"><strong>Not attempted for this element.</strong> The
+      three orientations measured across the library &mdash;
+      &lang;100&rang;, &lang;110&rang; and &lang;111&rang; dumbbells &mdash;
+      are cubic directions. A hexagonal close-packed lattice has its own
+      interstitial sites: octahedral, tetrahedral, the crowdion, and two
+      distinct basal dumbbells. Running the cubic list here would report the
+      lowest of the wrong set, so nothing is reported. All
+      ${AGG.int_hcp} hexagonal elements in the library are absent from
+      this section for the same reason, and the absence is a choice rather
+      than a gap in the data.</p>`;
+    const sites=Object.entries(I.per_site||{}).sort((a,b)=>a[1]-b[1]);
+    const collapsed = I.E_I<=0;
+    return `<h3>The self-interstitial</h3>
+  <p class="note">The vacancy takes an atom out of the lattice; this puts one
+  in. It is the other half of the point-defect pair, it is where radiation
+  damage starts, and unlike the vacancy it has no identity to fall back on
+  &mdash; the formation energy here is
+  E<sub>I</sub>&nbsp;=&nbsp;E(N+1)&nbsp;&minus;&nbsp;(N+1)/N&nbsp;E(N), with the
+  positions relaxed at a fixed cell and the lowest of the three dumbbells
+  taken. ${I.natoms?`The cell holds ${I.natoms} atoms before the extra one.`:""}
+  Nothing in the fit saw a defect, so this is a prediction in the strict
+  sense.</p>
+
+  ${collapsed?`<p class="note"><strong style="color:var(--bad)">This record
+  does not return a defect energy.</strong> E<sub>I</sub> comes back at
+  ${I.E_I.toFixed(2)}&nbsp;eV, which is not a formation energy: the extra atom
+  falls into the hole in the repulsive core that the isolated-triplet probe
+  finds for this element. The probe and the defect are the same geometry seen
+  twice, and this is where that pathology turns up in a calculation somebody
+  would actually run. ${AGG.int_collapsed.length} of the ${AGG.int_n} cubic
+  records do it (${AGG.int_collapsed.join(", ")}).</p>`:`
+  <div class="cols3">
+    ${cell3("E<sub>I</sub>", I.E_I.toFixed(2)+"&nbsp;eV",
+       "library median "+AGG.int_median.toFixed(2))}
+    ${cell3("lowest dumbbell", I.site.replace("<","&lang;").replace(">","&rang;"),
+       d.struct==="fcc" ? "&lang;100&rang; in "+AGG.int_fcc_100+" of "
+         +AGG.int_nfcc+" fcc records"
+       : "&lang;111&rang; in "+AGG.int_bcc_111+" of "+AGG.int_nbcc+" bcc records")}
+    ${cell3("as a fraction of E<sub>coh</sub>",
+       (I.E_I/(Array.isArray(d.Ecoh)?d.Ecoh[0]:d.Ecoh)).toFixed(2),
+       "an interstitial normally costs about half the cohesive energy")}
+  </div>
+
+  <p class="note"><b>The ordering is the part worth reading.</b> The three
+  orientations come out at
+  ${sites.map(([k,v])=>k.replace("<","&lang;").replace(">","&rang;")+"&nbsp;"
+      +v.toFixed(2)).join(", ")}&nbsp;eV, so this record prefers
+  ${I.site.replace("<","&lang;").replace(">","&rang;")} by
+  ${(sites[1][1]-sites[0][1]).toFixed(2)}&nbsp;eV over the next one. A pair
+  potential has no reason to order them at all &mdash; the orientations differ
+  in how the distortion is shared between neighbours, not in how many
+  neighbours there are &mdash; so agreement or disagreement with the
+  established ordering (&lang;100&rang; for face-centred metals,
+  &lang;111&rang; for most body-centred ones) is a real test and not a fitted
+  one.</p>`}
+
+  <p class="note">Across the library ${AGG.int_pos} of the ${AGG.int_n} cubic
+  records give a positive energy, with a median
+  ${AGG.int_median.toFixed(2)}&nbsp;eV over a range of
+  ${AGG.int_min.toFixed(2)}&ndash;${AGG.int_max.toFixed(2)}&nbsp;eV &mdash; a
+  spread far wider than the metals themselves have, which is the honest summary
+  of what an unfitted defect energy is worth here. The chosen site agrees with
+  the established ordering in ${AGG.int_fcc_100} of ${AGG.int_nfcc} face-centred
+  records and ${AGG.int_bcc_111} of ${AGG.int_nbcc} body-centred ones.</p>
+  `;})()}
+
   ${(d.tap&&d.tap.expansion&&d.tap.expansion.failed)?`
   <h3>Thermal expansion</h3>
   <p class="note"><strong style="color:var(--bad)">No coefficient: the crystal
@@ -4361,6 +4564,72 @@ function render(){
       is the third derivative of the same energy curve whose second derivative
       was fitted, and nothing in the fit constrains it.</p>`;})()}
   `:""}
+
+  ${(()=>{const R=d.gruneisen; if(!R) return "";
+    const win=Object.entries(R.gamma_windows||{})
+                .sort((a,b)=>parseFloat(a[0])-parseFloat(b[0]));
+    const swing=!!R.sign_changes;
+    const mdG=(d.tap&&d.tap.expansion)?d.tap.expansion.gruneisen:null;
+    return `<h3>Where the expansion comes from: &gamma;</h3>
+  <p class="note">The row above measures the expansion; this asks the spectrum
+  where it came from. In the quasi-harmonic picture a solid expands because its
+  phonons soften as it swells, and the whole of that is carried by one number:
+  &alpha;<sub>V</sub>&nbsp;=&nbsp;&gamma;C<sub>V</sub>/(BV), with &gamma; the
+  mode Gr&uuml;neisen parameter &minus;dln&omega;/dlnV, weighted by each mode's
+  own heat capacity. So &gamma; is not a second opinion about the expansion; it
+  is the expansion, computed from the phonons instead of from a barostat, and
+  the two have no code in common.</p>
+
+  <div class="cols3">
+    ${cell3("&gamma; from the spectrum",
+       swing?"&mdash;":R.gamma.toFixed(2),
+       swing?"not defined at this resolution"
+            :"library median "+AGG.g_median.toFixed(2))}
+    ${cell3("&gamma; from the measured expansion", R.gamma_exp.toFixed(2),
+       "&alpha;<sub>V</sub>BV/C<sub>V</sub>, all measured")}
+    ${cell3("&gamma; from this record's own MD",
+       (mdG===null||mdG===undefined)?"&mdash;":mdG.toFixed(2),
+       "the barostat run above")}
+  </div>
+
+  ${swing?`<p class="note"><strong style="color:var(--bad)">&gamma; is not
+  defined for this record at this resolution.</strong> It is a derivative, so
+  it needs a volume window, and ${d.name}'s frequencies are not smooth on the
+  per-cent scale: over the windows scanned it comes out
+  ${win.map(([w,v])=>v.toFixed(2)+" at &plusmn;"+(100*parseFloat(w)).toFixed(1)
+      +"&nbsp;%").join(", ")} &mdash; it <em>changes sign</em>. A number that
+  flips between a 1&nbsp;% and a 3&nbsp;% window is not a derivative of
+  anything, so none is quoted. ${AGG.g_swing.length} of the library's
+  ${AGG.g_n} records do this (${AGG.g_swing.join(", ")}), and it is the same
+  wiggle the equation-of-state scan shows, on the same elements.</p>`
+  :`<p class="plotnote"><b>The window it was taken over:</b>
+  ${win.map(([w,v])=>v.toFixed(3)+" at &plusmn;"+(100*parseFloat(w)).toFixed(1)
+      +"&nbsp;%").join(", ")}. Four windows are scanned rather than one
+  because a finite-difference derivative that moves with its own step size is
+  reporting the step and not the physics; ${d.name}'s does not change sign, so
+  the value at 1&nbsp;% is the one quoted.</p>`}
+
+  <p class="note">
+  ${(R.alpha_V_pred_1e6!==undefined&&R.alpha_V_meas_1e6)?`<b>What the
+    quasi-harmonic route then predicts</b> for the volume coefficient is
+    ${R.alpha_V_pred_1e6.toFixed(1)} &times;10<sup>&minus;6</sup>/K against
+    ${R.alpha_V_meas_1e6.toFixed(1)} measured${
+      (R.alpha_V_model_1e6!==null&&R.alpha_V_model_1e6!==undefined)?`, with the
+      molecular dynamics giving ${R.alpha_V_model_1e6.toFixed(1)}`:""}. The two
+    computed routes agree with each other better than either agrees with the
+    measurement, which is what says the shortfall is in the potential and not
+    in the method used to get at it. `:""}
+  Across the ${AGG.g_nstable} records where &gamma; is well defined its median
+  is ${AGG.g_median.toFixed(2)}, against ${AGG.g_median_exp.toFixed(2)} implied
+  by the measured expansion, bulk modulus and heat capacity &mdash; about half.
+  That is the expansion row above, restated in the phonons: the modes do not
+  soften fast enough under dilation, because how a bond's stiffness changes
+  with length is a third derivative and only the second was ever fitted.
+  For ${AGG.g_always_neg.length} records
+  (${AGG.g_always_neg.join(", ")}) &gamma; is negative in every window &mdash;
+  the modes stiffen as the crystal swells, which inverts the sign of the
+  expansion itself and is why those elements contract on heating.</p>
+  `;})()}
 
   ${d.tap_nudge?`<h3>An alternative fit that holds its lattice${
       d.tap_nudge.withdrawn?" &mdash; withdrawn for this element":""}</h3>
@@ -4692,6 +4961,99 @@ new MutationObserver(redraw).observe(document.documentElement,
 ATTEMPTED = sorted(refdata.ELEMENTS)
 FAILED = [e for e in ATTEMPTED if e not in DATA]
 
+
+#  ------------------------------------------------ library-wide aggregates
+#  Every number the four panels below quote about the library as a whole is
+#  computed here from library.json, never typed into the template.  The page
+#  has been wrong twice in exactly that way - a legend saying fourteen while
+#  the data held thirty-eight - and a count in a template literal cannot be
+#  tested.  The reductions are the same ones the manuscript makes, quantity by
+#  quantity, so that a reader who has both in front of them is not made to
+#  wonder which is right.
+def _med(xs):
+    xs = sorted(x for x in xs if x is not None)
+    return statistics.median(xs) if xs else None
+
+
+def _recs(key):
+    return {e: v[key] for e, v in DATA.items()
+            if isinstance(v, dict) and isinstance(v.get(key), dict)}
+
+
+#  self-interstitial: cubic elements only, and a record whose triplet core has
+#  a hole returns a non-positive energy rather than a defect energy
+_I = _recs("interstitial")
+_Iok = {e: v for e, v in _I.items() if v["E_I"] > 0}
+_Ifcc = [e for e in _Iok if DATA[e].get("struct") == "fcc"]
+_Ibcc = [e for e in _Iok if DATA[e].get("struct") == "bcc"]
+AGG = dict(
+    int_n=len(_I), int_pos=len(_Iok),
+    int_collapsed=sorted(e for e, v in _I.items() if v["E_I"] <= 0),
+    int_median=_med(v["E_I"] for v in _Iok.values()),
+    int_min=min((v["E_I"] for v in _Iok.values()), default=None),
+    int_max=max((v["E_I"] for v in _Iok.values()), default=None),
+    int_fcc_100=sum(_Iok[e]["site"] == "<100>" for e in _Ifcc), int_nfcc=len(_Ifcc),
+    int_bcc_111=sum(_Iok[e]["site"] == "<111>" for e in _Ibcc), int_nbcc=len(_Ibcc),
+    #  counted, not inferred by subtracting two unrelated totals
+    int_hcp=sum(1 for e, v in DATA.items()
+                if isinstance(v, dict) and v.get("struct") == "hcp"),
+)
+
+#  B': the reference is Li et al.'s experiment-fitted table, and the switched
+#  MAU arm is the one the library recommends, so it is the one quoted
+_bp = [(e, v["sets"]["tap"]["Bp"], v["ref"]["Bp"])
+       for e, v in _recs("eos").items()
+       if "tap" in v.get("sets", {}) and isinstance(v.get("ref"), dict)]
+_pub = [(e, r["Bp"], DATA[e]["eos"]["ref"]["Bp"])
+        for e, v in _recs("eos").items() if isinstance(v.get("ref"), dict)
+        for r in v.get("published", {}).values()]
+AGG.update(
+    bp_n=len(_bp), bp_median=_med(b for _, b, _ in _bp),
+    bp_ref_median=_med(r for _, _, r in _bp),
+    bp_within_one=sum(abs(b - r) < 1 for _, b, r in _bp),
+    bp_negative=sorted(e for e, b, _ in _bp if b < 0),
+    bp_pub_n=len(_pub), bp_pub_within_one=sum(abs(b - r) < 1 for _, b, r in _pub),
+)
+
+#  gamma: what disqualifies a record is the sign change between windows, not
+#  the size of the spread - see add_gruneisen.py
+_G = _recs("gruneisen")
+_Gst = {e: v for e, v in _G.items() if not v.get("sign_changes")}
+AGG.update(
+    g_n=len(_G), g_nstable=len(_Gst),
+    g_swing=sorted(e for e, v in _G.items() if v.get("sign_changes")),
+    g_median=_med(v["gamma"] for v in _Gst.values()),
+    g_median_exp=_med(v["gamma_exp"] for v in _Gst.values()),
+    g_always_neg=sorted(e for e, v in _G.items()
+                        if v.get("gamma_windows")
+                        and max(v["gamma_windows"].values()) < 0),
+)
+
+#  dC_ij/dT: model_P is the comparable one, and a ratio is only meaningful
+#  where the measured coefficient is not itself near zero
+_tc = [(e, k, c) for e, v in _recs("tempcoef").items() if not v.get("none")
+       for k, c in v.items()
+       if isinstance(c, dict) and c.get("model_P") is not None]
+_alk = {"Li", "Na", "K", "Rb", "Cs"}
+
+
+def _tcfield(name, field):
+    sub = [c for _, k, c in _tc if k == name]
+    if field == "n":
+        return len(sub)
+    return sum((c["model_P"] < 0) == (c["experiment"] < 0) for c in sub)
+
+
+AGG.update(
+    tc_n=len(_tc), tc_nel=len({e for e, _, _ in _tc}),
+    tc11_n=_tcfield("Tc11", "n"), tc11_sign=_tcfield("Tc11", "sign"),
+    tc44_n=_tcfield("Tc44", "n"), tc44_sign=_tcfield("Tc44", "sign"),
+    tc11_ratio=_med(c["model_P"] / c["experiment"] for e, k, c in _tc
+                    if k == "Tc11" and e not in _alk and abs(c["experiment"]) > 0.3),
+    tc44_ratio=_med(c["model_P"] / c["experiment"] for e, k, c in _tc
+                    if k == "Tc44" and e not in _alk and abs(c["experiment"]) > 0.3),
+)
+
 out = (HTML
        #  Second guard on the AFLOW withdrawal (see add_elastic_T.py).
        #  The merge was removed there, but a library.json from a backup
@@ -4699,6 +5061,7 @@ out = (HTML
        #  republish it silently.  Stripped here as well so that the
        #  licence guarantee does not depend on which file was loaded.
        .replace("__FT__", json.dumps(FT, separators=(",", ":")))
+       .replace("__AGG__", json.dumps(AGG, separators=(",", ":")))
        .replace("__ELSRC__", refdata_electronic.GAMMA_SOURCE)
        .replace("__DATA__", json.dumps(
            {e: {k: v for k, v in r.items() if k != "aflow"}

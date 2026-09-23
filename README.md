@@ -55,6 +55,10 @@ identical code:
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
 | thermal expansion | 32 % low; 9 records (6 elements) contract on heating |
+| self-interstitial formation energy | 23 of the 26 cubic records give a positive value, median 2.71 eV over a range of 0.33–12.53 — a spread far wider than the metals themselves have. For Ba, Cr and Li no energy comes back at all: the extra atom falls into the hole in the repulsive core. The dumbbell chosen agrees with the established ordering in 13 of 13 fcc records (⟨100⟩) and 8 of 10 bcc (⟨111⟩). Hexagonal elements are not attempted — the three orientations measured are cubic directions. `lammps/interstitial.py`, in `library.json` as `interstitial` |
+| B′, the pressure derivative of the bulk modulus | not fitted anywhere, so it is the first quantity the fit was never shown. Over the 32 elements with a measured value the switched arm's median is 3.06 against 4.42, within 1 for 11 of them, and **negative — which no metal is** — for 9. Published potentials through the identical scan: within 1 for 20 of 28. `lammps/eos.py`, in `library.json` as `eos` |
+| Grüneisen parameter γ | median 0.82 against 1.57 implied by the measured expansion, bulk modulus and heat capacity — about half, which is the expansion row above restated in the phonons. For 5 records (Fe, Mo, Rb, Ta, W) γ changes sign between a 1 % and a 3 % volume window and is not defined at that resolution; for 6 (Cr, K, Li, Na, Nb, V) it is negative in every window. `standalone/gruneisen.py`, in `library.json` as `gruneisen` |
+| temperature dependence of C_ij | with the measured expansion added back, the sign is right for 22 of 25 values of dC₁₁/dT and 22 of 25 of dC₄₄/dT, over 28 elements — but the rate is 0.96 of the measured one for C₁₁ and 0.40 for C₄₄. The shear constant is the difficult one at 0 K too, and heating does not change which. `standalone/tempcoef_compare.py`, in `library.json` as `tempcoef` |
 
 **So: do not use these parameters for defect energies, surface energies,
 diffusion barriers or melting.** Use them for elastic and vibrational
@@ -406,6 +410,34 @@ cd lammps
 python validate_pair.py      # pair_style ugur against latdyn.py
 python validate_kernel.py    # the shared kernel against latdyn.py
 ```
+
+### What a step costs
+
+This is a slow pair style and you should know by how much before you plan a
+run. The same cell and the same trajectory — 4000 atoms of copper, NVE at
+300 K, 2 fs, 2000 steps, one core — through this pair style and through
+published forms:
+
+| pair style | µs per atom-step | neighbours per atom |
+| --- | --- | --- |
+| `ugur` (switched) | 50.7 | 530 |
+| `ugur` (hard cut) | 48.8 | 530 |
+| `ugur/ang` (angular) | 47.7 | 538 |
+| `meam` | 7.9 | 78 |
+| `eam/alloy` | 1.2 | 70 |
+
+So **about 41× an EAM potential and 6× MEAM**. Almost all of that is the
+neighbour count, not the arithmetic: the three-body sum runs over pairs of
+neighbours inside r_c3, and this form keeps 530 of them per atom where an
+embedded-atom potential keeps 70. It is the price of an explicit angular term
+with no density to hide it in, and it is the reason the melting and expansion
+runs here are small.
+
+Two cautions about those numbers. They were measured on one core with threads
+off, so they compare the styles and not the throughput you will get; and
+compute nodes differ enough that only comparisons made inside a single job are
+used — the same `eam/alloy` run timed 9.85 s and 17.38 s on two nodes of the
+same machine.
 
 ## What is checked
 
