@@ -4111,6 +4111,13 @@ function render(){
     here is that element&rsquo;s own calculated ordering, and on the records
     where it is resolved most published potentials reproduce it; this record
     does not.`}`}
+  The anisotropy cell above is why the ordering is so rarely scored right
+  across the library: a record&rsquo;s three facets lie within a median 5.2 %
+  of one another where the reference&rsquo;s lie 18.3 % apart, so the model
+  flattens the facet dependence by about a factor of three and what is left is
+  the size of the tie window itself. These records are high on every facet at
+  once and nearly flat between them &mdash; not ordered wrongly so much as
+  barely ordered at all.
   It is the same shortage the vacancy energy exposes, and the usual account of
   it &mdash; that the energy of a bond in this form cannot depend on how many
   other bonds an atom has &mdash; is <em>too strong</em>. A three-body term
