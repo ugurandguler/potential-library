@@ -3556,7 +3556,15 @@ function render(){
       <p class="plotnote">A<sup>U</sup> = 5G<sub>V</sub>/G<sub>R</sub> +
       B<sub>V</sub>/B<sub>R</sub> &minus; 6 vanishes only for an isotropic
       solid. B/G above ~1.75 is the usual ductility indicator, and a positive
-      Cauchy pressure points the same way. The Debye temperature comes from the
+      Cauchy pressure points the same way. In this model the Cauchy pressure is
+      not free: C<sub>12</sub>&nbsp;&minus;&nbsp;C<sub>44</sub> is a sum over
+      triplets of
+      &phi;<sub>3</sub>&Prime;(r<sub>a</sub>+r<sub>b</sub>)&thinsp;r<sub>a</sub>r<sub>b</sub>
+      times (n<sub>a</sub>&times;n<sub>b</sub>)<sub>z</sub><sup>2</sup>, and
+      that last factor is a square. The geometry can only weight the sum, so
+      the sign is the curvature of the three-body term and nothing else &mdash;
+      which is why a pair potential, having no such term, is stuck at
+      C<sub>12</sub>&nbsp;=&nbsp;C<sub>44</sub>. The Debye temperature comes from the
       elastic constants and the density, not from the phonon spectrum &mdash;
       the two are independent estimates.
       ${mech.debye_iso?`<br><br><b>It is averaged over the real slowness

@@ -577,7 +577,7 @@ footer{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
   not in the reference data; they were entered by hand to size the effect, so
   the ordering is sound and the third digit is not.
   <p class="plotnote" style="margin-top:14px;opacity:.7">
-  <b>published tree</b> &middot; built 2026-09-23 14:36 &middot; 38 elements
+  <b>published tree</b> &middot; built 2026-09-23 14:43 &middot; 38 elements
   with more than one selectable parameter set. Two trees produce a page of
   this name and, since 1.1.0, they carry the same panels &mdash; the screen
   tree's renderer and library were promoted into the published one for the
@@ -3457,7 +3457,15 @@ function render(){
       <p class="plotnote">A<sup>U</sup> = 5G<sub>V</sub>/G<sub>R</sub> +
       B<sub>V</sub>/B<sub>R</sub> &minus; 6 vanishes only for an isotropic
       solid. B/G above ~1.75 is the usual ductility indicator, and a positive
-      Cauchy pressure points the same way. The Debye temperature comes from the
+      Cauchy pressure points the same way. In this model the Cauchy pressure is
+      not free: C<sub>12</sub>&nbsp;&minus;&nbsp;C<sub>44</sub> is a sum over
+      triplets of
+      &phi;<sub>3</sub>&Prime;(r<sub>a</sub>+r<sub>b</sub>)&thinsp;r<sub>a</sub>r<sub>b</sub>
+      times (n<sub>a</sub>&times;n<sub>b</sub>)<sub>z</sub><sup>2</sup>, and
+      that last factor is a square. The geometry can only weight the sum, so
+      the sign is the curvature of the three-body term and nothing else &mdash;
+      which is why a pair potential, having no such term, is stuck at
+      C<sub>12</sub>&nbsp;=&nbsp;C<sub>44</sub>. The Debye temperature comes from the
       elastic constants and the density, not from the phonon spectrum &mdash;
       the two are independent estimates.
       ${mech.debye_iso?`<br><br><b>It is averaged over the real slowness
