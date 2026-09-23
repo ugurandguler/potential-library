@@ -473,6 +473,10 @@ DEFECTS = dict(
            "means. A path lying entirely below the relaxed vacancy gives a "
            "negative 'barrier', which means the vacancy was not a minimum; "
            "those have their own row and are excluded from the barrier mean. "
+           "Every form is offered the same fifteen configurations; a denominator "
+           "below fifteen is what is left after the rows a configuration cannot "
+           "answer. The vacancies that come out negative sit on V for UG and "
+           "UG-2, on Nb and V for MAU, and on Mo and Nb for FS. "
            "Reference: Byggmästar et al. (2021): the vacancy value is their DFT "
            "average, the migration range is their tabGAP's own mean over some "
            "1100 nudged-elastic-band barriers, from Nb (1.06) to W (1.56).",
@@ -480,8 +484,9 @@ DEFECTS = dict(
     rows=[["mean vacancy formation", "3.3 (DFT)", "1.11", "1.66", "1.16 (10)", "1.97"],
           ["mean migration barrier", "1.06–1.56 (tabGAP)", "0.21", "0.13", "0.39", "0.54"],
           ["cases with no barrier at all", "—", "7/14", "9/15", "1/8", "3/15"],
-          ["negative barrier: vacancy not a minimum", "—", "1/15", "0", "2/10", "0"],
-          ["vacancy collapsed", "—", "0", "0", "5/15", "0"]],
+          ["negative vacancy formation energy", "—", "4/15", "3/15", "3/10", "3/15"],
+          ["negative barrier: vacancy not a minimum", "—", "1/15", "0/15", "2/10", "0/15"],
+          ["vacancy collapsed", "—", "0/15", "0/15", "5/15", "0/15"]],
     best=[None, None, None, None, None, None])
 
 PUBLISHED = dict(
