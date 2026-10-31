@@ -153,6 +153,56 @@ HEADER = """\
 """
 
 
+def gate_failed(rec):
+    """the box-free structure gate (add_gate.py): the record leaves its
+    crystal once the cell may change shape, which the 600 K screen - run in a
+    box of fixed shape - cannot see"""
+    g = (rec or {}).get("structure_gate") or {}
+    return g if g.get("verdict") in ("fail", "crashed") else None
+
+
+def warm_shear(lib_el, key):
+    """the lowest fraction of T_melt at which C' = (C11 - C12)/2 of the
+    finite-temperature elastic constants turns negative, if that is at or
+    below 0.15 T_melt - the warm screen, as add_elastic_T.py measured it"""
+    et = (lib_el.get("elasticT") or {}).get(key)
+    if not et:
+        return None
+    bad = [p["T"] / et["Tmelt"] for p in et["pts"] if p["T"] > 0 and not p["born_ok"]]
+    return min(bad) if bad and min(bad) <= 0.15 else None
+
+
+def ug_md_ok(lib_el):
+    """the angular switched record passes all four screens - stable at 0 K,
+    the 600 K run, the warm C' screen and the box-free gate - which makes it
+    the set to run where both MAU records fail (K and W)"""
+    rec = lib_el.get("tap_ug") or {}
+    return bool(rec and rec.get("stable") and no_md_reason(lib_el, "tap_ug") is None
+                and ((rec.get("structure_gate") or {}).get("verdict") == "pass"))
+
+
+def no_md_reason(lib_el, key):
+    """why a switched record is not fit for MD at temperature, or None: the
+    600 K screen, the box-free structure gate and the warm C' screen.  The
+    first version left out a record the 600 K screen had already failed, so
+    chromium's and niobium's switched files still opened with "USE for
+    molecular dynamics" above a line saying the opposite"""
+    rec = lib_el.get(key) or {}
+    state = (rec.get("md_screen") or {}).get("state")
+    bits = []
+    if state in ("collapsed", "disintegrated", "suspect"):
+        bits.append({"collapsed": "collapses in the 600 K run",
+                     "disintegrated": "disintegrates in the 600 K run",
+                     "suspect": "runs hot in the 600 K run"}[state])
+    if gate_failed(rec):
+        bits.append("leaves " + rec["structure_gate"].get("struct", "its structure")
+                    + " once the cell may change shape")
+    w = warm_shear(lib_el, key) if state == "ok" else None
+    if w is not None:
+        bits.append(f"its C' turns negative by {w:.2f} T_melt")
+    return " and ".join(bits) or None
+
+
 def main():
     lib = json.load(open(os.path.join(ROOT, "standalone", "library.json")))
     #  Which sets survive molecular dynamics at all.  Written into the file
@@ -207,9 +257,9 @@ def main():
                                + el + "_recut.ugur is recommended instead")
             #  What each truncation is for, with the measurement behind it.
             #
-            #  The hard sets reproduce the MEASURED dispersion better - 9.7 %
-            #  mean over the 33 elements that carry a measured curve against
-            #  12.6 % for the switched ones, and better in 25 of the 33 - and
+            #  The hard sets reproduce the MEASURED dispersion better - 9.9 %
+            #  mean over the 34 elements that carry a measured curve against
+            #  12.8 % for the switched ones, and better in 26 of the 34 - and
             #  they cannot be run at temperature.  Both halves are measured
             #  and neither is a preference.  The discontinuity is what does
             #  it, so each file carries its own rather than an average: it
@@ -224,9 +274,9 @@ def main():
                     f"{-abs(jump):.3g} meV ({jump / kT296:.3g} of k_B T at "
                     "296 K).  USE for static properties and for lattice "
                     "dynamics: measured against the measured dispersion the "
-                    "hard sets average 9.7 % over the 33 elements that have "
-                    "one, against 12.6 % for the switched sets, and are closer "
-                    "in 25 of them.  DO NOT use for molecular dynamics: "
+                    "hard sets average 9.9 % over the 34 elements that have "
+                    "one, against 12.8 % for the switched sets, and are closer "
+                    "in 26 of them.  DO NOT use for molecular dynamics: "
                     "copper, whose step is 8.4 meV, drifts 176 meV/atom/ns in "
                     "NVE and heats from 306 K to 389 K in 40 ps")
                 if name == "disp":
@@ -273,11 +323,18 @@ def main():
                         "every element that has a re-cut, not by hand")
                 elif name == "rc":
                     why = "; ".join(mr.get("why") or [])
+                    tap_bad = no_md_reason(lib[el], "tap")
                     trunc = base + (
                         "CANDIDATE, not the recommended set"
                         + (f": {why}" if why else "")
-                        + ".  For MD on this element use "
-                        f"{el}_taper.ugur")
+                        + ((f".  For MD on this element use {el}_taper.ugur.ang, "
+                            "the angular switched record, which passes every "
+                            f"screen; {el}_taper.ugur {tap_bad}")
+                           if tap_bad and ug_md_ok(lib[el]) else
+                           f".  No {el} record in this library is fit for MD "
+                           f"at temperature: {el}_taper.ugur {tap_bad}"
+                           if tap_bad else
+                           f".  For MD on this element use {el}_taper.ugur"))
                 else:
                     trunc = base + (
                         "CANDIDATE: the angular re-cut is never the "
@@ -289,10 +346,17 @@ def main():
                     f"switched from {taper:g} of each cutoff to the cutoff, "
                     "quintic, C2 - energy is conserved in MD: measured drift "
                     "within noise for copper (0.002 meV/atom/ns against 176 "
-                    "for its hard twin).  USE for molecular dynamics, which no hard set "
-                    "can do.  It pays for that on the dispersion: the "
-                    "switched sets average 12.6 % against the hard sets' "
-                    "9.7 %, because switching the pair term off over the "
+                    "for its hard twin).  "
+                    + (f"BUT THIS RECORD IS NOT FIT FOR MD AT TEMPERATURE: it "
+                       f"{no_md_reason(lib[el], key)} (see the MD lines below)"
+                       + (f"; for MD on {el} use {el}_taper.ugur.ang, the angular "
+                          "switched record, which passes every screen.  "
+                          if key == "tap" and ug_md_ok(lib[el]) else ".  ")
+                       if no_md_reason(lib[el], key) else
+                       "USE for molecular dynamics, which no hard set can do.  ")
+                    + "It pays for that on the dispersion: the "
+                    "switched sets average 12.8 % against the hard sets' "
+                    "9.9 %, because switching the pair term off over the "
                     "outer 15 % moves the force constants at the largest "
                     "separations, which is the short-wavelength end, and "
                     "nothing in the fit sees it")
@@ -343,6 +407,33 @@ def main():
                         f" 600 K ({md['T']} K, as equipartition requires)."
                         f"  This tested the SHAPE, not energy conservation;"
                         f" for that see the truncation line above.")
+            #  The two screens a fixed-shape run cannot see (2026-10-01): the
+            #  box-free structure gate and the warm C' screen.  Without them
+            #  the line above told the switched records of Cr, Cs, Fe, K, Mo,
+            #  Nb, Rb, V and W that they hold their shape, while each of them
+            #  leaves bcc or loses its shear stiffness once warm.
+            g = gate_failed(rec) if key in ("tap", "tap_ug", "rc", "rc_ug") else None
+            if g and g.get("verdict") == "crashed":
+                warn = (warn + nl + f"# MD AT TEMPERATURE: DO NOT USE.  With the"
+                        f" cell free to change shape the run blew up at"
+                        f" {g.get('T', 0):.0f} K (structure gate, lammps/gate/).")
+            elif g:
+                dE = g.get("dE_quench_meV", 0.0)
+                warn = (warn + nl + f"# MD AT TEMPERATURE: DO NOT USE.  With the"
+                        f" cell free to change shape (40 ps at {g.get('T', 0):.0f} K,"
+                        f" then a quench) the crystal leaves {g.get('struct', '')}:"
+                        f" {100 * g.get('frac_quench', 0):.0f} % of the atoms keep it,"
+                        f" {abs(dE):.0f} meV/atom {'below' if dE < 0 else 'above'}"
+                        f" the static lattice (structure gate, lammps/gate/).  The"
+                        f" 600 K screen holds the box shape fixed and cannot see"
+                        f" this.")
+            if key in ("tap", "tap_ug", "rc", "rc_ug") and (rec.get("md_screen") or {}).get("state") == "ok":
+                w = warm_shear(lib[el], key)
+                if w is not None:
+                    warn = (warn + nl + f"# MD AT TEMPERATURE: C' = (C11 - C12)/2"
+                            f" of the finite-temperature elastic constants turns"
+                            f" negative by {w:.2f} T_melt (lammps/elastic_T.py):"
+                            f" the crystal loses its shear stiffness when warm.")
             #  What three warm screens say about the candidates, which no
             #  cold screen can see.  The alkalis pass every 0 K test - they
             #  hit every fitted target and are dynamically stable along the
@@ -443,14 +534,15 @@ def main():
             #  must stay the same: this copy had drifted older than the page's
             #  and told K_recut.ugur it was worse than the published arm, when
             #  the current scoring says better.  Recomputed 2026-09-13 with
-            #  curve_mae.py, arms rc and tap.  Ir is nearest-branch against a
+            #  curve_mae.py, arms rc and tap; Mg and Re 2026-10-01.  Ir is nearest-branch against a
             #  digitised figure, so both of its numbers are lower bounds.
             RC_DISP = {"Ag": (13.0, 12.7), "Au": (4.2, 4.4), "Ba": (8.3, 9.6),
                        "Ca": (8.6, 8.3), "Cs": (6.4, 12.9), "Cu": (9.3, 10.0),
                        "Ir": (9.0, 9.9), "K": (11.8, 13.9), "Li": (7.0, 25.9),
-                       "Mg": (8.3, 6.6), "Na": (5.8, 16.2), "Ni": (12.1, 13.4),
+                       "Mg": (9.1, 7.1), "Na": (5.8, 16.2), "Ni": (12.1, 13.4),
                        "Pb": (12.9, 18.3), "Pd": (3.5, 3.6), "Pt": (5.0, 4.8),
-                       "Rb": (7.6, 11.8), "W": (17.2, 17.8), "Yb": (8.5, 8.6)}
+                       "Rb": (7.6, 11.8), "Re": (16.1, 18.8), "W": (17.2, 17.8),
+                       "Yb": (8.5, 8.6)}
             warm = ""
             if name in ("rc", "rc_ug") and el in RC_DISP:
                 mine, pub = RC_DISP[el]
@@ -580,6 +672,25 @@ def main():
     rec_els = sorted(e for e in lib if isinstance(lib[e], dict)
                      and (lib[e].get("md_recommended") or {}).get("set")
                      == "rc")
+    #  the elements with no record fit for MD at temperature, by the same
+    #  tests the headers apply (no_md_reason) plus md_recommended "none"
+    mau_bad = sorted(e for e in lib if isinstance(lib[e], dict) and lib[e].get("tap")
+                     and (lib[e].get("md_recommended") or {}).get("set") != "rc"
+                     and ((lib[e].get("md_recommended") or {}).get("set") == "none"
+                          or no_md_reason(lib[e], "tap")))
+    ug_els = [e for e in mau_bad if ug_md_ok(lib[e])]
+    no_md = [e for e in mau_bad if e not in ug_els]
+    no_md_text = (
+        f"For {len(no_md)} elements no record is fit for MD at temperature: "
+        + ", ".join(no_md) + ".\nEach one's switched set fails the 600 K run or, once warm, leaves its\n"
+        "structure when the cell may change shape or loses its shear stiffness;\n"
+        "its header says which.  Use those records for static and harmonic\n"
+        "properties only.") if no_md else ""
+    if ug_els:
+        no_md_text += (
+            f"\nFor {' and '.join(ug_els)} both MAU records fail the same way, but the "
+            "angular\nswitched record, <El>_taper.ugur.ang, passes every screen and is the "
+            "set to use.")
     #  a README beside them, because a directory of bare numbers is not a
     #  distribution
     open(os.path.join(OUT, "README"), "w").write(f"""\
@@ -643,6 +754,7 @@ Which one to use
 ----------------
 For molecular dynamics, use a *_taper set - or, for the {len(rec_els)} elements
 named above, <El>_recut.ugur, which is recommended there instead.
+{no_md_text}
 
 The hard-truncated potentials do not conserve energy: phi2 does not vanish at
 the cutoff, so a neighbour crossing it changes the energy in one step.

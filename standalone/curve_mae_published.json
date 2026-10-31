@@ -1,0 +1,925 @@
+{
+ "scores": {
+  "Ag|Ag_u3.eam": {
+   "el": "Ag",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.49833431677389795,
+   "pct": 9.815527216346227,
+   "n": 44,
+   "hcp": false,
+   "near": false
+  },
+  "Ag|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ag",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.5064527643036641,
+   "pct": 9.975433608502348,
+   "n": 44,
+   "hcp": false,
+   "near": false
+  },
+  "Al|Al_jnp.eam": {
+   "el": "Al",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.4139950018492438,
+   "pct": 4.272394239930278,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Al|Al_mm.eam.fs": {
+   "el": "Al",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.3899296938098581,
+   "pct": 4.024042247779754,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Al|Al_zhou.eam.alloy": {
+   "el": "Al",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.42302857283566686,
+   "pct": 4.365619946704509,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Al|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Al",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.43707986632223356,
+   "pct": 4.510628135420367,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Al|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Al",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.8198308665186145,
+   "pct": 8.460586857777239,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Au|Au_u3.eam": {
+   "el": "Au",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.44035519664800055,
+   "pct": 9.369259503148948,
+   "n": 94,
+   "hcp": false,
+   "near": false
+  },
+  "Au|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Au",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.4053527988848685,
+   "pct": 8.624527635848267,
+   "n": 94,
+   "hcp": false,
+   "near": false
+  },
+  "Be|Be_Agrawal.eam.alloy": {
+   "el": "Be",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 3.6367259690767773,
+   "pct": 17.932573812015665,
+   "n": 20,
+   "hcp": true,
+   "near": false
+  },
+  "Ca|Ca_2015KimKH_library.meam+Ca_2015KimKH_Ca.meam": {
+   "el": "Ca",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.4103263529960554,
+   "pct": 8.88152279212241,
+   "n": 56,
+   "hcp": false,
+   "near": false
+  },
+  "Cs|Cs_v2.eam.fs": {
+   "el": "Cs",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.049867934144300324,
+   "pct": 4.660554592925263,
+   "n": 69,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Cu_mishin1.eam.alloy": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.2449955395974532,
+   "pct": 3.310750535100719,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Cu_smf7.eam": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.20061942382522877,
+   "pct": 2.7110732949355234,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Cu_u3.eam": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.21210775926517655,
+   "pct": 2.8663210711510345,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Cu_u6.eam": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.2421045971175633,
+   "pct": 3.271683744831936,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Cu_zhou.eam.alloy": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.22353634290145388,
+   "pct": 3.0207613905601876,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Cu",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.358954714459984,
+   "pct": 4.8507393845943785,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Fe|Fe_mm.eam.fs": {
+   "el": "Fe",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.2536616341429232,
+   "pct": 2.739060287260668,
+   "n": 97,
+   "hcp": false,
+   "near": false
+  },
+  "Fe|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Fe",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.2197949966789918,
+   "pct": 2.373365403783561,
+   "n": 97,
+   "hcp": false,
+   "near": false
+  },
+  "Hf|2021--Huang-X--Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Hf",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.4305147825313919,
+   "pct": 10.08231340822932,
+   "n": 101,
+   "hcp": true,
+   "near": false
+  },
+  "Hf|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Hf",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.4305147825313919,
+   "pct": 10.08231340822932,
+   "n": 101,
+   "hcp": true,
+   "near": false
+  },
+  "Ir|Ir.lammps.eam": {
+   "el": "Ir",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.2038599270768101,
+   "pct": 3.3249054372940505,
+   "n": 85,
+   "hcp": false,
+   "near": true
+  },
+  "K|K_v2.eam.fs": {
+   "el": "K",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.43405222248382774,
+   "pct": 18.08550927015949,
+   "n": 122,
+   "hcp": false,
+   "near": false
+  },
+  "Li|Li_v2.eam.fs": {
+   "el": "Li",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.4122339275119672,
+   "pct": 4.670835486272672,
+   "n": 82,
+   "hcp": false,
+   "near": false
+  },
+  "Mg|Mg_mm.eam.fs": {
+   "el": "Mg",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.6812136135341011,
+   "pct": 9.280839421445519,
+   "n": 68,
+   "hcp": true,
+   "near": false
+  },
+  "Mg|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Mg",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.29680133467278713,
+   "pct": 4.04361491379819,
+   "n": 68,
+   "hcp": true,
+   "near": false
+  },
+  "Mo|Mo_Zhou04.eam.alloy": {
+   "el": "Mo",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.5796986280993861,
+   "pct": 7.052294745734624,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Mo|2001--Lee-B-J--Mo--LAMMPS--ipr1": {
+   "el": "Mo",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.8077964756488032,
+   "pct": 9.82720773295381,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Mo|2012--Park-H--Mo--LAMMPS--ipr1": {
+   "el": "Mo",
+   "family": "MEAM",
+   "style": "meam/spline",
+   "mae_THz": 0.5520300860066093,
+   "pct": 6.715694476966049,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Mo|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Mo",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.5797034620377048,
+   "pct": 7.052353552770131,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Mo|2020--Chen-Y--W-Mo--LAMMPS--ipr1": {
+   "el": "Mo",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.7134326206143518,
+   "pct": 8.679228961245153,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Mo|1987--Ackland-G-J--Mo--LAMMPS--ipr4": {
+   "el": "Mo",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.5763175027672972,
+   "pct": 7.011161834152033,
+   "n": 15,
+   "hcp": false,
+   "near": false
+  },
+  "Na|Na_MendelevM_2014.eam.fs": {
+   "el": "Na",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.07066220315101565,
+   "pct": 1.8497958940056454,
+   "n": 141,
+   "hcp": false,
+   "near": false
+  },
+  "Na|Na_v2.eam.fs": {
+   "el": "Na",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.2609477268014374,
+   "pct": 6.831092324644959,
+   "n": 141,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|Nb.eam.alloy": {
+   "el": "Nb",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.524389637263457,
+   "pct": 8.079963594198103,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|2001--Lee-B-J--Nb--LAMMPS--ipr1": {
+   "el": "Nb",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.7808938425732875,
+   "pct": 12.032262597431242,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|2019--Yang-C--Nb--LAMMPS--ipr1": {
+   "el": "Nb",
+   "family": "MEAM",
+   "style": "meam/spline",
+   "mae_THz": 0.26875776357313375,
+   "pct": 4.141105756134572,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|2021--Huang-X--Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Nb",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.7835336805183679,
+   "pct": 12.072938066538796,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Nb",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.7835336805183679,
+   "pct": 12.072938066538796,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Nb|2024--Nitol-M-S--V-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Nb",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 1.0387872622707264,
+   "pct": 16.005967061182222,
+   "n": 138,
+   "hcp": false,
+   "near": false
+  },
+  "Ni|Ni_smf7.eam": {
+   "el": "Ni",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.5593430708112115,
+   "pct": 6.29890845508121,
+   "n": 78,
+   "hcp": false,
+   "near": false
+  },
+  "Ni|Ni_u3.eam": {
+   "el": "Ni",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.47766726649825386,
+   "pct": 5.379135883989345,
+   "n": 78,
+   "hcp": false,
+   "near": false
+  },
+  "Ni|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ni",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.35919098179265385,
+   "pct": 4.044943488656012,
+   "n": 78,
+   "hcp": false,
+   "near": false
+  },
+  "Pb|Pb_Zhou04.eam.alloy": {
+   "el": "Pb",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.05565366198751272,
+   "pct": 2.5765584253478107,
+   "n": 60,
+   "hcp": false,
+   "near": false
+  },
+  "Pb|Pb_Wang02.eam.fs": {
+   "el": "Pb",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.21837413527342403,
+   "pct": 10.109913670065927,
+   "n": 60,
+   "hcp": false,
+   "near": false
+  },
+  "Pb|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Pb",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.055653661985210955,
+   "pct": 2.576558425241248,
+   "n": 60,
+   "hcp": false,
+   "near": false
+  },
+  "Pd|Pd_u3.eam": {
+   "el": "Pd",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.5289070552050207,
+   "pct": 7.710015381997385,
+   "n": 57,
+   "hcp": false,
+   "near": false
+  },
+  "Pd|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Pd",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.23811582001933954,
+   "pct": 3.471076093576378,
+   "n": 57,
+   "hcp": false,
+   "near": false
+  },
+  "Pt|Pt_u3.eam": {
+   "el": "Pt",
+   "family": "EAM",
+   "style": "eam",
+   "mae_THz": 0.6383017387059041,
+   "pct": 10.911140832579559,
+   "n": 87,
+   "hcp": false,
+   "near": false
+  },
+  "Pt|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Pt",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.4315500662667677,
+   "pct": 7.376924209688337,
+   "n": 87,
+   "hcp": false,
+   "near": false
+  },
+  "Rb|Rb_v2.eam.fs": {
+   "el": "Rb",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.07081438491469591,
+   "pct": 4.817305096237817,
+   "n": 112,
+   "hcp": false,
+   "near": false
+  },
+  "Re|WRe_YC2.eam.fs": {
+   "el": "Re",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.618834942879605,
+   "pct": 11.415512689164453,
+   "n": 19,
+   "hcp": true,
+   "near": false
+  },
+  "Re|WRe_Setyawan_set145.eam.alloy": {
+   "el": "Re",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.9266393546625936,
+   "pct": 17.093513275458285,
+   "n": 19,
+   "hcp": true,
+   "near": false
+  },
+  "Re|WRe.eam.alloy": {
+   "el": "Re",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.5036409778851199,
+   "pct": 9.290554840160853,
+   "n": 19,
+   "hcp": true,
+   "near": false
+  },
+  "Ru|Ru.eam.fs": {
+   "el": "Ru",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.5493599652615776,
+   "pct": 6.926742721744769,
+   "n": 283,
+   "hcp": true,
+   "near": true
+  },
+  "Ta|newPP1_47-setfl.eam.alloy": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.41583798794248317,
+   "pct": 8.267156817942011,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|Ta_Zhou04.eam.alloy": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.411285613655202,
+   "pct": 8.176652358950337,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|Ta1_Ravelo_2013.eam.alloy": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.47266047147310764,
+   "pct": 9.396828458709892,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|Ta2_Ravelo_2013.eam.alloy": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.5349929581940325,
+   "pct": 10.636042906441997,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2001--Lee-B-J--Ta--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.29948188576470725,
+   "pct": 5.953914229914656,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.4112852856234106,
+   "pct": 8.17664583744355,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2019--Chen-Y--W-Ta--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.41532171906503146,
+   "pct": 8.256893023161659,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2021--Huang-X--Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3057953651389095,
+   "pct": 6.079430718467385,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3057953651389095,
+   "pct": 6.079430718467385,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ta|2024--Nitol-M-S--V-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ta",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3038859527968089,
+   "pct": 6.041470234529005,
+   "n": 58,
+   "hcp": false,
+   "near": false
+  },
+  "Ti|Ti.meam.spline": {
+   "el": "Ti",
+   "family": "MEAM",
+   "style": "meam/spline",
+   "mae_THz": 0.7439505123078436,
+   "pct": 9.674258937683271,
+   "n": 79,
+   "hcp": true,
+   "near": false
+  },
+  "Ti|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ti",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.7945474869221036,
+   "pct": 10.332216995085872,
+   "n": 79,
+   "hcp": true,
+   "near": false
+  },
+  "Ti|2021--Huang-X--Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ti",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.5239653293037272,
+   "pct": 6.81359335895614,
+   "n": 79,
+   "hcp": true,
+   "near": false
+  },
+  "Ti|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ti",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.5239653293037272,
+   "pct": 6.81359335895614,
+   "n": 79,
+   "hcp": true,
+   "near": false
+  },
+  "Ti|2024--Nitol-M-S--V-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Ti",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.5239665839185286,
+   "pct": 6.8136096738430245,
+   "n": 79,
+   "hcp": true,
+   "near": false
+  },
+  "V|V.eam.fs": {
+   "el": "V",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.7916679479570725,
+   "pct": 10.024666311567042,
+   "n": 86,
+   "hcp": false,
+   "near": false
+  },
+  "V|V_Olsson_CMS2009.eam.alloy": {
+   "el": "V",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.6600414586785306,
+   "pct": 8.357917473009808,
+   "n": 86,
+   "hcp": false,
+   "near": false
+  },
+  "V|2001--Lee-B-J--V--LAMMPS--ipr1": {
+   "el": "V",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.5020769099625314,
+   "pct": 6.357657270457016,
+   "n": 86,
+   "hcp": false,
+   "near": false
+  },
+  "V|2020--Chen-Y--W-V--LAMMPS--ipr1": {
+   "el": "V",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.7296908738263189,
+   "pct": 9.239868229579079,
+   "n": 86,
+   "hcp": false,
+   "near": false
+  },
+  "V|2024--Nitol-M-S--V-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "V",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3629308077425563,
+   "pct": 4.595689709549667,
+   "n": 86,
+   "hcp": false,
+   "near": false
+  },
+  "W|W_zhou.eam.alloy": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.3000166852419747,
+   "pct": 4.444691633214441,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2001--Lee-B-J--W--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.486565833169378,
+   "pct": 7.208382713620415,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2013--Marinica-M-C--W-4--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.915391934041215,
+   "pct": 13.561361985795779,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2004--Zhou-X-W--W--LAMMPS--ipr2": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.3000166749888835,
+   "pct": 4.444691481316793,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2009--Olsson-P-A-T--W--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.31486840737827565,
+   "pct": 4.664717146344824,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2003--Han-S--W--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.28321183267838473,
+   "pct": 4.195730854494589,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.30001542482944804,
+   "pct": 4.444672960436267,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2019--Chen-Y--W-Ta--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.23297034569245254,
+   "pct": 3.4514125287770745,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2020--Chen-Y--W-Mo--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.2329703476403856,
+   "pct": 3.4514125576353423,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "W|2020--Chen-Y--W-V--LAMMPS--ipr1": {
+   "el": "W",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.2329703476403856,
+   "pct": 3.4514125576353423,
+   "n": 12,
+   "hcp": false,
+   "near": false
+  },
+  "Y|Y_2013KoWS_library.meam+Y_2013KoWS_Y.meam": {
+   "el": "Y",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.2758151956327338,
+   "pct": 5.931509583499651,
+   "n": 91,
+   "hcp": true,
+   "near": false
+  },
+  "Zr|Zr_mm.eam.fs": {
+   "el": "Zr",
+   "family": "EAM",
+   "style": "eam/fs",
+   "mae_THz": 0.22845058628000733,
+   "pct": 4.058385643886364,
+   "n": 61,
+   "hcp": true,
+   "near": false
+  },
+  "Zr|2004--Zhou-X-W--Cu-Ag-Au-Ni-Pd-Pt-Al-Pb-Fe-Mo-Ta-W-Mg-Co-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Zr",
+   "family": "EAM",
+   "style": "eam/alloy",
+   "mae_THz": 0.3199494410633404,
+   "pct": 5.6838471702997,
+   "n": 61,
+   "hcp": true,
+   "near": false
+  },
+  "Zr|2021--Huang-X--Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Zr",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3945166387530816,
+   "pct": 7.008520700521959,
+   "n": 61,
+   "hcp": true,
+   "near": false
+  },
+  "Zr|2022--Fereidonnejad-R--Al-Hf-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Zr",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3945166387530816,
+   "pct": 7.008520700521959,
+   "n": 61,
+   "hcp": true,
+   "near": false
+  },
+  "Zr|2024--Nitol-M-S--V-Nb-Ta-Ti-Zr--LAMMPS--ipr1": {
+   "el": "Zr",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.3945159954891644,
+   "pct": 7.008509273048345,
+   "n": 61,
+   "hcp": true,
+   "near": false
+  }
+ },
+ "failed": {}
+}

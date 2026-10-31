@@ -21,9 +21,23 @@ leaves the pair energy discontinuous and copper drifts 350 meV/atom/ns.
 THE FLOOR IS THE POINT.  Every q is scored twice, at q and at a symmetry
 image of q, and the spread between them is what the run cannot resolve.  A
 difference between columns smaller than that has not been measured, so the
-verdict is computed FROM the floor rather than left to the reader's eye: 15
-of the 27 differences are below it (2026-09-14, after Ir, Ru and Re).  The page
-counts them from this file rather than quoting a number.
+verdict is computed FROM the floor rather than left to the reader's eye.  The
+page counts them from this file rather than quoting a number.
+
+NVT, NOT NPT, SINCE 2026-10-01.  fix phonon reads unwrapped CARTESIAN
+positions, so under a barostat the affine box strain enters <u u*> on the
+q-lines along the primitive axes and softens the longitudinal branch there:
+every hcp element and every bcc one was hit (hcp LA and LO split by 15-25 % at
+A, where symmetry makes them degenerate), the fcc rows were not (no scored or
+drawn q lies on an axis).  The twelve affected elements were re-run in NVT at
+the MEAN cell of their own zero-pressure NPT run, same seed, steps and mesh;
+mdres.json keeps the NPT numbers under `npt_2026_08`.  The leak had flattered
+the hcp scores and inflated their floors two- to thirteen-fold.
+
+FIVE ELEMENTS LEFT THE STUDY at the same time: the switched records of Cs, Fe,
+Nb, Rb and W do not stay body-centred cubic at the measurement's temperature
+(the structure gate, add_gate.py), so what was measured was not a bcc
+spectrum.  They are kind "notbcc" below.
 
     python make_finiteT.py        # -> finiteT.json
 """
@@ -54,12 +68,23 @@ OUT = {
     #  replaced the Colella model as its reference, and no fix phonon run has
     #  been made against it - not waiting on a job, simply not run
     "unrun": ("V",),
+    #  2026-10-01: the switched record leaves bcc at the run temperature - the
+    #  spectrum that was measured belongs to a different structure
+    "notbcc": ("Cs", "Fe", "Nb", "Rb", "W"),
 }
+OUTSIDE = {el for g in OUT.values() for el in g}
+
+
+#  rows whose run measured one Gamma frequency, scored on that alone at 0 K
+#  as well (rhenium; its [001] dispersion entered the library 2026-10-01 and
+#  is not what this run measured)
+GAMMA_ONLY = ("Re",)
 
 
 def zero_k(els, use_a_meas):
     """{el: percent} for the tapered arm at one choice of volume"""
     CM.USE_A_MEAS, CM.NEAREST = use_a_meas, False
+    CM.ONLY_POINTS = set(GAMMA_ONLY)
     buf, keep = io.StringIO(), sys.stdout
     sys.stdout = buf
     try:
@@ -86,7 +111,7 @@ def main():
     rows = {}
     for el in els:
         m = md[el]
-        if "error" in m:
+        if "error" in m or el in OUTSIDE:
             continue
         if el not in a0 or el not in am:
             #  curve_mae prints "-" in the MAU column when the tapered arm is
@@ -111,11 +136,20 @@ def main():
             "ft": round(m["pct"], 1), "floor": round(fl, 1),
             "d": round(d, 1),
             "v": "flat" if abs(d) < fl else ("gain" if d > 0 else "loss"),
+            #  which ensemble the spectrum was sampled in: "nvt" at the mean
+            #  NPT cell (re-run 2026-10-01), "npt" otherwise (fcc and rhenium,
+            #  which the barostat leak does not reach)
+            "box": m.get("box", "npt"),
         }
         #  a row scored differently from the rest says how, in its own words
         #  (rhenium: one Gamma frequency, floored by its degenerate split)
         if m.get("note"):
             rows[el]["note"] = m["note"]
+        #  what the barostat run had said, so the page can show both
+        old = m.get("npt_2026_08")
+        if old:
+            rows[el]["npt"] = {"ft": round(old["pct"], 1),
+                               "floor": round(old["sc_pct"], 1)}
 
     why = {}
     for kind, group in OUT.items():

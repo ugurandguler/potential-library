@@ -1,0 +1,33 @@
+# Structure gate: does the record keep its reference structure at T with the box FREE (tri NPT)?
+units metal
+atom_style atomic
+boundary p p p
+read_data cell.data
+change_box all triclinic
+include pair.in
+neighbor 1.0 bin
+neigh_modify every 1 delay 0 check yes
+compute cna all cna/atom ${rc}
+variable isr atom c_cna==${ct}
+compute nr all reduce sum v_isr
+variable pea equal pe/atoms
+thermo_style custom step temp pe press lx ly lz xy xz yz c_nr
+thermo_modify format float %.6f
+fix r all box/relax tri 0.0
+minimize 1e-12 1e-12 20000 200000
+unfix r
+print "E0 pe_atom=$(pe/atoms) nref=$(c_nr) N=$(atoms) vol_atom=$(vol/atoms)"
+velocity all create ${T} 20260930 mom yes rot yes dist gaussian
+fix 1 all npt temp ${T} ${T} 0.1 tri 0.0 0.0 1.0
+timestep 0.001
+thermo 2000
+run 20000
+fix av all ave/time 100 200 20000 v_pea c_nr
+run 20000
+print "MD pe_atom=$(f_av[1]) nref=$(f_av[2]) T=$(temp)"
+unfix av
+unfix 1
+velocity all set 0 0 0
+fix r all box/relax tri 0.0
+minimize 1e-12 1e-12 20000 200000
+print "QUENCH pe_atom=$(pe/atoms) nref=$(c_nr)"

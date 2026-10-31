@@ -55,6 +55,14 @@ def arms(d):
 
 
 SRC = os.path.join(HERE, "..", "lammps", "npt_expansion.json")
+#  Records whose expansion runs did not stay in the reference structure
+#  (2026-10-01).  Fifteen body-centred records leave bcc during the very runs
+#  that measure their expansion - a Bain shear, a collapse to close packing -
+#  and the cell edge then follows whatever the crystal became.  Their slope is
+#  not a thermal expansion and must not enter the median: before this check
+#  five of the nine "negative" records were such collapses, and the median
+#  carried ten more.  The evidence per record is in the file itself.
+STRUCT = os.path.join(HERE, "..", "lammps", "expansion_structure.json")
 #  the harmonic Grueneisen still comes from the quasi-harmonic run; only the
 #  expansion coefficient itself was replaced
 QHA = {"tap": "expansion_tap.json", "tap_ug": "expansion_tap_ug.json"}
@@ -67,6 +75,9 @@ def main():
         print(f"{SRC} is missing")
         return
     npt = json.load(open(SRC))
+    tr = json.load(open(STRUCT)) if os.path.exists(STRUCT) else {}
+    held = tr.get("_held_only_by_the_barostat", {})
+    tr = {k: v for k, v in tr.items() if not k.startswith("_")}
 
     gam = {}
     for tag, fn in QHA.items():
@@ -78,6 +89,8 @@ def main():
                         k: r[k] for k in ("gruneisen", "gruneisen_weighted")
                         if k in r}
 
+    covered_tags = {k.split("|", 1)[1] for k in npt
+                    if not k.split("|", 1)[1].startswith("base|")}
     #  Clear first, then write.  Merging into whatever is already there keeps
     #  records from runs that no longer exist: lithium's quasi-harmonic entry
     #  survived the switch to NPT and sat in the library as a NaN, rendered on
@@ -92,8 +105,14 @@ def main():
         #  under "rc" and "rc_ug", so their results would have survived a
         #  rerun that no longer produced them - which is the exact failure the
         #  note above describes, one arm later.
+        #  ...but only the arms THIS sweep measures.  The re-cut and
+        #  force-matched arms carry expansion records written by
+        #  add_candidates.py from refit/, and clearing every sub-record
+        #  deleted all 52 of them whenever this ran outside refresh.py's
+        #  order (caught 2026-10-01 by a key-path diff).
         for t, sub in list(d.items()):
-            if isinstance(sub, dict) and "expansion" in sub:
+            if (isinstance(sub, dict) and "expansion" in sub
+                    and t in covered_tags):
                 del sub["expansion"]
                 cleared += 1
         d.pop("baseline_expansion", None)
@@ -134,13 +153,20 @@ def main():
             if el not in lib or not isinstance(lib[el].get(tag), dict):
                 continue
             rec.update(gam.get(key, {}))
+            if key in tr:
+                rec["not_bcc"] = tr[key]
+            if key in held:
+                rec["held_cubic"] = held[key]
             lib[el][tag]["expansion"] = rec
-            if v.get("ratio"):
+            if v.get("ratio") and key not in tr:
                 ours.append((v["ratio"], el, tag))
         n += 1
 
     print(f"{n} records ({len(ours)} ours, {len(base)} baseline), "
           f"{cleared} stale records cleared")
+    if tr:
+        print(f"  LEFT THEIR STRUCTURE, excluded from the statistics {len(tr)}: "
+              + " ".join(sorted(tr)))
 
     #  A non-finite number is not a measurement.  Say so loudly rather than
     #  writing it and letting toFixed render it as "NaN" on the page.

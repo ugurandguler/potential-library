@@ -3,8 +3,9 @@
 # pair_style ugur/ang
 # pair_coeff * * Cr_taper.ugur.ang Cr
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift within noise for copper (0.002 meV/atom/ns against 176 for its hard twin).  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.6 % against the hard sets' 9.7 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift within noise for copper (0.002 meV/atom/ns against 176 for its hard twin).  BUT THIS RECORD IS NOT FIT FOR MD AT TEMPERATURE: it collapses in the 600 K run and leaves bcc once the cell may change shape (see the MD lines below).  It pays for that on the dispersion: the switched sets average 12.8 % against the hard sets' 9.9 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
 # MD: DO NOT USE.  At 600 K the crystal collapses: it reaches 1163 K and its potential energy falls below the static lattice.  Static properties from this set are still valid.
+# MD AT TEMPERATURE: DO NOT USE.  With the cell free to change shape (40 ps at 300 K, then a quench) the crystal leaves bcc: 0 % of the atoms keep it, 513 meV/atom below the static lattice (structure gate, lammps/gate/).  The 600 K screen holds the box shape fixed and cannot see this.
 #
 # LATTICE STABILITY: this set is NOT a harmonic minimum.
 # Along the Setyawan-Curtarolo path its frequencies reach -24.369 cm^-1,

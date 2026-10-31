@@ -303,8 +303,17 @@ USE_A_MEAS = True
 #  form, which rotates the Cartesian frame for fcc and bcc, and the
 #  polarisation direction was being built in the unrotated one.
 NEAREST = False
+#  Elements scored on their symmetry-point measurements ONLY (rows without a
+#  branch label).  make_finiteT sets it for rhenium: its finite-temperature
+#  run measures the Gamma frequency alone, so its 0 K column must be the
+#  Gamma frequency alone too, not the [001] dispersion entered on 2026-10-01.
+ONLY_POINTS = set()
 
 QGATE = []
+
+#  el -> [(name, Phi)]: score these force constants instead of the arms'
+#  records (curve_mae_published.py sets it); None = the library's own arms
+EXTERNAL = None
 
 #  how each hcp point was resolved: fully labelled, narrowed to a pair of
 #  transverse branches, or left to the six-way nearest read
@@ -345,17 +354,48 @@ def main(only=(), field="exp_curve"):
                "hcp": v["struct"] == "hcp" and field == "exp_curve"}
         if near_rec and field == "exp_curve":
             out["near"] = True
-        for key, name in ARMS:
-            rec = v if key is None else v.get(key)
-            if not rec or "m" not in rec:
-                continue
-            pot = L.Potential.from_record(rec)
+        arms = ([(None, n, P) for n, P in EXTERNAL(el)] if EXTERNAL
+                else [(k, n, None) for k, n in ARMS])
+        for key, name, ext in arms:
+            if ext is None:
+                rec = v if key is None else v.get(key)
+                if not rec or "m" not in rec:
+                    continue
+                pot = L.Potential.from_record(rec)
+                Phi = angfc.force_constants(cry, pot) if key == "tap_ug" else None
+            else:
+                #  force constants from elsewhere (a published potential
+                #  through LAMMPS): the same reading, a different Phi
+                pot, Phi = None, ext
             hcp = v["struct"] == "hcp"
-            Phi = angfc.force_constants(cry, pot) if key == "tap_ug" else None
             err, nu_max = [], 0.0
+            #  A frequency measured AT a symmetry point is stored on every
+            #  drawn segment that ends there (add_phonon_curves places it by
+            #  which segments end where), so Gamma on the hcp path appears
+            #  three times.  It is one measurement and is scored once.
+            #  Found 2026-10-01 when rhenium's Raman point, triplicated, moved
+            #  its score by 1.8 points.
+            seen = set()
+
+            def first(r, a, b):
+                #  only a measured row carries a label; a model row is
+                #  [t, nu1, nu2, nu3] and is never a point measurement
+                if (field != "exp_curve" or len(r) < 4 or not isinstance(r[3], str)
+                        or "[" in r[3] or r[0] not in (0.0, 1.0)):
+                    return True
+                key = (a if r[0] == 0.0 else b, round(r[1], 6), r[3])
+                if key in seen:
+                    return False
+                seen.add(key)
+                return True
             for sk, pts in ec["segs"].items():
                 a, b = sk.split("|")
                 if (a, b) not in segs:
+                    continue
+                pts = [r for r in pts if first(r, a, b)]
+                if el in ONLY_POINTS:
+                    pts = [r for r in pts if "[" not in str(r[3])]
+                if not pts:
                     continue
                 ka, kb = segs[(a, b)]
                 #  a model row is [t, f...] and may carry fewer than three
@@ -438,6 +478,9 @@ def main(only=(), field="exp_curve"):
                 out[name] = (float(np.mean(err)), 100.0 * np.mean(err) / nu_max)
                 out["n"] = len(err)
         rows.append(out)
+
+    if EXTERNAL:
+        return rows
 
     print(f"\n{'el':5s}{'T':>5s}{'pts':>5s}"
           + "".join(f"{n:>18s}" for _, n in ARMS))

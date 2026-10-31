@@ -16,14 +16,9 @@ self-contained file: no server, no external requests, no scripts loaded from
 anywhere. Open it in a browser, or serve it through GitHub Pages.
 
 `docs/index.html` is the published copy. The file it is made from is
-`standalone/potential.html`, which `make_gui.py` writes — and **two trees write
-a file of that name**, so the page names itself in its own footer, "screen
-tree" or "published tree". As of 1.1.0 the two carry the same panels — the
-screen tree's renderer and library were promoted into this one for the release
-— so the stamp now says only which tree built the file you have open. It is
-still the first line to read when a change seems missing: twice a change has
-been reported as absent when the file on disk already had it and the browser
-was showing an older copy.
+`standalone/potential.html`, which `make_gui.py` writes. When a change seems
+missing, check first that the browser is not showing an older copy: twice a
+change has been reported as absent when the file on disk already had it.
 
 ## Read this before using the parameters
 
@@ -42,6 +37,10 @@ download reference data already carried here; and `fitz`, only in
 The library reproduces **the elastic tensor at the experimental lattice
 constant** as well as tabulated EAM does, and that is what it was fitted to. It
 is a statement about the second derivative of the energy at fixed coordination.
+On the measured phonons, which it was not fitted to, published EAM and MEAM
+potentials do better for 21 of the 29 metals they cover (7.4 % against 10.2 %
+of the highest frequency; the paragraph *Published potentials do better on
+these curves* below has the details).
 
 It does **not** transfer to coordination changes. Measured against
 density-functional theory and against 51 published potentials run through the
@@ -54,7 +53,7 @@ identical code:
 | vacancy formation energy | **2.25× the median of the published classical potentials** in JARVIS-FF (not DFT) for the switched arms, over the 21 elements that have one, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.05 MAU, 1.55 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
-| thermal expansion | 32 % low; 9 records (6 elements) contract on heating |
+| thermal expansion | 28 % low (median 0.72 of experiment over the 59 records that keep their structure); 4 records (Na, Ta) contract on heating. 15 body-centred records leave bcc during the expansion runs themselves and carry no coefficient |
 | self-interstitial formation energy | 23 of the 26 cubic records give a positive value, median 2.71 eV over a range of 0.33–12.53 — a spread far wider than the metals themselves have. For Ba, Cr and Li no energy comes back at all: the extra atom falls into the hole in the repulsive core. The dumbbell chosen agrees with the established ordering in 13 of 13 fcc records (⟨100⟩) and 8 of 10 bcc (⟨111⟩). Hexagonal elements are not attempted — the three orientations measured are cubic directions. `lammps/interstitial.py`, in `library.json` as `interstitial` |
 | B′, the pressure derivative of the bulk modulus | not fitted anywhere, so it is the first quantity the fit was never shown. Over the 32 elements with a measured value the switched arm's median is 3.06 against 4.42, within 1 for 11 of them, and **negative — which no metal is** — for 9. Published potentials through the identical scan: within 1 for 20 of 28. `lammps/eos.py`, in `library.json` as `eos` |
 | Grüneisen parameter γ | median 0.82 against 1.57 implied by the measured expansion, bulk modulus and heat capacity — about half, which is the expansion row above restated in the phonons. For 5 records (Fe, Mo, Rb, Ta, W) γ changes sign between a 1 % and a 3 % volume window and is not defined at that resolution; for 6 (Cr, K, Li, Na, Nb, V) it is negative in every window. `standalone/gruneisen.py`, in `library.json` as `gruneisen` |
@@ -69,7 +68,17 @@ properties near the fitted volume.
 same as staying stable on heating: the switched records of Cs, Fe, K, Mo, Rb, V
 and W lose C′ = (C₁₁ − C₁₂)/2 between 5 and 10 per cent of their melting
 point, measured with the Born stress-fluctuation method. The page marks those
-points hollow and now says so in the panel note.
+points hollow and now says so in the panel note. **And the switched records of
+Cr, Cs, Fe, K, Li, Mo, Nb, Rb, V and W do not keep the bcc structure at 300 K**
+(0.6 of the melting point for the alkalis) once the cell may change shape: the
+**structure gate**, a column of its own in each element's LAMMPS table, shows
+them shearing or collapsing within picoseconds to an arrangement below their
+own static lattice. The molecular-dynamics screen cannot see that, because its
+box shape is fixed. All 23 re-cut candidates pass it. The ten that fail
+are the MAU switched records; the angular switched records of K and W keep bcc and pass
+every screen, so for those two elements `<El>_taper.ugur.ang` is the set to run,
+and for the other eight - Cr, Cs, Fe, Li, Mo, Nb, Rb, V - no record is fit for
+MD at temperature. Each file's header says which.
 
 The surface row carries a criterion, not just a count. Most disagreements about
 facet ordering are near-ties: where the closest two faces differ by less than
@@ -232,58 +241,43 @@ wants the settling temperature as well. Both files default to tantalum's
 force-matched record and take the element, potential file, lattice constant and
 mass as command-line variables.
 
-## The same improvement, twice — and it does not add up
+## The same improvement, twice — a finding withdrawn
 
-Two separate things reduce the error against a **measured** dispersion. Force
-matching moves the 0 K harmonic spectrum. Measuring the spectrum instead by
-displacement correlation during equilibrium molecular dynamics, at the
-temperature the neutron experiment was actually run at, gives the renormalised
-spectrum rather than the harmonic one.
+Until October 2026 this section said that two things which reduce the error
+against a measured dispersion — force matching, which moves the 0 K harmonic
+spectrum, and measuring the spectrum by molecular dynamics at the temperature
+of the experiment — **do not add but substitute**: ordered by what force
+matching gained at 0 K, the gain at temperature fell steadily and changed sign,
+with a correlation of −0.96 over seven elements. **That finding is withdrawn.**
+Two things under it were wrong.
 
-The natural expectation is that they add: one repairs the form, the other
-supplies the anharmonicity no harmonic form can carry. **They do not add. They
-substitute.**
+Every finite-temperature run was made under a barostat, and LAMMPS'
+`fix phonon` reads Cartesian positions, so the fluctuating cell leaks into the
+displacement correlations along the primitive axes and softens the
+longitudinal branch there. That reaches every body-centred element; five of
+the seven were body-centred. And, more decisively, several of the crystals
+were not body-centred cubic at all: the **structure gate** (40 ps with the cell
+free to change shape, then a quench, counted by common-neighbour analysis)
+shows the library's switched records of molybdenum, niobium, tungsten and
+vanadium, and the force-matched records of molybdenum, nickel, tungsten and
+vanadium, leaving their structure at the run temperature. The "at T" number
+for those was measured on whatever the crystal had become.
 
-| | library 0 K | library at T | fit 0 K | fit at T | gain at T |
-| --- | --- | --- | --- | --- | --- |
-| V\* | 14.5 | 14.7 | 23.6 | **12.1** | **+11.5** |
-| Nb | 12.3 | 12.8 | 12.6 | **10.6** | +2.0 |
-| Ta | 14.8 | 12.9 | 12.2 | **9.7** | +2.5 |
-| Cu | 10.0 | 8.4 | 5.4 | **4.1** | +1.3 |
-| Mo | 14.8 | 9.2 | 9.6 | 12.4 | −2.8 |
-| Ni | 13.4 | 11.9 | 7.7 | 10.8 | −3.1 |
-| W | 17.8 | 10.3 | 8.9 | 14.6 | −5.7 |
+| | library at T | force-matched fit at T |
+| --- | --- | --- |
+| V | leaves bcc | leaves bcc |
+| Nb | leaves bcc | stays bcc; barostat run, not repeated |
+| Ta | 14.5 (re-run at constant volume; was 12.9) | barostat run, not repeated |
+| Cu | 8.4 (fcc, untouched by either) | 4.1 (fcc, untouched by either) |
+| Mo | leaves bcc | leaves bcc |
+| Ni | 11.9 (fcc, untouched by either) | leaves fcc |
+| W | leaves bcc | leaves bcc |
 
-Per cent of the highest measured frequency, all against the same curves and
-the same q-points. \* vanadium is scored against a fitted model, not a
-measurement — see below.
-
-Ordered by how much force matching gained at 0 K, **the gain at temperature
-falls steadily and changes sign**, with a correlation of −0.96 over the seven.
-The crossover sits near five points. Copper is face-centred and falls between
-two body-centred elements in that ordering, so this is not a structure effect.
-Whichever lever is pulled first takes the improvement; the other moves back.
-
-Vanadium is the case that makes it plain, because it is the only one at the
-far end. Force matching made its 0 K dispersion **9.1 points worse**, and the
-thermal measurement recovered 11.5 — ending below the library's own figure. A
-fit that looks like a failure at zero kelvin is the best vanadium record here
-once it is measured at the temperature its reference was taken at. **A
-0 K-only reading would have discarded it.**
-
-What this does **not** say is what the shared content is. Anharmonic
-renormalisation and the effect of fitting to strained and defected
-configurations are both plausible, and this measurement does not separate
-them. It also gives no floor: four body-centred elements suggested a common
-limit near 9–10 per cent and copper's 4.1 removed it.
-
-Vanadium's row in this comparison is scored against a Born–von Kármán model
-(Colella and Batterman 1970), gated on the elastic constants it was *not*
-fitted to. Vanadium scatters neutrons almost entirely incoherently, which is
-what makes it the standard neutron calibrant, so no neutron dispersion exists;
-a measured one does, by inelastic x-ray scattering (Bosak *et al.* 2008), and
-since September 2026 the library's 0 K comparison uses it. Tungsten has twelve measured points and molybdenum fifteen against
-niobium's hundred and thirty-eight, so those two rows are thin.
+Copper is the only element whose four numbers all survive, and one element
+cannot carry a trend. Nothing replaces the claim; whether the two improvements
+add, compete or are unrelated is open again. The vanadium case that made it
+vivid — a force-matched fit that looked like a failure at 0 K and the best
+record at temperature — goes with it: that fit leaves bcc too.
 
 ## Three potentials, one hierarchy
 
@@ -319,31 +313,7 @@ docs/         index.html, the interactive library.  GitHub Pages serves from
 provenance/   how the reference numbers were read out of the source volumes.
               Not runnable from a clean checkout - the volumes are publisher
               copyright and are not in this repository.
-doc/          make_doc.py and make_doc_tr.py, which generate the English and
-              Turkish notes from facts.json.  The .docx files are output, not
-              source - edit the generators.
-refit/        the same nine parameters refitted to density-functional forces.
-              Written up separately in REFIT.md.
 ```
-
-A second working tree, `ugurpotential_screen/`, sits beside this one. It is
-where the next release is built, and everything it held for 1.1.0 — the
-shell-gap re-cut candidate arms, the (11̄0) polar panel, the reference-path
-label fix and the finite-temperature dispersion study — was promoted into this
-tree for the release.
-
-**Promotion is not a copy.** `make_gui.py` and `library.json` normally do not
-travel: the renderers differ on purpose, and copying the published one over the
-screen one destroyed a day's work once. Carrying them the other way, for a
-release, is safe only after proving the source is a superset of the
-destination, and the proof is not the file size. For 1.1.0 a key-PATH diff of
-the two `library.json` files — not a key-name diff — found exactly one field
-the screen tree lacked, `dyn/path`, present on all 38 elements and nested
-inside `dyn` where a shallow comparison could not see it. It was merged back,
-and the result was checked to carry every path either file had and to leave
-every fitted parameter and every target byte-identical. Four producer modules
-were likewise kept from this tree rather than overwritten, because the release
-work had moved them ahead of the screen copies.
 
 Two independent implementations of the same potential exist on purpose.
 `standalone/latdyn.py` is analytic and lattice-based; `lammps/pair_ugur.cpp`
@@ -384,10 +354,11 @@ version difference from a defect.
 One thing to know before running `refresh.py`: it **overwrites
 `standalone/potential.html` with what your checkout can compute**, which is
 less than the shipped page. This was measured, not estimated — the repository
-was cloned into an empty directory and run, most recently on 2026-09-23. All
-148 Python files compile, `selftest.py` passes every check, and `refresh.py`
-completes its nineteen steps in under two minutes. The page it writes is about
-3.3 MB against the shipped 7.6 MB, and what is missing is data that is not ours to redistribute or
+was copied into an empty directory, with no access to the tree it was built
+in, and run, most recently on 2026-10-31. All 157 Python files compile,
+`selftest.py` passes every check, and `refresh.py` completes its twenty-five
+steps in under two minutes. The page it writes is about 3.5 MB against the
+shipped 8.2 MB, and what is missing is data that is not ours to redistribute or
 is too large to carry:
 
 | missing from a rebuild | why |
@@ -395,7 +366,7 @@ is too large to carry:
 | Materials Project, MC3D, JARVIS overlays | fetched data. Set `MP_API_KEY` for the first; the other two need their own downloads |
 | the switched arms `tap` and `tap_ug` | written by `add_taper_overlay.py` from the `dense_*.json` search output, which is gigabytes and is not carried |
 | the re-cut candidate arms | `add_candidates.py` reads `refit/`, which is not published |
-| *nothing else* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 27 rows and 26 curves appear (rhenium has one measured frequency, not a curve). Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
+| *nothing else* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 22 rows and 21 curves appear (rhenium has one measured frequency, not a curve). Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
 
 Every one of those steps says what it could not do and continues, rather than
 failing. **The shipped `docs/index.html` is the complete page** and carries all
@@ -472,10 +443,11 @@ and carry no electronic term.
 The **measured phonon** comparison outgrew a single compilation. It began as
 III/13a's zone-boundary points and is now a set of dispersion curves along the
 symmetry path, and **all 38 elements carry one**: 27 dispersions transcribed
-from tabulated measured frequencies; 3 digitised from published figures —
-iridium and ruthenium by neutrons, vanadium by x-rays — and flagged as such;
-4 records of individual measured frequencies rather than a dispersion
-(beryllium, molybdenum, rhenium, tungsten); and 4 reconstructed only from
+from tabulated measured frequencies; 4 digitised from published figures —
+iridium, ruthenium and rhenium by neutrons (rhenium along [001] only, read from
+two figures of the same measurement), vanadium by x-rays — and flagged as such;
+3 records of individual measured frequencies rather than a dispersion
+(beryllium, molybdenum, tungsten); and 4 reconstructed only from
 published force constants (cobalt, chromium, rhodium, strontium). Seven
 reconstructions are drawn in all, because molybdenum, tungsten and vanadium
 carry one beside their measured points. Each is transcribed from its own
@@ -488,6 +460,28 @@ symmetric model for tungsten, a dipolar fluctuation model for cobalt — and
 each was tested against measured curves already on the page before it was
 trusted. The compilations themselves are publisher copyright and are not
 redistributed here.
+
+**Published potentials do better on these curves.** Each published EAM and
+MEAM file the library is compared with elsewhere — 92 of them, 66 EAM and 26
+MEAM, on 29 metals — was taken through LAMMPS by finite differences
+(`lammps/phonon_published.py`, supercell edge at least four cut-offs) and scored
+by `curve_mae.py` with the library's own reading of the measured points
+(`standalone/curve_mae_published.py`), so only the force constants differ.
+Applied to the library's own copper record, that route reproduces the analytic
+frequencies to 0.0002 THz. A MEAM library file that writes an integer field as
+a decimal, which current LAMMPS rejects, is read with those fields rewritten as
+integers and no value changed (`meam_library_ints` in that script). Over the 29 metals the element's median published
+potential is off by **7.4 %** of the highest measured frequency, the hard-cut
+library by **10.2 %**; the published one is closer for 21 of the 29, and the
+library only for Au, Be, Ca, K, Mg, Pd, Pt and Zr. No published potential was found
+for Ba, Lu, Sc, Tl and Yb. Each element's page lists its own numbers under the
+dispersion, and `curve_mae_published.json` holds every score. The recommendation
+follows: **use the library for elastic properties near the fitted volume, and
+for phonons only where no published potential does better.** The three MEAM
+files of Aitken *et al.* (Phys. Rev. B 103, 094116, 2021) are scored the same
+way but kept apart (`curve_mae_aitken.json`; Ni 6.8, Al 3.0, Cu 4.1 % against
+the library's 9.1, 5.2, 8.5); the files themselves are theirs and are not
+redistributed.
 
 The three anchors are not at one temperature: cohesive energies are 0 K,
 lattice constants about 293 K, elastic constants about 300 K, and zero-point
@@ -502,12 +496,26 @@ Every phonon comparison above scores a 0 K harmonic calculation against a
 measurement made at 9 to 296 K, which charges the potential for a temperature
 difference it was never asked to reproduce. LAMMPS' `fix phonon` can measure
 the spectrum a molecular-dynamics trajectory actually has, so it was run for
-each element at its own paper's temperature. **27 of the 38 carry that
+each element at its own paper's temperature. **22 of the 38 carry that
 measurement**; each element page shows the curve beside the 0 K one and the
-neutron points, and the 11 without it carry a sentence saying which kind of
+neutron points, and the 16 without it carry a sentence saying which kind of
 absence it is. Iridium, ruthenium and rhenium joined the original 24 in
 September 2026: the first two scored against points digitised from published
 figures, rhenium against its single Raman frequency at Γ.
+
+**Two corrections, October 2026.** Every run had been made under a barostat,
+and `fix phonon` reads Cartesian positions, so the fluctuating cell leaked into
+the displacement correlations along the primitive axes and softened the
+longitudinal branch there — in hcp it split the two modes that symmetry makes
+degenerate at A by 15 to 25 per cent. The fcc rows and rhenium's Γ frequency
+are out of its reach; the twelve hcp and bcc elements it touched were re-run
+**at constant volume, in the mean cell of their own zero-pressure run**, same
+seed, steps and mesh. The leak had flattered the hcp scores and inflated their
+floors two- to thirteen-fold. Second, the switched records of caesium, iron,
+niobium, rubidium and tungsten **do not stay body-centred cubic** at the
+measurement's temperature once the cell may change shape, so what had been
+measured for them was a spectrum of another structure. Those five left the
+study.
 
 Two things make the table readable. The numbers are the **switched** arm
 (`<El>_taper.ugur`), not the hard-truncated root the parameter selector calls
@@ -516,13 +524,13 @@ MAU — a hard cut leaves the pair energy discontinuous and copper drifts
 `lammps/nve_check.py`), so the switched arm is the only one
 that can be run at temperature at all. And every run is scored twice, at q and
 at a symmetry image of q, so it reports **its own noise floor**; the verdict is
-computed from that rather than left to the reader, because 15 of the 27
+computed from that rather than left to the reader, because 13 of the 22
 differences are smaller than it.
 
-The result is **12 gains, no losses, and 15 differences too small to read**.
-The three newest are all in the last group: iridium 9.9 to 9.4 per cent
-against a floor of 1.3, ruthenium 9.0 to 8.4 against 2.9, rhenium 12.0 to 12.7
-against 2.4.
+The result is **8 gains, no losses and 14 differences too small to read**. The
+gains are the face-centred copper, gold, nickel, lead, calcium and ytterbium
+and the body-centred barium and sodium. No hexagonal element gains once its floor is
+honest — before the re-run, yttrium's "gain" of 6.2 points was almost all leak.
 The gains are mostly one to three points, which is the size the effect ought to
 be: copper's real 49 K to 298 K shift is 0.5 per cent on average, and two
 independent 1967 neutron measurements of copper disagree by the same 0.5 per

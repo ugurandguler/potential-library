@@ -1,0 +1,21 @@
+{
+ "_about": "Expansion records whose NPT runs (npt_expansion.py: iso barostat, 6x6x6 conventional cell) did not stay in the reference structure, checked 2026-09-30/10-01. bcc_end = CNA bcc atoms of 432 after 40 ps of the SAME protocol at the third grid temperature (job 6428618; controls Ba|tap 420, Na|tap_ug 432, Ta|tap_ug 432). jump_pct = lattice parameter against the 0 K a0, in per cent, at the lowest grid temperature or, where jump_at_K is given, at that temperature; a healthy record starts within a few tenths of a per cent above it and rises linearly. gate = the box-free structure gate (lammps/gate/gate.json). A record listed here has no valid expansion coefficient: its slope is the slope of whatever the crystal turned into.",
+ "Cr|tap":    {"bcc_end": 0,    "T_check": 437, "jump_pct": 1.04,  "gate": "FAIL"},
+ "Cr|tap_ug": {"bcc_end": 0,    "T_check": 437, "jump_pct": 1.97,  "gate": "FAIL"},
+ "Cs|tap":    {"bcc_end": null, "T_check": null, "jump_pct": 1.20, "gate": "FAIL"},
+ "Cs|tap_ug": {"bcc_end": 0,    "T_check": 103, "jump_pct": 0.95,  "gate": "FAIL"},
+ "Fe|tap":    {"bcc_end": 6,    "T_check": 437, "jump_pct": -1.02, "gate": "FAIL", "jump_at_K": 306},
+ "Fe|tap_ug": {"bcc_end": 21,   "T_check": 437, "jump_pct": -0.77, "gate": "FAIL", "jump_at_K": 306},
+ "K|tap":     {"bcc_end": 0,    "T_check": 115, "jump_pct": 0.83,  "gate": "FAIL"},
+ "Mo|tap":    {"bcc_end": 0,    "T_check": 437, "jump_pct": -0.60, "gate": "FAIL", "jump_at_K": 306},
+ "Nb|tap":    {"bcc_end": null, "T_check": null, "jump_pct": -0.73, "gate": "FAIL"},
+ "Nb|tap_ug": {"bcc_end": 2,    "T_check": 437, "jump_pct": -0.72, "gate": "FAIL"},
+ "Rb|tap":    {"bcc_end": null, "T_check": null, "jump_pct": 1.21, "gate": "FAIL"},
+ "Rb|tap_ug": {"bcc_end": 0,    "T_check": 107, "jump_pct": 1.27,  "gate": "FAIL"},
+ "V|tap":     {"bcc_end": 2,    "T_check": 437, "jump_pct": -1.07, "gate": "FAIL"},
+ "V|tap_ug":  {"bcc_end": 1,    "T_check": 437, "jump_pct": -1.07, "gate": "FAIL"},
+ "W|tap":     {"bcc_end": 3,    "T_check": 437, "jump_pct": -0.46, "gate": "FAIL", "jump_at_K": 437},
+ "_held_only_by_the_barostat": {
+   "Mo|tap_ug": "the expansion runs stayed bcc (432 of 432 at 437 K) because an isotropic barostat cannot shear the cell; with the box free to change shape (the structure gate) the same record leaves bcc. Its expansion coefficient is that of a bcc crystal held cubic, and is kept with this caveat."
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "Al": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 7.454,
+  "stable": true
+ },
+ "Cr": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 12.962,
+  "stable": true
+ },
+ "Cu": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 5.902,
+  "stable": true
+ },
+ "Fe": {
+  "min_mesh_cm1": 0.0,
+  "min_near_gamma_cm1": 8.574,
+  "stable": true
+ },
+ "Ir": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 7.709,
+  "stable": true
+ },
+ "Mo": {
+  "min_mesh_cm1": -139.964,
+  "min_near_gamma_cm1": 10.407,
+  "stable": false
+ },
+ "Na": {
+  "min_mesh_cm1": -96.818,
+  "min_near_gamma_cm1": -17.273,
+  "stable": false
+ },
+ "Nb": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 5.617,
+  "stable": true
+ },
+ "Ni": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 8.061,
+  "stable": true
+ },
+ "Pt": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 4.175,
+  "stable": true
+ },
+ "Rh": {
+  "min_mesh_cm1": 0.0,
+  "min_near_gamma_cm1": 8.639,
+  "stable": true
+ },
+ "Ta": {
+  "min_mesh_cm1": -97.57,
+  "min_near_gamma_cm1": 5.366,
+  "stable": false
+ },
+ "V": {
+  "min_mesh_cm1": -239.237,
+  "min_near_gamma_cm1": 8.77,
+  "stable": false
+ },
+ "W": {
+  "min_mesh_cm1": -0.0,
+  "min_near_gamma_cm1": 9.149,
+  "stable": true
+ }
+}

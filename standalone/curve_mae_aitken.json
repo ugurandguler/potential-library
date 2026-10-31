@@ -1,0 +1,35 @@
+{
+ "scores": {
+  "Al|Aitken2021-MEAM-Al": {
+   "el": "Al",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.2894589869828126,
+   "pct": 2.987192848119841,
+   "n": 110,
+   "hcp": false,
+   "near": false
+  },
+  "Cu|Aitken2021-MEAM-Cu": {
+   "el": "Cu",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.30418079527483394,
+   "pct": 4.1105512874977554,
+   "n": 92,
+   "hcp": false,
+   "near": false
+  },
+  "Ni|Aitken2021-MEAM-Ni": {
+   "el": "Ni",
+   "family": "MEAM",
+   "style": "meam",
+   "mae_THz": 0.6036754041252383,
+   "pct": 6.798146442851783,
+   "n": 78,
+   "hcp": false,
+   "near": false
+  }
+ },
+ "failed": {}
+}

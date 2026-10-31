@@ -1757,23 +1757,82 @@ PHONON_CURVE["Ir"] = {
     },
 }
 
-#  Re: ONE frequency, the Raman-active E2g transverse optic mode at Gamma.
-#  Stored in THz directly because a points record is not passed through
-#  nu_scale; 120.9 cm-1 x 0.0299792458 = 3.6245 THz.
-RE_REF = ("H. Olijnyk, A. P. Jephcoat and K. Refson, Europhys. Lett. <b>53</b>, "
-          "504 (2001), Table I: the transverse-optical &Gamma;-point (E<sub>2g</sub>) "
-          "mode by high-pressure Raman spectroscopy, &nu;<sub>0</sub> = 120.9 "
-          "&plusmn; 0.3 cm<sup>&minus;1</sup>, the zero-pressure coefficient of a "
-          "fit to data up to 60 GPa (Table II gives 121 cm<sup>&minus;1</sup> at "
-          "0 GPa), here 3.6245 THz.  <b>One frequency, not a dispersion.</b>  The "
-          "temperature is not stated; pressure was calibrated by ruby "
-          "fluorescence and the measurement is taken as room temperature.  "
-          "Checked on ruthenium in the same paper: its 190.6 cm<sup>&minus;1</sup> "
-          "(23.63 meV) agrees with the &Gamma;-point transverse optic branch of the "
-          "neutron data of Heid et al. 2000, read from their figure at 23.68 meV")
-PHONON_CURVE["Re"] = {"T_K": 295, "struct": "hcp", "ref": RE_REF, "points": {
-    "G": [(3.6245, 0.009, "G5+")],
-}}
+#  Re: the [001] dispersion (Gamma-A) by inelastic neutron scattering at room
+#  temperature, Smith and Wakabayashi 1981, plus the Raman E2g frequency at
+#  Gamma, which was the only reference until 2026-10-01.
+#
+#  DIGITISED, from two drawings of the same measurement.  Smith 1981 Fig. 1
+#  plots Re beside Tc and Ru (open squares T, filled squares L, 300 dpi scan);
+#  Wakabayashi, Scherm and Smith 1982 Fig. 11 replots the same data - their
+#  Ref. 19 is the 1981 paper - beside Ru alone (filled triangles L, open
+#  triangles T, 612 dpi).  The points sit at zeta = 0.1, 0.2, ... in both, so
+#  only the frequency is read; each value here is the mean of the two
+#  readings, which differ by 0.015 THz at the median and 0.06 at most (the
+#  largest at Gamma, where both markers sit on the frame line).
+#
+#  Both figures use the DOUBLE-ZONE scheme, zeta = cq/2pi from 0 to 1 with A
+#  at 0.5: acoustic branches on 0-0.5, optic on 0.5-1.  Mapped to the reduced
+#  Gamma-A segment, t = 2 zeta for LA/TA and t = 2(1 - zeta) for LO/TO; the
+#  A point is entered once, on the acoustic branch.
+#
+#  THREE CHECKS THE READING DID NOT USE.  The first transverse point gives a
+#  slope 0.7 % from the sound velocity of C44 and the first longitudinal one
+#  0.1 % from that of C33 (refdata's elastic constants and 0 K cell).  And
+#  Smith's figure carries one point the 1982 redraw omits, the transverse
+#  optic mode AT Gamma, partly hidden by the frame: about 3.62 THz, against
+#  the 3.6245 of the Raman E2g measurement below.  It is not entered - one
+#  partly hidden marker in one figure - but it is the same mode measured by
+#  two techniques, and they agree.
+RE_REF = ("H. G. Smith and N. Wakabayashi, Solid State Commun. <b>39</b>, 371 "
+          "(1981): the [001] (&Gamma;&ndash;A) dispersion by inelastic neutron "
+          "scattering at room temperature, the only direction measured.  "
+          "<b>Digitised from the figures</b>, as the paper tabulates no "
+          "frequencies: each value is the mean of two readings of the same data, "
+          "from Fig. 1 of that paper and from Fig. 11 of N. Wakabayashi, R. H. "
+          "Scherm and H. G. Smith, Phys. Rev. B <b>25</b>, 5122 (1982), which "
+          "redraws it; the two readings agree to 0.015&nbsp;THz (median) and "
+          "0.06&nbsp;THz at most.  No error bars are given.  The same points "
+          "are reproduced as experiment by H.-C. Ri et al., J. Mol. Model. "
+          "<b>27</b>, 156 (2021), Fig. 3, but there <b>unfolded</b>: the "
+          "double-zone &zeta; = 0&ndash;1 of the source (&Gamma;&ndash;A&ndash;"
+          "&Gamma;) is spread over a reduced &Gamma;&ndash;A axis, so the A-point "
+          "values sit mid-segment and the &Gamma; values at A; here the optic "
+          "points are folded back, and the branches meet at A as symmetry "
+          "requires.  Checked against numbers the reading "
+          "did not use: the initial transverse and longitudinal slopes agree "
+          "with the sound velocities of C<sub>44</sub> and C<sub>33</sub> to "
+          "0.7 and 0.1&nbsp;%, and the transverse optic mode at &Gamma; in "
+          "Smith's figure, about 3.62&nbsp;THz, with the Raman frequency.  "
+          "<br>The point at &Gamma; is H. Olijnyk, A. P. Jephcoat and K. Refson, "
+          "Europhys. Lett. <b>53</b>, 504 (2001), Table I: the transverse-optical "
+          "(E<sub>2g</sub>) mode by high-pressure Raman spectroscopy, "
+          "&nu;<sub>0</sub> = 120.9 &plusmn; 0.3 cm<sup>&minus;1</sup>, the "
+          "zero-pressure coefficient of a fit to data up to 60 GPa, here "
+          "3.6245 THz; the temperature is not stated and is taken as room "
+          "temperature")
+PHONON_CURVE["Re"] = {
+    "T_K": 295, "struct": "hcp", "ref": RE_REF,
+    "digitised": ("These points were read from Fig. 1 of Smith and Wakabayashi "
+                  "(1981) and from Fig. 11 of Wakabayashi, Scherm and Smith "
+                  "(1982), which redraws the same measurement; each is the mean "
+                  "of the two readings, which agree to 0.015&nbsp;THz (median).  "
+                  "The source labels L and T, so they are scored by "
+                  "polarisation.  Only &Gamma;&ndash;A was measured."),
+    "seg_override": {"[00z]": [("G", "A", 0.0, 1.0)]},
+    #  stored in THz directly; a points record is not passed through nu_scale,
+    #  and 120.9 cm-1 x 0.0299792458 = 3.6245 THz
+    "points": {"G": [(3.6245, 0.009, "G5+")]},
+    "branches": {
+        "LA[00z]": [[0.4, 2.553, 0.0], [0.6, 3.539, 0.0], [0.8, 4.513, 0.0],
+                    [1.0, 5.053, 0.0]],
+        "LO[00z]": [[0.0, 3.67, 0.0], [0.2, 4.13, 0.0], [0.4, 4.897, 0.0],
+                    [0.6, 5.309, 0.0], [0.8, 5.421, 0.0]],
+        "TA[00z]": [[0.2, 0.625, 0.0], [0.4, 1.249, 0.0], [0.6, 1.716, 0.0],
+                    [0.8, 2.167, 0.0], [1.0, 2.572, 0.0]],
+        "TO[00z]": [[0.2, 3.614, 0.0], [0.4, 3.577, 0.0], [0.6, 3.293, 0.0],
+                    [0.8, 2.926, 0.0]],
+    },
+}
 
 
 V_REF = ("A. Bosak, M. Hoesch, D. Antonangeli, D. L. Farber, I. Fischer and "

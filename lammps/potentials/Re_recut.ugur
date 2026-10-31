@@ -11,6 +11,12 @@
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
+# Measured dispersion: 16.1 % against 18.8 % for the published switched
+# arm - better.
+# Over the 21 accepted re-cut records: thermal expansion error 30.7 % -> 25.6 %
+# median, 10 better and 10 worse; elastic constants near 300 K against the
+# room-temperature values 5.2 % -> 3.4 % median, 11 better and 10 worse.
+#
 # Fitted to: cohesive energy, lattice constant, bulk modulus and the elastic
 # constants of Re at its experimental lattice constant.  Nothing else.
 #

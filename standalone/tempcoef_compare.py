@@ -24,7 +24,8 @@ So the expansion term is added back here,
 
 with dlnC/dlnV computed analytically at +/-1 % of the lattice constant and
 alpha_L the MEASURED linear expansion coefficient - not the model's own, which
-is 32 % low and would fold that error into this comparison.
+is about 28 % low (median over the records that keep their structure) and would
+fold that error into this comparison.
 
     python tempcoef_compare.py            # writes tempcoef_compare.json
     python tempcoef_compare.py --print

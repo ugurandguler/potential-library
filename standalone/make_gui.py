@@ -1324,7 +1324,8 @@ function drawGamma(d){
     curve is normalised to its own value at the lowest temperature, since what
     is being compared is a slope and not a lattice constant.               */
 function drawExpansion(d){
-  const recs=armRecs(d,r=>r.expansion&&r.expansion.T&&r.expansion.T.length>1);
+  const recs=armRecs(d,r=>r.expansion&&r.expansion.T&&r.expansion.T.length>1
+                          &&!r.expansion.not_bcc);
   const bases=Object.entries(d.baseline_expansion||{})
     .filter(o=>o[1]&&o[1].T&&o[1].T.length>1);
   if(!recs.length&&!bases.length) return;
@@ -1653,6 +1654,35 @@ function coreless(d){
 
 /* frequencies are stored in cm-1 and plotted in THz */
 const CM1_PER_THZ=33.35641;
+/*  The library against published EAM and MEAM potentials on the MEASURED
+    dispersion (add_published_phonons.py): each published file taken through
+    LAMMPS by finite differences and scored by curve_mae with the library's
+    own reading, so only the force constants differ.  The three MEAM files
+    of Aitken et al. (2021), which are not in the NIST repository, are shown
+    on their own line and are not counted in the median. */
+const potName = s => { const m = /^(\d{4})--([A-Za-z]+)-/.exec(s);
+  return m ? m[2] + " " + m[1] : s.replace(/^Aitken2021-MEAM-\w+$/, "Aitken 2021 MEAM"); };
+function pubPhonons(el, d){
+  const p = d.published_phonons;
+  if(!p) return d.exp_curve && !d.exp_curve.points_only
+    ? `<br><b>vs published potentials</b>: none tested for ${el}.` : "";
+  const pc = x => x.toFixed(1) + "&nbsp;%";
+  const best = p.published[0];
+  const ours = p.ours_hard;
+  const better = p.published.filter(r => r[2] < ours).length;
+  return `<br><b>vs published potentials</b> on the measured dispersion, scored
+    exactly as this library (per cent of the highest measured frequency):
+    this library <strong>${pc(ours)}</strong> hard-cut${p.ours_switched == null ? ""
+    : ", " + pc(p.ours_switched) + " switched"}${p.n ? `; the ${p.n === 1 ? "one published EAM/MEAM potential tested"
+    : p.n + " published EAM/MEAM potentials tested"}${p.n > 1 ? `, median ${pc(p.median)},
+    best <strong>${pc(best[2])}</strong> (${potName(best[0])}, ${best[1]})`
+    : ` ${pc(best[2])} (${potName(best[0])}, ${best[1]})`}. ${better === 0
+      ? `<b>${p.n === 1 ? "It is not" : "None of them is"} closer than the hard-cut record.</b>`
+      : better === p.n ? `<b>${p.n === 1 ? "It is closer" : "All " + p.n + " are closer"}</b>;
+        for phonons of ${el} a published potential is the better choice.`
+      : `${better} of ${p.n} are closer.`}` : "."}${(p.aitken || []).map(r =>
+      ` ${potName(r[0])}, scored the same way: ${pc(r[1])}.`).join("")}`;
+}
 const THZ=v=>v/CM1_PER_THZ;
 
 /* a round tick spacing giving roughly `want` intervals over `span` */
@@ -2176,34 +2206,49 @@ function uf3Note(nb, here){
 }
 
 /*  What to make of the re-cut candidate for THIS element, which is not the
-    same answer twice.  The arm looks strong in aggregate - 8.3 % against the
-    published switched arm's 11.2 % over the 17 elements that have both and
+    same answer twice.  The arm looks strong in aggregate - 8.8 % against the
+    published switched arm's 11.7 % over the 18 elements that have both and
     were not rejected - and that number is misleading on its own: almost all
     of the gap is lithium, sodium, potassium, rubidium and caesium, and the
     last four are exactly the elements the arm breaks once the crystal is
-    warm.  Take those five out and it is 8.6 against 9.2 over 12 elements,
-    better by more than half a point in 5.  A wash.  (Recomputed 2026-09-13,
-    after the 2026-08-29 lattice-constant correction and with iridium.)
+    warm.  Take those five out and it is 9.2 against 10.0 over 13 elements,
+    better by more than half a point in 6.  A wash.  (Recomputed 2026-10-01,
+    with rhenium's dispersion and magnesium's points counted once.)
 
     So the page says it per element rather than quoting the aggregate.  The
     dispersion numbers are the measured comparison, arm against published
     switched arm, as a percentage of that element's highest measured
     frequency; the warm classes come from three independent screens - thermal
     expansion, 300 K elastic constants, and the sign of dC11/dT.  */
-/*  curve_mae.py with the arms rc and tap, 2026-09-13.  Li, Pb and Rb had been
+/*  curve_mae.py with the arms rc and tap, 2026-09-13; Mg and Re 2026-10-01,
+    when rhenium's [001] dispersion was entered and a symmetry-point
+    measurement stopped being counted once per segment ending there (Mg's K
+    and M points had been counted twice).  Li, Pb and Rb had been
     left at their values from before the 2026-08-29 lattice-constant
     correction; a copy of this table in lammps/export_potentials.py was older
     still.  Iridium's points are read from a figure and carry no branch
     labels, so both of its numbers are nearest-branch lower bounds.  */
 const RC_DISP = {Ag:[13.0,12.7], Au:[4.2,4.4], Ba:[8.3,9.6], Ca:[8.6,8.3],
                  Cs:[6.4,12.9], Cu:[9.3,10.0], Ir:[9.0,9.9], K:[11.8,13.9],
-                 Li:[7.0,25.9], Mg:[8.3,6.6], Na:[5.8,16.2], Ni:[12.1,13.4],
+                 Li:[7.0,25.9], Mg:[9.1,7.1], Na:[5.8,16.2], Ni:[12.1,13.4],
                  Pb:[12.9,18.3], Pd:[3.5,3.6], Pt:[5.0,4.8], Rb:[7.6,11.8],
-                 W:[17.2,17.8], Yb:[8.5,8.6]};
+                 Re:[16.1,18.8], W:[17.2,17.8], Yb:[8.5,8.6]};
 const RC_NEAR = ["Ir"];
 /*  Distinct measured frequencies in a points-only record.  One Gamma point is
     drawn at every place the path passes Gamma, so counting drawn marks says
     three where rhenium has one.  */
+/*  Points on a measured branch (their label names a direction, "LA[00z]"),
+    each drawn once; and DISTINCT symmetry-point measurements, which are drawn
+    on every segment ending at their point and must not be counted that way -
+    rhenium's one Raman frequency appears three times on the hcp path.  */
+function nBranch(ec){
+  return Object.values(ec.segs).reduce(
+    (a,v)=>a+v.filter(p=>String(p[3]).includes("[")).length,0);
+}
+function nPoint(ec){
+  return new Set(Object.values(ec.segs).flatMap(v=>v.filter(
+    p=>!String(p[3]).includes("[")).map(p=>String(p[3])+"|"+p[1]))).size;
+}
 function nMeasured(ec){
   return new Set(Object.values(ec.segs).flatMap(
     v=>v.map(p=>String(p[3])+"|"+p[1]))).size;
@@ -2230,6 +2275,12 @@ function cpLat(d){
 const RC_BROKEN = ["Na","K","Rb","Cs","Li"];  /* warm screens: catastrophic  */
 const RC_SUSPECT = ["Yb"];                   /* the same failure, milder    */
 const RCREC = d => !!(d && d.md_recommended && d.md_recommended.set === "rc");
+/*  the box-free structure gate (add_gate.py).  Hard-cut records carry
+    "na_hard" and count as neither.  */
+const GATEFAIL = r => !!(r && r.structure_gate
+                  && (r.structure_gate.verdict === "fail"
+                      || r.structure_gate.verdict === "crashed"));
+const GATEPASS = r => !!(r && r.structure_gate && r.structure_gate.verdict === "pass");
 /*  The warm failure in this element's own numbers.  The sentence used to quote
     fixed ranges - "-36 to -42", "84-94 % against 12-18 %" - which no longer
     matched the stored data and could not cover lithium, whose grid stops at
@@ -2336,7 +2387,50 @@ function forceGateNote(d){
     moving it to admit these four would delete that.</p>`;
 }
 
-function recutNote(d){
+/*  No record of the element is fit for MD at temperature (2026-10-31).  The
+    LAMMPS table already shows the switched set failing the box-free gate,
+    but only Li (md_recommended "none") said so in words, and the re-cut
+    branches below talk about the re-cut alone - so Cr, Cs, Fe, K, Mo, Nb,
+    Rb, V and W had no sentence saying what the exporter and the rule both
+    conclude.  The warm screen is the same one add_elastic_T.py measured:
+    C' negative by 0.15 T_melt in a record that holds the fixed-box run.  */
+function warmTap(d, arm){
+  arm = arm || "tap";
+  const et = (d.elasticT||{})[arm], md = ((d[arm]||{}).md_screen||{}).state;
+  if(!et || !et.pts || md !== "ok") return null;
+  const bad = et.pts.filter(p => p.T > 0 && !p.born_ok).map(p => p.T/et.Tmelt);
+  return bad.length && Math.min(...bad) <= 0.15 ? Math.min(...bad) : null;
+}
+/*  the angular switched record passes all four screens of the paper's
+    table 2 - where both MAU records fail (K, W) it is the set to run  */
+const ugMDok = d => !!(d.tap_ug && d.tap_ug.stable
+  && ((d.tap_ug.md_screen||{}).state === "ok") && GATEPASS(d.tap_ug)
+  && warmTap(d, "tap_ug") === null);
+function noMDLead(d){
+  if(!d.tap || RCREC(d) || (d.md_recommended||{}).set === "none") return "";
+  const g = GATEFAIL(d.tap), w = warmTap(d);
+  if(!g && w === null) return "";
+  const bits = [];
+  if(g) bits.push(`leaves ${d.struct} once the cell may change shape (the
+    structure column of the LAMMPS table)`);
+  if(w !== null) bits.push(`its C&prime; turns negative by
+    ${w.toFixed(2)}&nbsp;T<sub>m</sub> in the finite-temperature elastic
+    constants`);
+  if(ugMDok(d)) return `<p class="plotnote"><strong>${d.sym}: for molecular
+    dynamics use the angular switched record,
+    <code>${d.sym}_taper.ugur.ang</code>.</strong> It passes all four screens
+    &mdash; stable at 0&nbsp;K, the fixed-box run, the warm elastic constants
+    and the box-free structure test &mdash; where the MAU switched set
+    ${bits.join(", and ")}${d.rc ? ", and the re-cut is not a substitute (below)"
+    : ""}.</p>`;
+  return `<p class="plotnote"><strong>${d.sym}: no record here is fit for
+    molecular dynamics at temperature.</strong> The switched set
+    ${bits.join(", and ")}${d.rc ? ", and the re-cut is not a substitute (below)"
+    : ", and there is no re-cut"}. Use ${d.sym}'s records for static and
+    harmonic properties only.</p>`;
+}
+function recutNote(d){ return noMDLead(d) + recutNote0(d); }
+function recutNote0(d){
   const has = d.rc || d.rc_ug;
   const el = d.sym, nm = d.name;
   if(!has){
@@ -2437,9 +2531,16 @@ function recutNote(d){
     THE FLOOR decides what may be read.  fix phonon imposes no symmetry on
     what it inverts, so two wavevectors the crystal forces to be equal do not
     come out equal; every q is scored twice and the spread is the run's
-    resolution.  The verdict column is computed from it, because fifteen of
-    the twenty-seven differences are smaller than it and a reader subtracting
-    two printed numbers would rank the library on noise.                    */
+    resolution.  The verdict column is computed from it, because most of the
+    differences are smaller than it and a reader subtracting two printed
+    numbers would rank the library on noise.
+
+    NVT AT THE MEAN CELL, since 2026-10-01, for every hcp and bcc row.  fix
+    phonon reads Cartesian positions, so a barostat's fluctuating cell leaks
+    into <u u*> along the primitive axes; the fcc rows and rhenium's single
+    Gamma frequency are out of its reach and keep their NPT runs.  Five bcc
+    elements left the study the same day: their switched records do not stay
+    bcc at the measurement temperature (kind "notbcc").                    */
 const FT_WHY = {
   cold: T => `measured at ${T} K, far below the Debye temperature &mdash; `
            + `classical dynamics describes the wrong physics there, and a `
@@ -2479,12 +2580,33 @@ const FT_WHY = {
            + `mode at &Gamma;, so there is no dispersion to set a curve `
            + `against; a small-cell run at ${T} K that measures that one `
            + `frequency has been submitted and its result is not in yet`,
-  unrun: T => `a measured dispersion for this element was entered after the `
+  /*  and where the switched record fails the box-free gate, a run would not
+      be counted anyway - the reason the "notbcc" elements left the study -
+      which the bare "not run yet" left the reader to work out (V)  */
+  unrun: (T, d) => `a measured dispersion for this element was entered after the `
            + `study ran, read from a published figure, and no run at the `
-           + `measurement's ${T} K has been made against it yet`,
+           + `measurement's ${T} K has been made against it yet`
+           + (d && GATEFAIL(d.tap)
+              ? `. Nor would one count: once the cell may change shape, the `
+                + `switched record leaves ${d.struct} at `
+                + `${d.tap.structure_gate.T.toFixed(0)} K (the structure gate, in `
+                + `the LAMMPS section below), the same reason the elements `
+                + `marked as not body-centred in this panel left this study`
+              : ""),
   none: () => `no dispersion reference exists for this element, measured or `
            + `reconstructed`,
+  /*  2026-10-01: measured and scored until then, and withdrawn - the run had
+      been measuring a crystal that was no longer the one being modelled  */
+  notbcc: T => `the switched record does not stay body-centred cubic at `
+           + `${T} K. With the cell free to change shape it shears or collapses `
+           + `within picoseconds into a close-packed arrangement that lies below `
+           + `its own static lattice (the structure gate, in the LAMMPS section `
+           + `below). A spectrum was measured and scored here until October 2026; `
+           + `it belonged to that other structure rather than to bcc, and it has `
+           + `been withdrawn`,
 };
+/*  kinds where the absence is a fact about the POTENTIAL, not the data  */
+const FT_POT = k => k === "screen" || k === "notbcc";
 /*  kinds that are not outside the study, only not in it yet  */
 const FT_WAIT = k => k === "pending" || k === "gamma" || k === "unrun";
 const FT_V = {gain: ["gain", "ok"], loss: ["loss", "bad"],
@@ -2680,8 +2802,9 @@ function finiteTBlock(d){
       ?"no run has been made for this one yet":"this one is waiting on its run"}.`
       :`${ftCount().rows} of the ${ftCount().all}
       elements carry a finite-temperature measurement; this is one of the
-      ${ftCount().out} that do not, and that is a fact about the reference data
-      rather than about the potential.`}</p>`;
+      ${ftCount().out} that do not, and ${FT_POT(o.kind)
+      ?"here that is a fact about the potential, not about the reference data."
+      :"that is a fact about the reference data rather than about the potential."}`}</p>`;
   }
   const [word, cls] = FT_V[r.v];
   const cv = (FT.curve||{})[el], hasCurve = !!cv && !!(((d.tap||{}).ld||{}).std);
@@ -2732,8 +2855,21 @@ function finiteTBlock(d){
   </tbody></table>
   <p class="plotnote">Per cent of the highest measured frequency, over
     ${r.n} point${r.n===1?"":"s"}. ${r.mesh} cells, ${(r.steps/1e6).toFixed(1)} million steps
-    of 2 fs under a barostat, so the volume is the potential's own at that
-    temperature and not one imposed on it.
+    of 2 fs${r.box==="nvt"?` <strong>at constant volume</strong>, in the mean
+    cell of this potential's own zero-pressure run at the same temperature
+    &mdash; so the volume is still the potential's own, not one imposed on it.
+    Not under the barostat itself: <code>fix phonon</code> reads Cartesian
+    positions, and a fluctuating cell leaks into the displacement correlations
+    on the wavevectors along the primitive axes, softening the longitudinal
+    branch there${d.struct==="hcp"?` &mdash; at A it split the two modes that
+    symmetry makes degenerate by 15&ndash;25&nbsp;%`:""}. ${d.name} was re-run
+    this way in October 2026${r.npt?`; the barostat run had given
+    ${r.npt.ft.toFixed(1)}&nbsp;% against a floor of ${r.npt.floor.toFixed(1)}&nbsp;%`:""}.`
+    :` under a barostat, so the volume is the potential's own at that
+    temperature and not one imposed on it. The barostat's fluctuating cell
+    leaks into <code>fix phonon</code> on wavevectors along the primitive axes,
+    and ${d.struct==="fcc"?"none of the scored or drawn points for a face-centred crystal lies on one":"the one frequency scored here is at &Gamma;, which it does not reach"},
+    so this run was kept.`}
     <strong>This is the switched record</strong>
     (<code>${el}_taper.ugur</code>), which is NOT what the parameter-set
     selector above calls MAU &mdash; that is the hard-truncated root record.
@@ -2756,8 +2892,8 @@ function lammpsBlock(d){
   /*  The "what" column carries the USE, not just the name.  Which truncation
       a reader wants is not a matter of taste and the two answers point
       opposite ways: measured against neutron dispersion the hard sets average
-      9.7 % over the 33 elements that have a curve and the switched ones
-      12.6 %, hard being closer in 25 of the 33 - and no hard set can be run
+      9.9 % over the 34 elements that have a curve and the switched ones
+      12.8 %, hard being closer in 26 of the 34 - and no hard set can be run
       at temperature, because phi2 does not vanish at the cutoff.  Copper
       drifts 176 meV per atom per nanosecond in NVE with the hard set and
       0.002 - within noise - with the switched one (nve_check.py, 2026-09-22).  Each file's own header carries
@@ -2768,7 +2904,14 @@ function lammpsBlock(d){
      "hard truncation &mdash; static properties and lattice dynamics, "
      + "<strong>not molecular dynamics</strong>"],
     ["tap",  d.tap,    d.sym+"_taper.ugur",       "ugur",
-     (RCREC(d)
+     GATEFAIL(d.tap)
+       ? "switched &mdash; holds in the fixed-box screen but <strong>does not "
+         + "keep its structure at temperature</strong> (last column), so it is "
+         + "not a set for MD" + (RCREC(d) ? "; the re-cut below is recommended"
+         : ugMDok(d) ? "; the angular switched set below passes every screen "
+           + "and is the one to use"
+         : (GATEPASS(d.rc) ? "; the re-cut candidate below keeps it" : ""))
+       : (RCREC(d)
        ? "switched &mdash; runs MD, but for " + d.sym + " the re-cut below is "
          + "<strong>recommended instead</strong>"
        : "switched &mdash; <strong>the set to use for MD</strong>; "
@@ -2777,8 +2920,11 @@ function lammpsBlock(d){
      "hard + angular &mdash; static properties and lattice dynamics, "
      + "<strong>not molecular dynamics</strong>"],
     ["tap_ug", d.tap_ug, d.sym+"_taper.ugur.ang", "ugur/ang",
-     "switched + angular &mdash; <strong>MD</strong>; about 3 points worse "
-     + "on the measured dispersion"],
+     GATEFAIL(d.tap_ug)
+       ? "switched + angular &mdash; <strong>does not keep its structure at "
+         + "temperature</strong> (last column), so not for MD"
+       : "switched + angular &mdash; <strong>MD</strong>; about 3 points worse "
+         + "on the measured dispersion"],
     /*  The re-cut ships under its own stem.  Where recommend_recut.py finds
         it passes every cold and warm screen it is the RECOMMENDED set for
         molecular dynamics; elsewhere it is a candidate, shipped so the
@@ -2807,6 +2953,24 @@ function lammpsBlock(d){
   if(!SETS.length) return "";
   const V = r => (r[1] && r[1].md_screen) || null;
   const bad = SETS.filter(r=>{const v=V(r); return v && v.collapsed;});
+  /*  the box-free structure gate, by the record's own result.  Hard-cut sets
+      are measured but carry no verdict: their pair energy is discontinuous,
+      so a quench can move a neighbour shell across the cut and report an
+      energy jump of electron-volts with the structure intact.  */
+  const gfail = SETS.filter(r=>GATEFAIL(r[1]));
+  const gcell = r => {
+    const g = r[1] && r[1].structure_gate;
+    if(!g) return ["not run", ""];
+    if(g.verdict === "na_hard") return ["&mdash; hard cut, not for dynamics", ""];
+    if(g.verdict === "crashed") return [`<strong>the run blew up</strong> at
+      ${g.T.toFixed(0)} K`, "bad"];
+    const pct = x => (100*x).toFixed(0);
+    if(g.verdict === "fail") return [`<strong>leaves ${g.struct}</strong> at
+      ${g.T.toFixed(0)} K: ${pct(g.frac_quench)}&nbsp;% left after a quench,
+      ${Math.abs(g.dE_quench_meV).toFixed(0)} meV/atom ${g.dE_quench_meV<0?"below":"above"}
+      the static lattice`, "bad"];
+    return [`keeps ${g.struct} at ${g.T.toFixed(0)} K`, ""];
+  };
   const rows = SETS.map(r=>{
     const v = V(r);
     let verdict, cls;
@@ -2818,8 +2982,10 @@ function lammpsBlock(d){
     else if(v.T > 400){ verdict = `suspect &mdash; runs at ${v.T} K where
       equipartition gives 300`; cls = "warn"; }
     else verdict = `holds its structure (${v.T} K)`;
-    return `<tr${cls?` class="${cls}"`:""}><td><code>${r[2]}</code></td>
-      <td><code>${r[3]}</code></td><td>${r[4]}</td><td>${verdict}</td></tr>`;
+    const [gv, gcls] = gcell(r);
+    return `<tr${(cls||gcls)?` class="${gcls==="bad"?"bad":cls}"`:""}><td><code>${r[2]}</code></td>
+      <td><code>${r[3]}</code></td><td>${r[4]}</td><td>${verdict}</td>
+      <td>${gv}</td></tr>`;
   }).join("");
   const rcnote = recutNote(d);
   const fnote = forceNote(d) + forceGateNote(d) + forceCoverageNote(d);
@@ -2835,8 +3001,21 @@ function lammpsBlock(d){
     The 0 K stability screen inside the fit cannot see this &mdash; it asks
     whether the reference structure is a harmonic minimum, not whether it
     survives thermal excitation.</div>`:""}
+  ${gfail.length?`<div class="warn" style="border-left-color:var(--bad)">
+    <strong>${gfail.length===1?"One":gfail.length} parameter set${gfail.length===1?"":"s"}
+    for ${d.name} that ${gfail.length===1?"is":"are"} meant for dynamics
+    ${gfail.length===1?"does":"do"} not keep the crystal structure at
+    temperature</strong> (${gfail.map(r=>`<code>${r[2]}</code>`).join(", ")}).
+    With the cell free to change shape the ${d.struct} lattice shears or
+    collapses within picoseconds into an arrangement below its own static
+    energy. The fixed-box screen in the column before cannot see this &mdash; a
+    shear of the lattice is a change of the box's shape, which that screen does
+    not allow &mdash; and neither can the 0 K stability check inside the fit.
+    Anything measured on such a run at temperature is a property of the other
+    structure.</div>`:""}
   <table class="tbl"><thead><tr><th>file</th><th>pair_style</th>
-    <th>parameters</th><th>molecular dynamics</th></tr></thead>
+    <th>parameters</th><th>molecular dynamics</th>
+    <th>box free, at temperature</th></tr></thead>
     <tbody>${rows}</tbody></table>
   ${rcnote}
   ${fnote}
@@ -2849,7 +3028,17 @@ function lammpsBlock(d){
   the 300 K equipartition requires, and the sign of the potential energy
   against the static lattice. It is not a drift measurement &mdash; reading a
   drift rate is how chromium was recorded as an integrator artefact while its
-  crystal was in fact coming apart.</p>`;
+  crystal was in fact coming apart.
+  <br><br>The last column is the <strong>structure gate</strong>, added in
+  October 2026 because the screen's box cannot change shape: 40&nbsp;ps under a
+  fully triclinic barostat at 300&nbsp;K (0.6 of the melting point for the
+  alkalis), then a quench with the cell free, and the fraction of atoms still
+  in the reference structure by common-neighbour analysis. A record fails if
+  under 90&nbsp;% remain or the quenched energy is more than 2&nbsp;meV/atom
+  below the static lattice. Over the library ${AGG.gate_tap_fail.length} of the
+  ${AGG.gate_tap_n} switched records fail
+  (${AGG.gate_tap_fail.join(", ")}), every one of them body-centred, and
+  ${AGG.gate_rc_pass} of the ${AGG.gate_rc_n} re-cut candidates pass.</p>`;
 }
 
 function ugBlock(d){
@@ -3755,9 +3944,9 @@ function render(){
         <code>${d.name}.ugur.ang</code>. The switched-cutoff sets
         (<code>${d.name}_taper.ugur</code>) carry no stored dispersion and are
         reachable only from the download table below. That distinction is not
-        cosmetic: measured against neutron and x-ray data over the 33 elements
-        that have it, the hard-truncated sets average 9.7&nbsp;% and the switched
-        ones 12.6&nbsp;%, and the hard one is closer in 25 of the 33. The switched
+        cosmetic: measured against neutron and x-ray data over the 34 elements
+        that have it, the hard-truncated sets average 9.9&nbsp;% and the switched
+        ones 12.8&nbsp;%, and the hard one is closer in 26 of the 34. The switched
         sets are what molecular dynamics has to use, because a hard cut leaves
         the pair energy discontinuous, and that is the arm any
         finite-temperature number quoted elsewhere belongs to.</p>
@@ -3798,19 +3987,22 @@ function render(){
         it &mdash; the symmetry points, or a handful the authors singled out
         &mdash; so there is no measured curve between them and none is drawn`)
         :d.exp_curve.digitised?`The diamonds along the branches are
-        <strong>${Object.values(d.exp_curve.segs).reduce(
-        (a,v)=>a+v.length,0)} points read from the published figure</strong>,
-        not a table &mdash; see below`
+        <strong>${nBranch(d.exp_curve)} points read from the published figure</strong>,
+        not a table &mdash; see below${nPoint(d.exp_curve)?`, and
+        ${nPoint(d.exp_curve)===1?"one frequency":nPoint(d.exp_curve)+" frequencies"}
+        measured at a symmetry point by other means is drawn wherever the path
+        passes that point`:""}`
         :`The circles along the branches are the <strong>whole measured
-        dispersion</strong>, ${Object.values(d.exp_curve.segs).reduce(
-        (a,v)=>a+v.length,0)} points with their quoted errors`}, at
+        dispersion</strong>, ${nBranch(d.exp_curve)} points with their quoted
+        errors${nPoint(d.exp_curve)?`, and ${nPoint(d.exp_curve)} frequencies
+        measured at the zone-boundary points`:""}`}, at
         <strong>${d.exp_curve.T_K} K</strong>. The temperature is
         part of the datum rather than a footnote: frequencies soften measurably
         with it${d.exp_curve.T_K<200?`, and this set is well below room
         temperature &mdash; the full dispersion of this element has not been
         measured at 300 K, which is why the density-functional literature
         compares against ${d.exp_curve.T_K} K as well`:""}.${d.exp_curve.points_only?""
-        :d.struct==="hcp"
+        :(d.struct==="hcp" && (d.exp_curve.segs["M|K"]||[]).some(r=>String(r[3]).includes("[")))
         ?` The [&zeta;&zeta;0] branch runs past K and on to M; the points
         beyond K belong on M&ndash;K and are drawn there, not folded back
         onto &Gamma;&ndash;K.`
@@ -3859,7 +4051,18 @@ function render(){
       <br>A reference need not sample the point a label names, so the labels
       sit at fractional positions between samples, and a curve can cross a
       &Gamma; line without having reached zero AT any sample there.
-      ${PAR_SET!=="mau"?`<br><b>"This potential only" follows the parameter
+      ${(()=>{const Q=parSet(d);
+        return (Q!==d && !(Q.ld && Q.ld.std)) ? `<br><b>No 0&nbsp;K dispersion is
+        stored for the ${(setsOf(d).find(o=>o[0]===PAR_SET)||[0,PAR_SET])[1]} record of
+        ${d.name}, so every curve here, and the thermodynamics beside it, is the
+        hard-cut MAU record's.</b> ${Q.dyn && Q.dyn.stable===false
+          ? `The selected record's own verdict is the warning above:
+            ${(100*(Q.dyn.imag_frac||0)).toFixed(1)}&nbsp;% of its modes are imaginary,
+            down to ${(Q.dyn.most_neg_cm1/CM1_PER_THZ).toFixed(2)}&nbsp;THz, which
+            these curves do not show.`
+          : `The selected record's stability screen finds no imaginary mode.`}`
+        : "";})()}
+      ${PAR_SET!=="mau" && (parSet(d).ld && parSet(d).ld.std)?`<br><b>"This potential only" follows the parameter
       set selected above; the DFT comparisons do not.</b> Their residual was
       computed by re-evaluating our dispersion at the reference's own
       q-points, and that was done for MAU alone &mdash; no such resampling
@@ -3876,7 +4079,7 @@ function render(){
         highest branch), top frequency
         ${(r[1].stats.ours_max/CM1_PER_THZ).toFixed(2)} vs
         ${((r[1].stats.mp_max||r[1].stats.ref_max)/CM1_PER_THZ).toFixed(2)}
-        THz.`).join("")}</p>
+        THz.`).join("")}${pubPhonons(cur,d)}</p>
     </div>
     <div>
       <h3>Phonon thermodynamics</h3>
@@ -4471,8 +4674,36 @@ function render(){
   measurement that failed are not the same statement.</p>
   `:""}
 
+  ${(d.tap&&d.tap.expansion&&d.tap.expansion.not_bcc)?(()=>{
+    /*  2026-10-01.  The cell edge of a crystal that has stopped being bcc
+        follows whatever it became - a Bain shear, a collapse to close
+        packing - so its slope is not a thermal expansion.  Five of the
+        nine "negative" records were this; ten more sat in the median.
+        The evidence is the record's own (lammps/expansion_structure.json).  */
+    const x=d.tap.expansion.not_bcc, u=(d.tap_ug||{}).expansion;
+    const uok=u&&u.ratio!==undefined&&!u.not_bcc&&!u.failed;
+    return `<h3>Thermal expansion</h3>
+  <p class="note"><strong style="color:var(--bad)">No coefficient: the switched
+  record does not stay body-centred cubic during its own expansion runs.</strong>
+  ${(x.bcc_end!==null&&x.bcc_end!==undefined)?`After 40&nbsp;ps of the same
+  zero-pressure protocol at ${x.T_check}&nbsp;K, ${x.bcc_end} of 432 atoms are
+  still in a bcc environment by common-neighbour analysis; the same check keeps
+  barium, sodium and tantalum at 420&ndash;432.`:""} ${x.jump_at_K
+  ?`At ${x.jump_at_K}&nbsp;K the cell edge jumps to`
+  :`At the lowest temperature of the grid the cell edge already sits`}
+  ${x.jump_pct>0?"+":"&minus;"}${Math.abs(x.jump_pct).toFixed(2)}&nbsp;% from the
+  static lattice, where a crystal that keeps its structure starts a few tenths
+  of a per cent above it and rises in a straight line. The slope is the slope of whatever the
+  crystal became, so it is not quoted, and it is left out of every statistic on
+  this page. The structure gate in the LAMMPS section below shows the same
+  record leaving bcc when the cell may also change shape.${uok?`
+  <br><br>The switched record <em>with</em> the angular term keeps its
+  structure through the same runs: &alpha;&nbsp;=&nbsp;${u.alpha_1e6.toFixed(1)}&nbsp;&times;10<sup>&minus;6</sup>/K,
+  &times;${u.ratio.toFixed(2)} of experiment.${u.held_cubic?` One caveat:
+  ${u.held_cubic}.`:""}`:""}</p>`;})():""}
+
   ${(d.tap&&d.tap.expansion&&d.tap.expansion.alpha_1e6!==undefined
-     &&!d.tap.expansion.failed)?`
+     &&!d.tap.expansion.failed&&!d.tap.expansion.not_bcc)?`
   <h3>Thermal expansion</h3>
   <p class="note">This is the one test on the page that stays <em>inside</em>
   the regime the form describes. The vacancy, the surface, the ground state and
@@ -4504,7 +4735,7 @@ function render(){
   <canvas id="expan"></canvas>
   <p class="plotnote">
     ${armKey(armRecs(d,r=>r.expansion&&r.expansion.T&&
-                             r.expansion.T.length>1))}
+                             r.expansion.T.length>1&&!r.expansion.not_bcc))}
     ${Object.keys(d.baseline_expansion||{}).length?`&nbsp;&middot;&nbsp;
       published potentials in thin grey`:""}
     ${d.tap.expansion.alpha_exp_1e6?`&nbsp;&middot;&nbsp;
@@ -4547,19 +4778,25 @@ function render(){
       ? ` For ${d.name}, ${b.length} published potential${b.length>1?"s go":
           " goes"} through the identical barostat and land${b.length>1?"":"s"}
           at ${Math.min(...b).toFixed(2)}&ndash;${Math.max(...b).toFixed(2)} of
-          experiment; across the library their median is 0.96 against our
-          0.68.` : "";
+          experiment; across the library their median is
+          ${AGG.x_base_median.toFixed(2)} against our ${AGG.x_median.toFixed(2)}.` : "";
     if(a<0) return `<p class="note"><strong style="color:var(--bad)">This
       record contracts on heating.</strong> A negative expansion coefficient
       for a simple metal is not a small error, and it is not a subtlety of the
-      barostat: nine of our 74 records come back negative and <em>none</em> of
-      the 51 published potentials does. All nine are body-centred.${scale}
+      barostat: ${AGG.x_neg.length} of our ${AGG.x_n} records come back negative
+      (${AGG.x_neg.map(k=>k.replace("|tap_ug"," + angular").replace("|tap","")).join(", ")})
+      and <em>none</em> of the ${AGG.x_base_n} published potentials does. All of
+      them are body-centred. That count leaves out ${AGG.x_notbcc.length} more
+      records whose crystals left bcc during these same runs &mdash; until
+      October 2026 they were counted, and five of them were &ldquo;negative&rdquo;
+      only because the cell had collapsed.${scale}
       Thermal expansion is the third derivative of the same energy curve whose
       second derivative was fitted, so nothing constrains it &mdash; getting
       the curvature right at one volume says nothing about how it changes with
       volume.</p>`;
-    return `<p class="note">The library sits at a median 0.68 of the measured
-      coefficient, systematically low.${scale} That is a milder failure than
+    return `<p class="note">The library sits at a median
+      ${AGG.x_median.toFixed(2)} of the measured coefficient, over the
+      ${AGG.x_n} records that keep their structure, systematically low.${scale} That is a milder failure than
       the coordination tests above and it has a different cause: the expansion
       is the third derivative of the same energy curve whose second derivative
       was fitted, and nothing in the fit constrains it.</p>`;})()}
@@ -4967,9 +5204,8 @@ FAILED = [e for e in ATTEMPTED if e not in DATA]
 #  computed here from library.json, never typed into the template.  The page
 #  has been wrong twice in exactly that way - a legend saying fourteen while
 #  the data held thirty-eight - and a count in a template literal cannot be
-#  tested.  The reductions are the same ones the manuscript makes, quantity by
-#  quantity, so that a reader who has both in front of them is not made to
-#  wonder which is right.
+#  tested.  Each reduction is made once, here, quantity by quantity, so that
+#  every place that quotes it agrees with every other.
 def _med(xs):
     xs = sorted(x for x in xs if x is not None)
     return statistics.median(xs) if xs else None
@@ -5033,6 +5269,44 @@ AGG.update(
     g_always_neg=sorted(e for e, v in _G.items()
                         if v.get("gamma_windows")
                         and max(v["gamma_windows"].values()) < 0),
+)
+
+#  thermal expansion: the two switched arms the NPT sweep measured, WITHOUT
+#  the records whose crystals left their structure during those very runs
+#  (lammps/expansion_structure.json, 2026-10-01).  Typed into the template
+#  these were "nine of our 74" and "0.68"; five of the nine were collapses.
+_X = [(e, t, r["expansion"]) for e, v in DATA.items() if isinstance(v, dict)
+      for t, r in v.items() if t in ("tap", "tap_ug") and isinstance(r, dict)
+      and isinstance(r.get("expansion"), dict)
+      and r["expansion"].get("ratio") is not None]
+_Xok = [(e, t, x) for e, t, x in _X if not x.get("not_bcc")]
+_Xb = [x["ratio"] for v in DATA.values() if isinstance(v, dict)
+       for x in (v.get("baseline_expansion") or {}).values()
+       if isinstance(x, dict) and x.get("ratio")]
+AGG.update(
+    x_n=len(_Xok), x_median=_med(x["ratio"] for _, _, x in _Xok),
+    x_neg=sorted(f"{e}|{t}" for e, t, x in _Xok if x["ratio"] < 0),
+    x_neg_els=sorted({e for e, t, x in _Xok if x["ratio"] < 0}),
+    x_notbcc=sorted(f"{e}|{t}" for e, t, x in _X if x.get("not_bcc")),
+    x_base_n=len(_Xb), x_base_median=_med(_Xb),
+)
+
+#  the box-free structure gate (add_gate.py): which switched records leave
+#  their structure at temperature, and how the re-cut arm fares on the same test
+def _gate(arm):
+    out = {}
+    for e, v in DATA.items():
+        r = v if arm is None else (v.get(arm) if isinstance(v, dict) else None)
+        if isinstance(r, dict) and isinstance(r.get("structure_gate"), dict):
+            out[e] = r["structure_gate"]["verdict"]
+    return out
+
+
+_gt, _grc = _gate("tap"), _gate("rc")
+AGG.update(
+    gate_tap_n=len(_gt),
+    gate_tap_fail=sorted(e for e, v in _gt.items() if v in ("fail", "crashed")),
+    gate_rc_n=len(_grc), gate_rc_pass=sum(v == "pass" for v in _grc.values()),
 )
 
 #  dC_ij/dT: model_P is the comparable one, and a ratio is only meaningful

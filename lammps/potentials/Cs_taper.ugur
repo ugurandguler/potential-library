@@ -3,8 +3,10 @@
 # pair_style ugur
 # pair_coeff * * Cs_taper.ugur Cs
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift within noise for copper (0.002 meV/atom/ns against 176 for its hard twin).  USE for molecular dynamics, which no hard set can do.  It pays for that on the dispersion: the switched sets average 12.6 % against the hard sets' 9.7 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD: measured drift within noise for copper (0.002 meV/atom/ns against 176 for its hard twin).  BUT THIS RECORD IS NOT FIT FOR MD AT TEMPERATURE: it leaves bcc once the cell may change shape and its C' turns negative by 0.05 T_melt (see the MD lines below).  It pays for that on the dispersion: the switched sets average 12.8 % against the hard sets' 9.9 %, because switching the pair term off over the outer 15 % moves the force constants at the largest separations, which is the short-wavelength end, and nothing in the fit sees it
 # MD: structure screened - holds its shape at 600 K (316 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+# MD AT TEMPERATURE: DO NOT USE.  With the cell free to change shape (40 ps at 181 K, then a quench) the crystal leaves bcc: 0 % of the atoms keep it, 28 meV/atom below the static lattice (structure gate, lammps/gate/).  The 600 K screen holds the box shape fixed and cannot see this.
+# MD AT TEMPERATURE: C' = (C11 - C12)/2 of the finite-temperature elastic constants turns negative by 0.05 T_melt (lammps/elastic_T.py): the crystal loses its shear stiffness when warm.
 #
 # LATTICE STABILITY: this set is NOT a harmonic minimum.
 # Along the Setyawan-Curtarolo path its frequencies reach -1.541 cm^-1,

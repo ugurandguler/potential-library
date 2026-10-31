@@ -5,6 +5,7 @@
 #
 # Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2.  NOT FIT FOR MOLECULAR DYNAMICS: squeezed uniformly, this record's energy falls without a barrier (fit.py's compression test, barrier below k_B T_melt), and its re-cut fails the warm screens, so no Li record in this library is recommended for MD.  Static and harmonic properties only
 # MD: DO NOT USE.  At 600 K this structure disintegrates - 432 atoms become 13 and LAMMPS stops.
+# MD AT TEMPERATURE: DO NOT USE.  With the cell free to change shape the run blew up at 272 K (structure gate, lammps/gate/).
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the
 # symmetry path; no imaginary modes.

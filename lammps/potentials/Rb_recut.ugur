@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Rb_recut.ugur Rb
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 16 K to 281 K (x2.437).  For MD on this element use Rb_taper.ugur
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 16 K to 281 K (x2.437).  No Rb record in this library is fit for MD at temperature: Rb_taper.ugur leaves bcc once the cell may change shape and its C' turns negative by 0.05 T_melt
 # MD: structure screened - holds its shape at 600 K (333 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

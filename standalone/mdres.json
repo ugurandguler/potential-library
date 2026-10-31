@@ -28,17 +28,29 @@
   "steps": 6500000
  },
  "Ba": {
+  "box": "nvt",
   "el": "Ba",
   "how": {},
-  "mae": 0.1779,
+  "mae": 0.1919,
   "mesh": "8x8x8",
   "n": 73,
-  "near_pct": 5.34,
+  "near_pct": 5.98,
+  "npt_2026_08": {
+   "how": {},
+   "mae": 0.1779,
+   "n": 73,
+   "near_pct": 5.34,
+   "nu_max": 2.3,
+   "pct": 7.74,
+   "sc": 0.0083,
+   "sc_max": 0.032,
+   "sc_pct": 0.36
+  },
   "nu_max": 2.3,
-  "pct": 7.74,
-  "sc": 0.0083,
-  "sc_max": 0.032,
-  "sc_pct": 0.36,
+  "pct": 8.35,
+  "sc": 0.0105,
+  "sc_max": 0.0322,
+  "sc_pct": 0.45,
   "steps": 6500000
  },
  "Ca": {
@@ -67,7 +79,8 @@
   "sc": 0.0086,
   "sc_max": 0.0294,
   "sc_pct": 0.81,
-  "steps": 13000000
+  "steps": 13000000,
+  "withdrawn": "not bcc at the run temperature (structure gate, 2026-09-30)"
  },
  "Cu": {
   "el": "Cu",
@@ -95,23 +108,39 @@
   "sc": 0.2174,
   "sc_max": 0.8953,
   "sc_pct": 2.35,
-  "steps": 6500000
+  "steps": 6500000,
+  "withdrawn": "not bcc at the run temperature (structure gate, 2026-09-30)"
  },
  "Hf": {
+  "box": "nvt",
   "el": "Hf",
   "how": {
    "label": 93,
    "nearest": 8
   },
-  "mae": 0.7543,
+  "mae": 0.8581,
   "mesh": "21x21x21",
   "n": 101,
-  "near_pct": 5.42,
+  "near_pct": 5.65,
+  "npt_2026_08": {
+   "how": {
+    "label": 93,
+    "nearest": 8
+   },
+   "mae": 0.7543,
+   "n": 101,
+   "near_pct": 5.42,
+   "nu_max": 4.27,
+   "pct": 17.67,
+   "sc": 0.2009,
+   "sc_max": 0.6729,
+   "sc_pct": 4.71
+  },
   "nu_max": 4.27,
-  "pct": 17.67,
-  "sc": 0.2009,
-  "sc_max": 0.6729,
-  "sc_pct": 4.71,
+  "pct": 20.1,
+  "sc": 0.0672,
+  "sc_max": 0.2045,
+  "sc_pct": 1.57,
   "steps": 6500000
  },
  "Ir": {
@@ -129,51 +158,93 @@
   "steps": 6500000
  },
  "Lu": {
+  "box": "nvt",
   "el": "Lu",
   "how": {
    "label": 115,
    "nearest": 8
   },
-  "mae": 0.4253,
+  "mae": 0.4856,
   "mesh": "21x21x21",
   "n": 123,
-  "near_pct": 6.28,
+  "near_pct": 7.09,
+  "npt_2026_08": {
+   "how": {
+    "label": 115,
+    "nearest": 8
+   },
+   "mae": 0.4253,
+   "n": 123,
+   "near_pct": 6.28,
+   "nu_max": 3.67,
+   "pct": 11.59,
+   "sc": 0.1545,
+   "sc_max": 0.5025,
+   "sc_pct": 4.21
+  },
   "nu_max": 3.67,
-  "pct": 11.59,
-  "sc": 0.1545,
-  "sc_max": 0.5025,
-  "sc_pct": 4.21,
+  "pct": 13.23,
+  "sc": 0.0499,
+  "sc_max": 0.387,
+  "sc_pct": 1.36,
   "steps": 6500000
  },
  "Mg": {
+  "box": "nvt",
   "el": "Mg",
   "how": {
    "label": 60,
    "nearest": 16
   },
-  "mae": 0.4214,
+  "mae": 0.5312,
   "mesh": "21x21x21",
   "n": 76,
-  "near_pct": 4.8,
+  "near_pct": 5.96,
+  "npt_2026_08": {
+   "how": {
+    "label": 60,
+    "nearest": 16
+   },
+   "mae": 0.4214,
+   "n": 76,
+   "near_pct": 4.8,
+   "nu_max": 7.34,
+   "pct": 5.74,
+   "sc": 0.2293,
+   "sc_max": 0.7601,
+   "sc_pct": 3.12
+  },
   "nu_max": 7.34,
-  "pct": 5.74,
-  "sc": 0.2293,
-  "sc_max": 0.7601,
-  "sc_pct": 3.12,
+  "pct": 7.24,
+  "sc": 0.019,
+  "sc_max": 0.0767,
+  "sc_pct": 0.26,
   "steps": 6500000
  },
  "Na": {
+  "box": "nvt",
   "el": "Na",
   "how": {},
-  "mae": 0.451,
+  "mae": 0.5035,
   "mesh": "8x8x8",
   "n": 141,
-  "near_pct": 8.36,
+  "near_pct": 9.18,
+  "npt_2026_08": {
+   "how": {},
+   "mae": 0.451,
+   "n": 141,
+   "near_pct": 8.36,
+   "nu_max": 3.82,
+   "pct": 11.81,
+   "sc": 0.0207,
+   "sc_max": 0.0746,
+   "sc_pct": 0.54
+  },
   "nu_max": 3.82,
-  "pct": 11.81,
-  "sc": 0.0207,
-  "sc_max": 0.0746,
-  "sc_pct": 0.54,
+  "pct": 13.18,
+  "sc": 0.0183,
+  "sc_max": 0.0736,
+  "sc_pct": 0.48,
   "steps": 6500000
  },
  "Nb": {
@@ -188,7 +259,8 @@
   "sc": 0.1029,
   "sc_max": 0.3178,
   "sc_pct": 1.59,
-  "steps": 6500000
+  "steps": 6500000,
+  "withdrawn": "not bcc at the run temperature (structure gate, 2026-09-30)"
  },
  "Ni": {
   "el": "Ni",
@@ -244,7 +316,8 @@
   "sc": 0.0415,
   "sc_max": 0.2326,
   "sc_pct": 2.82,
-  "steps": 6500000
+  "steps": 6500000,
+  "withdrawn": "not bcc at the run temperature (structure gate, 2026-09-30)"
  },
  "Re": {
   "el": "Re",
@@ -262,84 +335,155 @@
   "steps": 6500000
  },
  "Ru": {
+  "box": "nvt",
   "el": "Ru",
   "how": {
    "nearest": 283
   },
-  "mae": 0.6665,
+  "mae": 0.6885,
   "mesh": "21x21x21",
   "n": 283,
-  "near_pct": 8.4,
+  "near_pct": 8.68,
+  "npt_2026_08": {
+   "how": {
+    "nearest": 283
+   },
+   "mae": 0.6665,
+   "n": 283,
+   "near_pct": 8.4,
+   "nu_max": 7.931,
+   "pct": 8.4,
+   "sc": 0.2296,
+   "sc_max": 2.6058,
+   "sc_pct": 2.9
+  },
   "nu_max": 7.931,
-  "pct": 8.4,
-  "sc": 0.2296,
-  "sc_max": 2.6058,
-  "sc_pct": 2.9,
+  "pct": 8.68,
+  "sc": 0.1122,
+  "sc_max": 1.9611,
+  "sc_pct": 1.42,
   "steps": 6500000
  },
  "Sc": {
+  "box": "nvt",
   "el": "Sc",
   "how": {
-   "label": 125,
-   "nearest": 7
+   "label": 126,
+   "nearest": 6
   },
-  "mae": 0.7802,
+  "mae": 0.9578,
   "mesh": "21x21x21",
   "n": 132,
-  "near_pct": 7.17,
+  "near_pct": 9.54,
+  "npt_2026_08": {
+   "how": {
+    "label": 125,
+    "nearest": 7
+   },
+   "mae": 0.7802,
+   "n": 132,
+   "near_pct": 7.17,
+   "nu_max": 6.91,
+   "pct": 11.29,
+   "sc": 0.4607,
+   "sc_max": 8.8365,
+   "sc_pct": 6.67
+  },
   "nu_max": 6.91,
-  "pct": 11.29,
-  "sc": 0.4607,
-  "sc_max": 8.8365,
-  "sc_pct": 6.67,
+  "pct": 13.86,
+  "sc": 0.0348,
+  "sc_max": 0.1655,
+  "sc_pct": 0.5,
   "steps": 6500000
  },
  "Ta": {
+  "box": "nvt",
   "el": "Ta",
   "how": {},
-  "mae": 0.6471,
+  "mae": 0.7276,
   "mesh": "8x8x8",
   "n": 58,
-  "near_pct": 9.46,
+  "near_pct": 9.74,
+  "npt_2026_08": {
+   "how": {},
+   "mae": 0.6471,
+   "n": 58,
+   "near_pct": 9.46,
+   "nu_max": 5.03,
+   "pct": 12.87,
+   "sc": 0.0325,
+   "sc_max": 0.1269,
+   "sc_pct": 0.65
+  },
   "nu_max": 5.03,
-  "pct": 12.87,
-  "sc": 0.0325,
-  "sc_max": 0.1269,
-  "sc_pct": 0.65,
+  "pct": 14.46,
+  "sc": 0.0393,
+  "sc_max": 0.1731,
+  "sc_pct": 0.78,
   "steps": 6500000
  },
  "Ti": {
+  "box": "nvt",
   "el": "Ti",
   "how": {
    "label": 77,
    "nearest": 2
   },
-  "mae": 1.2711,
+  "mae": 1.4414,
   "mesh": "21x21x21",
   "n": 79,
-  "near_pct": 5.14,
+  "near_pct": 5.94,
+  "npt_2026_08": {
+   "how": {
+    "label": 77,
+    "nearest": 2
+   },
+   "mae": 1.2711,
+   "n": 79,
+   "near_pct": 5.14,
+   "nu_max": 7.69,
+   "pct": 16.53,
+   "sc": 0.3034,
+   "sc_max": 1.14,
+   "sc_pct": 3.95
+  },
   "nu_max": 7.69,
-  "pct": 16.53,
-  "sc": 0.3034,
-  "sc_max": 1.14,
-  "sc_pct": 3.95,
+  "pct": 18.74,
+  "sc": 0.0802,
+  "sc_max": 0.2388,
+  "sc_pct": 1.04,
   "steps": 6500000
  },
  "Tl": {
+  "box": "nvt",
   "el": "Tl",
   "how": {
    "label": 45,
    "nearest": 2
   },
-  "mae": 0.1494,
+  "mae": 0.1256,
   "mesh": "10x10x10",
   "n": 47,
-  "near_pct": 4.24,
+  "near_pct": 2.84,
+  "npt_2026_08": {
+   "how": {
+    "label": 45,
+    "nearest": 2
+   },
+   "mae": 0.1494,
+   "n": 47,
+   "near_pct": 4.24,
+   "nu_max": 2.84,
+   "pct": 5.26,
+   "sc": 0.0967,
+   "sc_max": 0.2682,
+   "sc_pct": 3.4
+  },
   "nu_max": 2.84,
-  "pct": 5.26,
-  "sc": 0.0967,
-  "sc_max": 0.2682,
-  "sc_pct": 3.4,
+  "pct": 4.42,
+  "sc": 0.0488,
+  "sc_max": 0.1134,
+  "sc_pct": 1.72,
   "steps": 6500000
  },
  "W": {
@@ -354,23 +498,39 @@
   "sc": 0.1717,
   "sc_max": 0.4181,
   "sc_pct": 2.54,
-  "steps": 6500000
+  "steps": 6500000,
+  "withdrawn": "not bcc at the run temperature (structure gate, 2026-09-30)"
  },
  "Y": {
+  "box": "nvt",
   "el": "Y",
   "how": {
    "label": 86,
    "nearest": 5
   },
-  "mae": 0.6338,
+  "mae": 0.891,
   "mesh": "21x21x21",
   "n": 91,
-  "near_pct": 8.34,
+  "near_pct": 10.83,
+  "npt_2026_08": {
+   "how": {
+    "label": 86,
+    "nearest": 5
+   },
+   "mae": 0.6338,
+   "n": 91,
+   "near_pct": 8.34,
+   "nu_max": 4.65,
+   "pct": 13.63,
+   "sc": 0.1949,
+   "sc_max": 0.6196,
+   "sc_pct": 4.19
+  },
   "nu_max": 4.65,
-  "pct": 13.63,
-  "sc": 0.1949,
-  "sc_max": 0.6196,
-  "sc_pct": 4.19,
+  "pct": 19.16,
+  "sc": 0.0691,
+  "sc_max": 2.3376,
+  "sc_pct": 1.49,
   "steps": 6500000
  },
  "Yb": {
@@ -388,21 +548,37 @@
   "steps": 6500000
  },
  "Zr": {
+  "box": "nvt",
   "el": "Zr",
   "how": {
-   "pair": 24,
    "label": 32,
-   "nearest": 5
+   "nearest": 5,
+   "pair": 24
   },
-  "mae": 0.517,
+  "mae": 0.6749,
   "mesh": "10x10x10",
   "n": 61,
-  "near_pct": 5.77,
+  "near_pct": 6.71,
+  "npt_2026_08": {
+   "how": {
+    "label": 32,
+    "nearest": 5,
+    "pair": 24
+   },
+   "mae": 0.517,
+   "n": 61,
+   "near_pct": 5.77,
+   "nu_max": 5.6291,
+   "pct": 9.18,
+   "sc": 0.2944,
+   "sc_max": 0.9205,
+   "sc_pct": 5.23
+  },
   "nu_max": 5.6291,
-  "pct": 9.18,
-  "sc": 0.2944,
-  "sc_max": 0.9205,
-  "sc_pct": 5.23,
+  "pct": 11.99,
+  "sc": 0.0614,
+  "sc_max": 0.1582,
+  "sc_pct": 1.09,
   "steps": 6500000
  }
 }

@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Mo_recut.ugur Mo
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: imaginary modes on the mesh or path; the fitted structure is not its ground state.  For MD on this element use Mo_taper.ugur
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: imaginary modes on the mesh or path; the fitted structure is not its ground state.  No Mo record in this library is fit for MD at temperature: Mo_taper.ugur leaves bcc once the cell may change shape and its C' turns negative by 0.06 T_melt
 # MD: structure screened - holds its shape at 600 K (304 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # LATTICE STABILITY: this set is NOT a harmonic minimum.

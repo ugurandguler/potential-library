@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Cs_recut.ugur Cs
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 15 K to 271 K (x2.457); 300 K elastic error 79.7 % against 65.4 % for the switched set.  For MD on this element use Cs_taper.ugur
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not the recommended set: thermal expansion -37e-6/K, negative; C11 stiffens from 15 K to 271 K (x2.457); 300 K elastic error 79.7 % against 65.4 % for the switched set.  No Cs record in this library is fit for MD at temperature: Cs_taper.ugur leaves bcc once the cell may change shape and its C' turns negative by 0.05 T_melt
 # MD: structure screened - holds its shape at 600 K (324 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

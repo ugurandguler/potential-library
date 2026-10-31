@@ -58,6 +58,13 @@ Which one to use
 ----------------
 For molecular dynamics, use a *_taper set - or, for the 15 elements
 named above, <El>_recut.ugur, which is recommended there instead.
+For 8 elements no record is fit for MD at temperature: Cr, Cs, Fe, Li, Mo, Nb, Rb, V.
+Each one's switched set fails the 600 K run or, once warm, leaves its
+structure when the cell may change shape or loses its shear stiffness;
+its header says which.  Use those records for static and harmonic
+properties only.
+For K and W both MAU records fail the same way, but the angular
+switched record, <El>_taper.ugur.ang, passes every screen and is the set to use.
 
 The hard-truncated potentials do not conserve energy: phi2 does not vanish at
 the cutoff, so a neighbour crossing it changes the energy in one step.

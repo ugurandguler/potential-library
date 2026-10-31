@@ -68,6 +68,9 @@ The order is not arbitrary:
                   than computing anything, and each skips if that file is not
                   in this checkout
                   (Kittel Table 2), which the thermodynamics note subtracts
+  add_gate        the box-free structure gate: does each record keep its
+                  crystal structure at temperature when the barostat may shear
+                  the cell?  Reads lammps/gate/gate.json; optional
   add_plane_d     the (1 -1 0) polar section.  The three coordinate planes
                   contain no member of <111>, which for a cubic crystal is
                   where the extremum sits
@@ -155,6 +158,13 @@ CHAIN = [
     ("add_eos.py", "the equation-of-state scan and B'", True),
     ("add_gruneisen.py", "the Grueneisen parameter and its window scan", True),
     ("add_tempcoef.py", "measured dC_ij/dT beside the sweep's own", True),
+    #  the box-free structure gate (2026-10-01): reads lammps/gate/gate.json,
+    #  a cluster result, so it is optional like the four above.  It must come
+    #  after every step that creates an arm record, since it writes into them.
+    ("add_gate.py", "the box-free structure gate", True),
+    #  the published-potential phonon scores (2026-10-31): reads
+    #  curve_mae_published.json, made from a LAMMPS run, so optional too
+    ("add_published_phonons.py", "the library against published potentials on phonons", True),
     ("make_gui.py", "potential.html", False),
 ]
 
@@ -230,7 +240,13 @@ def would_lose(path):
             "rcut3", "reach", "rms", "s3", "struct", "theta_D_exp", "ug",
             #  fetched overlays: build_library keeps `mp`, and the chain's
             #  own steps re-fetch or rewrite these three
-            "mp", "jarvis", "mc3d", "min_cm1", "stable", "fc_check"}
+            "mp", "jarvis", "mc3d", "min_cm1", "stable", "fc_check",
+            #  re-measured 2026-10-01 the same way (clone, no library.json,
+            #  refresh.py): the four out-of-fit steps, the electronic heat
+            #  capacity and the structure gate write these, and leaving them
+            #  out made the guard report them as losses it cannot restore
+            "eos", "gamma_e", "gruneisen", "interstitial", "tempcoef",
+            "structure_gate"}
     lost = {}
     for el, d in lib.items():
         if not isinstance(d, dict):

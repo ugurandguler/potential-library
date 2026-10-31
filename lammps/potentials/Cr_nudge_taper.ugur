@@ -4,7 +4,7 @@
 # pair_coeff * * Cr_nudge_taper.ugur Cr
 #
 # Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  CANDIDATE, not part of the published library.  This is the best solution in the same pool as the shipped switched record that survives a 1e-5 A displacement, which the shipped one does not; it costs elastic accuracy to get there and the page carries both errors side by side.  Read them before using this
-# MD: structure screened - holds its shape at 600 K (304 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
+# MD: not screened.
 #
 # Nudge test: passed - displaced by 1e-5 A and relaxed, the lattice returns.
 #
