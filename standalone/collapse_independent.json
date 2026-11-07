@@ -1,0 +1,48 @@
+{
+ "Ba|tap": {
+  "open_collapse": {
+   "diamond": -19.62
+  }
+ },
+ "Ba|tap_ug": {
+  "open_collapse": {
+   "diamond": -5.67
+  }
+ },
+ "Cr|tap_ug": {
+  "vacancy_cell_free": -85.42,
+  "vacancy_direct": {
+   "E_V": -345.3,
+   "bcc_fraction": 0.02,
+   "median_coordination": 11
+  }
+ },
+ "Li|tap": {
+  "open_collapse": {
+   "A15": -338.53,
+   "diamond": -46.67,
+   "sc": -141.27
+  }
+ },
+ "Li|tap_ug": {
+  "open_collapse": {
+   "diamond": -23.61,
+   "sc": -196.8
+  }
+ },
+ "Na|tap": {
+  "open_collapse": {
+   "sc": -2.14
+  }
+ },
+ "V|tap_force": {
+  "perfect_cell_free": {
+   "bcc_fraction": 0.25,
+   "dE_per_atom": -0.05452,
+   "dV": -0.0546
+  }
+ },
+ "_resolved": "The community vacancy test did not complete for W force-matched and Li switched UG; the same calculation done directly (one-vacancy cell, atoms and cell relaxed together from a 1e-3 A rattle) gives 2.98 eV (fixed cell 3.13) and 1.02 eV (fixed cell 1.03) with the bcc crystal intact, so neither is a collapse and neither is listed. Cr switched UG and V force-matched were redone the same way: Cr's perfect crystal stays bcc, but with a vacancy and the cell free it turns close-packed (2 % of atoms keep the bcc first shell, median coordination 11) and E_V comes out at -345 eV (the community test, by another path, -85); V's perfect crystal itself leaves bcc once the cell may relax (75 % of atoms lose the bcc first shell, 5.5 % denser, 0.055 eV/atom lower), so its -52 eV is not a vacancy energy.",
+ "_source": "Independent tests, run 2026-11-01..03 on a separate implementation of the potential (a model driver written for this check, not part of this release) with community test code, switched and re-cut sets only (a hard cut makes the energy discontinuous). open_collapse: a prototype outside fcc/hcp/bcc/dhcp that relaxes, cell free, more than 0.5 eV/atom BELOW the fitted structure - energies no metal has; dE in eV/atom relative to the fitted structure. vacancy_cell_free: the vacancy test, which relaxes the cell as well, where it returns a negative energy (eV) or does not complete. The library's own vacancy energies are at fixed cell (lammps/vacancy.py) and are not these.",
+ "_threshold_eV": 0.5
+}

@@ -12,18 +12,18 @@ Nothing is carried over except the fetched MP reference data, which is a
 property of the element and not of the fit.
 
 **WHAT THIS DOES NOT REBUILD, and it is more than what it does.** The tree
-holds twenty-eight producers and this chain runs eleven.  The switched arms
+holds more producers than this chain runs.  The switched arms
 `tap` and `tap_ug` - the two the library actually recommends for molecular
 dynamics - the re-cut and force-matched arms, the elastic constants against
 temperature, the surface, stacking, ground-state and expansion measurements,
 the MD screen, the nudge test and every published-potential baseline come from
-the other seventeen, and most of those read cluster output that the published
+the others, and most of those read cluster output that the published
 tree does not carry.
 
 Since `build_library.py` builds its dictionary from scratch and keeps only
-`mp`, running this over a populated library DELETES all of that.  Measured:
-the published page is 7.0 MB and what this chain regenerates from `fit.json`
-alone is 3.2 MB.  So it now refuses when the library holds records it cannot
+`mp`, running this over a populated library DELETES all of that.  Measured
+2026-11-07: the published page is 10.5 MB and what this chain regenerates from
+`fit.json` alone is 3.5 MB.  So it now refuses when the library holds records it cannot
 put back, lists them, and needs `--force` to go ahead anyway.
 
 The order is not arbitrary:
@@ -51,12 +51,23 @@ The order is not arbitrary:
   add_phonon_curves the measured dispersion curves; add_bvk_curve the
                   reconstructed ones.  Both read refdata_phonon_curves.py and
                   need nothing fetched
+  refresh_mech    the Debye average over the real slowness surface on every
+                  mechanical record.  add_ug_overlay copies UG's mechanics as
+                  the angular runs stored them, with the old isotropic average;
+                  without this step a clean clone's UG Debye temperatures came
+                  out about 2 % high (found by the v1.4.7 clean-clone test)
   add_dynstab_ug  the same stability screen on the angular arm
   unify_stable    one meaning for `stable` on every record, mesh AND path -
                   AFTER the last stability screen, whose verdict it copies
   add_ld_tap      the switched arm's own 0 K dispersion, which the finite-T
                   panel draws its reference curve from; a clean clone has no
                   `tap` record and the step does nothing there
+  squeeze_probe --merge / compression.py --merge / add_independent_collapse
+                  (v1.4.7) the trimer squeeze, the compression basin and its
+                  entry pressure, and the collapses the independent ground-state
+                  and vacancy tests found.  Each folds a shipped result file into
+                  the records present; on a clean clone that is the root and UG
+                  records for the first two and nothing for the third
   recommend_recut which switched set to recommend for MD, per element, by a
                   rule over the warm and cold screens; needs `rc` and `tap`,
                   so it too does nothing on a clean clone
@@ -128,6 +139,7 @@ CHAIN = [
     ("add_exp_phonon.py", "measured phonon frequencies, out-of-sample", True),
     ("add_jarvis_overlay.py", "JARVIS-DFT comparison, conflicting entries flagged", True),
     ("add_ug_overlay.py", "UG (angular) results beside MAU, if any exist", True),
+    ("refresh_mech.py", "the Debye average over the slowness surface", False),
     ("add_reachability.py", "is this metal inside the form's reach", False),
     #  Everything below was added after 1.0.0 and was being run by hand, which
     #  meant this script stopped rebuilding what it says it rebuilds: a clean
@@ -147,6 +159,12 @@ CHAIN = [
     #  back to drawing no reference curve at all.
     ("unify_stable.py", "one meaning for stable: mesh AND path", False),
     ("add_ld_tap.py", "the switched arm's own 0 K dispersion", False),
+    #  v1.4.7: three result files folded into whichever records this checkout
+    #  has.  All three ship, so none is optional; the third writes nothing on
+    #  a clean clone, whose records carry no switched arm
+    ("squeeze_probe.py --merge", "the trimer squeeze (squeeze.json)", False),
+    ("compression.py --merge", "the compression basin and its entry pressure", False),
+    ("add_independent_collapse.py", "collapses found by independent tests", False),
     ("recommend_recut.py", "which switched set to recommend for MD", False),
     ("add_electronic.py", "electronic heat-capacity coefficients", False),
     #  the four quantities the fit was never shown.  Each reads a result file
@@ -211,8 +229,8 @@ def would_lose(path):
     `build_library.py` builds the dictionary from scratch on every run and
     carries over only `mp` from the previous one, because everything else is
     taken to be a property of the fit.  That was true as long as the chain
-    was the only place that produced everything.  Today the tree has
-    twenty-eight producers and the chain runs eleven of them; the rest need
+    was the only place that produced everything.  Today the tree has more
+    producers than the chain runs; the rest need
     cluster output, and that output is not in the published tree.  So the
     chain is no longer a rebuild but a PARTIAL rebuild, and for someone who
     does not know the difference it is a silent deletion.
@@ -224,7 +242,7 @@ def would_lose(path):
         lib = _json.load(open(path, encoding="utf-8"))
     except ValueError:
         return {}
-    #  top-level fields the chain writes (build_library + 11 steps)
+    #  top-level fields the chain writes (build_library and the steps after it)
     #  MEASURED, not guessed from reading the code: this is exactly the key
     #  set a from-scratch chain run produces, taken from one - the public tree
     #  cloned into an empty directory with no library.json, `refresh.py`, and
@@ -246,7 +264,9 @@ def would_lose(path):
             #  capacity and the structure gate write these, and leaving them
             #  out made the guard report them as losses it cannot restore
             "eos", "gamma_e", "gruneisen", "interstitial", "tempcoef",
-            "structure_gate"}
+            "structure_gate",
+            #  v1.4.7: the trimer squeeze, folded in from squeeze.json
+            "squeeze"}
     lost = {}
     for el, d in lib.items():
         if not isinstance(d, dict):
@@ -284,7 +304,8 @@ def main(merge_dirs, force=False):
         run("merge_fits.py", *merge_dirs)
     for i, (script, what, optional) in enumerate(CHAIN, 1):
         print(f"[{i}/{len(CHAIN)}] {script:20s} {what}")
-        run(script, optional=optional)
+        name, *args = script.split()
+        run(name, *args, optional=optional)
     page = os.path.join(HERE, "potential.html")
     print(f"\n{page}  ({os.path.getsize(page) / 1024:.0f} KB)")
 

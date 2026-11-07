@@ -62,7 +62,10 @@ def main():
         struct = refdata.ELEMENTS[el]["struct"]
         for name, rec in (("MAU", v), ("UG", v.get("ug")),
                           ("MAU re-cut", v.get("rc")),
-                          ("UG re-cut", v.get("rc_ug"))):
+                          ("UG re-cut", v.get("rc_ug")),
+                          ("switched MAU", v.get("tap")),
+                          ("switched UG", v.get("tap_ug")),
+                          ("force-matched", v.get("tap_force"))):
             if not isinstance(rec, dict) or not rec.get("mech_planes"):
                 continue
             if "d" in rec["mech_planes"]:

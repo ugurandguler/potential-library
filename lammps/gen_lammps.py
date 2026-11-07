@@ -4,7 +4,9 @@ Akgun & Ugur (PRB 51, 3458 (1995)) two-body model potential."""
 import math, os
 
 J_PER_EV = 1.602176634e-19
-OUT = r"C:\Users\Admin\Desktop\ugurpotential\lammps"
+#  this folder, wherever the repository was cloned (a fixed local path
+#  until v1.4.7)
+OUT = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(OUT, exist_ok=True)
 
 def jm(D29):

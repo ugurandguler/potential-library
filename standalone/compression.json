@@ -1,0 +1,615 @@
+{
+ "Ag|hard_disp": null,
+ "Ag|rc": null,
+ "Ag|rc_ug": {
+  "P_enter_GPa": 2801.3103893246016,
+  "barrier": 54.87054179236289,
+  "depth": -500.4489944689588,
+  "reachable": false,
+  "x": 0.5550000000000117
+ },
+ "Ag|tap": {
+  "P_enter_GPa": 4000.5711156283883,
+  "barrier": 74.70780658577118,
+  "depth": -432.2539587761897,
+  "reachable": false,
+  "x": 0.540000000000012
+ },
+ "Ag|tap_ug": {
+  "P_enter_GPa": 4001.148162348071,
+  "barrier": 74.71536740541022,
+  "depth": -431.70272079901434,
+  "reachable": false,
+  "x": 0.540000000000012
+ },
+ "Ag|ug": null,
+ "Al|rc_ug": null,
+ "Al|tap": {
+  "P_enter_GPa": 2867.416019566232,
+  "barrier": 45.995038448836176,
+  "depth": -1068.2452830176796,
+  "reachable": false,
+  "x": 0.5550000000000117
+ },
+ "Al|tap_ug": {
+  "P_enter_GPa": 1353.199956956471,
+  "barrier": 27.199468764209538,
+  "depth": -703.6910004450453,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Al|ug": null,
+ "Au|rc": null,
+ "Au|tap": {
+  "P_enter_GPa": 85307.42463112083,
+  "barrier": 717.1939016919611,
+  "depth": -63215991.70023419,
+  "reachable": false,
+  "x": 0.5650000000000115
+ },
+ "Au|tap_ug": null,
+ "Au|ug": null,
+ "Ba|rc": {
+  "P_enter_GPa": 1.8795715571830984,
+  "barrier": 0.21384859676209111,
+  "depth": -2.164325074152779,
+  "reachable": false,
+  "x": 0.7900000000000067
+ },
+ "Ba|rc_ug": {
+  "P_enter_GPa": 2.5936724095279917,
+  "barrier": 0.29272838127595047,
+  "depth": -11.237855854039626,
+  "reachable": false,
+  "x": 0.7700000000000071
+ },
+ "Ba|tap": {
+  "P_enter_GPa": 2.2412997571899926,
+  "barrier": 0.1700637227082018,
+  "depth": -211.8095380764253,
+  "reachable": false,
+  "x": 0.8300000000000058
+ },
+ "Ba|tap_ug": {
+  "P_enter_GPa": 1.5218232875889972,
+  "barrier": 0.10558800698758652,
+  "depth": -79.50807021709574,
+  "reachable": false,
+  "x": 0.8550000000000053
+ },
+ "Ba|ug": {
+  "P_enter_GPa": 3.698794547223796,
+  "barrier": 0.14396226994643246,
+  "depth": -10.843411135202079,
+  "reachable": false,
+  "x": 0.915000000000004
+ },
+ "Be|tap": {
+  "P_enter_GPa": 108.27940706461183,
+  "barrier": 1.0871202916442284,
+  "depth": -6.630454039708488,
+  "reachable": false,
+  "x": 0.7350000000000079
+ },
+ "Be|tap_ug": null,
+ "Be|ug": null,
+ "Ca|rc": null,
+ "Ca|rc_ug": null,
+ "Ca|tap": null,
+ "Ca|tap_ug": null,
+ "Ca|ug": null,
+ "Co|rc": null,
+ "Co|tap": null,
+ "Co|tap_ug": null,
+ "Co|ug": {
+  "P_enter_GPa": 85.41414623071927,
+  "barrier": 0.4925326715356686,
+  "depth": -6.899916532877885,
+  "reachable": false,
+  "x": 0.9200000000000039
+ },
+ "Cr|tap": null,
+ "Cr|tap_nudge": {
+  "P_enter_GPa": 82592.69834852984,
+  "barrier": 496.2169666223838,
+  "depth": -53511516835.85686,
+  "reachable": false,
+  "x": 0.6450000000000098
+ },
+ "Cr|tap_ug": null,
+ "Cr|ug": null,
+ "Cs|rc": null,
+ "Cs|rc_ug": null,
+ "Cs|tap": null,
+ "Cs|tap_ug": null,
+ "Cs|ug": null,
+ "Cu|hard_disp": {
+  "P_enter_GPa": 26920.30752367665,
+  "barrier": 142.36261629025284,
+  "depth": -879.8471590979814,
+  "reachable": false,
+  "x": 0.5250000000000123
+ },
+ "Cu|rc": null,
+ "Cu|rc_ug": {
+  "P_enter_GPa": 6571.50866500872,
+  "barrier": 75.48020841736218,
+  "depth": -966.306911340623,
+  "reachable": false,
+  "x": 0.5500000000000118
+ },
+ "Cu|tap": {
+  "P_enter_GPa": 12806.66575652758,
+  "barrier": 119.16930213013109,
+  "depth": -762.6377849014814,
+  "reachable": false,
+  "x": 0.5300000000000122
+ },
+ "Cu|tap_force": null,
+ "Cu|tap_ug": {
+  "P_enter_GPa": 9865.60286137928,
+  "barrier": 93.53254543152678,
+  "depth": -7166.189736327146,
+  "reachable": false,
+  "x": 0.5600000000000116
+ },
+ "Cu|ug": null,
+ "Fe|tap": {
+  "P_enter_GPa": 7488.793967597809,
+  "barrier": 71.2174936337992,
+  "depth": -41173.375778774425,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Fe|tap_nudge": {
+  "P_enter_GPa": 12000.688252794494,
+  "barrier": 97.5316038015403,
+  "depth": -772887.5621229463,
+  "reachable": false,
+  "x": 0.590000000000011
+ },
+ "Fe|tap_ug": {
+  "P_enter_GPa": 7485.462323402539,
+  "barrier": 71.20125846240185,
+  "depth": -40977.83437323806,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Fe|ug": null,
+ "Hf|tap": null,
+ "Hf|tap_ug": null,
+ "Hf|ug": null,
+ "Ir|rc": null,
+ "Ir|rc_ug": null,
+ "Ir|tap": null,
+ "Ir|tap_ug": null,
+ "Ir|ug": null,
+ "K|rc": null,
+ "K|rc_ug": null,
+ "K|tap": null,
+ "K|tap_ug": {
+  "P_enter_GPa": 41.706699371177855,
+  "barrier": 3.729061078161129,
+  "depth": -36.17311381881414,
+  "reachable": false,
+  "x": 0.5500000000000118
+ },
+ "K|ug": null,
+ "Li|rc": null,
+ "Li|rc_ug": null,
+ "Li|tap": {
+  "P_enter_GPa": 0.0,
+  "barrier": 0.0,
+  "depth": -433.9196636060017,
+  "reachable": true,
+  "x": 0.9200000000000039
+ },
+ "Li|tap_ug": {
+  "P_enter_GPa": 0.0,
+  "barrier": 0.0,
+  "depth": -396.0668453861348,
+  "reachable": true,
+  "x": 0.9200000000000039
+ },
+ "Li|ug": {
+  "P_enter_GPa": 0.9901443833536667,
+  "barrier": 0.01580123599999128,
+  "depth": -44.93996376032737,
+  "reachable": true,
+  "x": 0.915000000000004
+ },
+ "Lu|tap": {
+  "P_enter_GPa": 59.072615575585914,
+  "barrier": 2.6602529900187784,
+  "depth": -13.62216822221423,
+  "reachable": false,
+  "x": 0.6950000000000087
+ },
+ "Lu|tap_ug": null,
+ "Lu|ug": null,
+ "Mg|rc": {
+  "P_enter_GPa": 828.2039561603333,
+  "barrier": 19.234334799857308,
+  "depth": -4181.6742701228795,
+  "reachable": false,
+  "x": 0.5800000000000112
+ },
+ "Mg|rc_ug": null,
+ "Mg|tap": null,
+ "Mg|tap_ug": null,
+ "Mg|ug": {
+  "P_enter_GPa": 61.475378890486674,
+  "barrier": 0.83468117698886,
+  "depth": -1.0375768809417625,
+  "reachable": false,
+  "x": 0.8600000000000052
+ },
+ "Mo|rc": {
+  "P_enter_GPa": 15254.56638712187,
+  "barrier": 191.27452960100564,
+  "depth": -15538.498252785008,
+  "reachable": false,
+  "x": 0.5450000000000119
+ },
+ "Mo|rc_ug": {
+  "P_enter_GPa": 13106.56025221632,
+  "barrier": 172.445148831019,
+  "depth": -15527.595263802812,
+  "reachable": false,
+  "x": 0.5500000000000118
+ },
+ "Mo|tap": {
+  "P_enter_GPa": 56478.312210442455,
+  "barrier": 525.9675761385914,
+  "depth": -1467169.1623058,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Mo|tap_force": null,
+ "Mo|tap_nudge": {
+  "P_enter_GPa": 41386.7683013523,
+  "barrier": 422.34817146962746,
+  "depth": -682659.2189297724,
+  "reachable": false,
+  "x": 0.5750000000000113
+ },
+ "Mo|tap_ug": {
+  "P_enter_GPa": 45594.56306595292,
+  "barrier": 425.12189625455056,
+  "depth": -68763030.64496467,
+  "reachable": false,
+  "x": 0.590000000000011
+ },
+ "Mo|ug": {
+  "P_enter_GPa": 120785.9035340413,
+  "barrier": 1007.7116030280505,
+  "depth": -232967.4415845752,
+  "reachable": false,
+  "x": 0.5500000000000118
+ },
+ "Na|rc": null,
+ "Na|rc_ug": null,
+ "Na|tap": {
+  "P_enter_GPa": 2.2549739210904325,
+  "barrier": 0.09897644095616753,
+  "depth": -7.986227601848285,
+  "reachable": false,
+  "x": 0.8050000000000064
+ },
+ "Na|tap_ug": {
+  "P_enter_GPa": 1.3212493196449517,
+  "barrier": 0.060387116122725626,
+  "depth": -14.75164690192513,
+  "reachable": false,
+  "x": 0.825000000000006
+ },
+ "Na|ug": null,
+ "Nb|tap": {
+  "P_enter_GPa": 3870.63893435844,
+  "barrier": 92.24243795978751,
+  "depth": -4.2373907871367145,
+  "reachable": false,
+  "x": 0.5000000000000129
+ },
+ "Nb|tap_force": null,
+ "Nb|tap_nudge": {
+  "P_enter_GPa": 2369.1288771701593,
+  "barrier": 44.29566055874467,
+  "depth": -17896.353022439907,
+  "reachable": false,
+  "x": 0.6300000000000101
+ },
+ "Nb|tap_ug": {
+  "P_enter_GPa": 3855.467605935346,
+  "barrier": 91.71577146356796,
+  "depth": -37.21739721293069,
+  "reachable": false,
+  "x": 0.5050000000000128
+ },
+ "Nb|ug": {
+  "P_enter_GPa": 7735.292534065719,
+  "barrier": 100.81624954168326,
+  "depth": -4.097882972214239,
+  "reachable": false,
+  "x": 0.5000000000000129
+ },
+ "Ni|rc": null,
+ "Ni|rc_ug": {
+  "P_enter_GPa": 10647.340681291098,
+  "barrier": 104.65093202236407,
+  "depth": -289.45751208728166,
+  "reachable": false,
+  "x": 0.5200000000000125
+ },
+ "Ni|tap": null,
+ "Ni|tap_force": null,
+ "Ni|tap_ug": null,
+ "Ni|ug": null,
+ "Pb|hard_disp": {
+  "P_enter_GPa": 5945.549908664099,
+  "barrier": 133.71368618874212,
+  "depth": -570.0468163812448,
+  "reachable": false,
+  "x": 0.5250000000000123
+ },
+ "Pb|rc": null,
+ "Pb|rc_ug": {
+  "P_enter_GPa": 1605.071547981097,
+  "barrier": 52.80372902928321,
+  "depth": -1135.2647125261738,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Pb|tap": {
+  "P_enter_GPa": 19720.90619879203,
+  "barrier": 298.18462794241293,
+  "depth": -37106336.26933019,
+  "reachable": false,
+  "x": 0.5600000000000116
+ },
+ "Pb|tap_ug": {
+  "P_enter_GPa": 2177.015567724531,
+  "barrier": 69.42258921517838,
+  "depth": -381.0641002042853,
+  "reachable": false,
+  "x": 0.540000000000012
+ },
+ "Pb|ug": null,
+ "Pd|hard_disp": null,
+ "Pd|rc": null,
+ "Pd|rc_ug": {
+  "P_enter_GPa": 16095.267887727923,
+  "barrier": 208.73323869086278,
+  "depth": -183.5933809070705,
+  "reachable": false,
+  "x": 0.5100000000000127
+ },
+ "Pd|tap": {
+  "P_enter_GPa": 79991.46896758281,
+  "barrier": 623.7967079757093,
+  "depth": -248108.1173003639,
+  "reachable": false,
+  "x": 0.5450000000000119
+ },
+ "Pd|tap_ug": {
+  "P_enter_GPa": 11081.191766933476,
+  "barrier": 163.65588834133507,
+  "depth": -397.7470670875701,
+  "reachable": false,
+  "x": 0.5250000000000123
+ },
+ "Pd|ug": null,
+ "Pt|rc": null,
+ "Pt|rc_ug": null,
+ "Pt|tap": null,
+ "Pt|tap_ug": null,
+ "Pt|ug": null,
+ "Rb|rc": null,
+ "Rb|rc_ug": null,
+ "Rb|tap": null,
+ "Rb|tap_ug": null,
+ "Rb|ug": null,
+ "Re|rc": null,
+ "Re|tap": {
+  "P_enter_GPa": 10708.679634930397,
+  "barrier": 158.31379528484973,
+  "depth": -17396.58155896009,
+  "reachable": false,
+  "x": 0.5850000000000111
+ },
+ "Re|tap_ug": null,
+ "Re|ug": {
+  "P_enter_GPa": 370876.8802729019,
+  "barrier": 2145.1227381409244,
+  "depth": -18656133128256.438,
+  "reachable": false,
+  "x": 0.5600000000000116
+ },
+ "Rh|rc": null,
+ "Rh|rc_ug": null,
+ "Rh|tap": null,
+ "Rh|tap_ug": null,
+ "Rh|ug": null,
+ "Ru|tap": null,
+ "Ru|tap_ug": null,
+ "Ru|ug": null,
+ "Sc|tap": null,
+ "Sc|tap_ug": null,
+ "Sc|ug": null,
+ "Sr|rc": null,
+ "Sr|rc_ug": {
+  "P_enter_GPa": 351.85984482434463,
+  "barrier": 19.165815654793352,
+  "depth": -440.3629903209783,
+  "reachable": false,
+  "x": 0.5600000000000116
+ },
+ "Sr|tap": null,
+ "Sr|tap_ug": null,
+ "Sr|ug": {
+  "P_enter_GPa": 432.9837121417297,
+  "barrier": 22.92854308519918,
+  "depth": -19.64356005831561,
+  "reachable": false,
+  "x": 0.5050000000000128
+ },
+ "Ta|tap": {
+  "P_enter_GPa": 3010.6141534958233,
+  "barrier": 63.07712893130673,
+  "depth": -2025.7181736538778,
+  "reachable": false,
+  "x": 0.590000000000011
+ },
+ "Ta|tap_force": null,
+ "Ta|tap_ug": {
+  "P_enter_GPa": 3010.0596232741627,
+  "barrier": 63.070860043630645,
+  "depth": -2020.5092518028296,
+  "reachable": false,
+  "x": 0.590000000000011
+ },
+ "Ta|ug": {
+  "P_enter_GPa": 11265.146800582663,
+  "barrier": 163.30465009777913,
+  "depth": -18893.579716871744,
+  "reachable": false,
+  "x": 0.5750000000000113
+ },
+ "Ti|tap": {
+  "P_enter_GPa": 194801.35567922657,
+  "barrier": 1787.0050442618622,
+  "depth": -328558.69023251155,
+  "reachable": false,
+  "x": 0.5700000000000114
+ },
+ "Ti|tap_ug": null,
+ "Ti|ug": null,
+ "Tl|rc_ug": null,
+ "Tl|tap": null,
+ "Tl|tap_ug": {
+  "P_enter_GPa": 4219.627972723612,
+  "barrier": 109.26163886452018,
+  "depth": -219.6432153407501,
+  "reachable": false,
+  "x": 0.5200000000000125
+ },
+ "Tl|ug": null,
+ "V|tap": {
+  "P_enter_GPa": 4000.1950557671134,
+  "barrier": 58.79550145268425,
+  "depth": -2506.2129821315093,
+  "reachable": false,
+  "x": 0.5800000000000112
+ },
+ "V|tap_force": null,
+ "V|tap_ug": {
+  "P_enter_GPa": 4000.2132059165256,
+  "barrier": 58.795774810387854,
+  "depth": -2506.2009357607158,
+  "reachable": false,
+  "x": 0.5800000000000112
+ },
+ "V|ug": {
+  "P_enter_GPa": 4586.1067329638045,
+  "barrier": 65.38161664272157,
+  "depth": -314.50489143447777,
+  "reachable": false,
+  "x": 0.540000000000012
+ },
+ "W|rc": {
+  "P_enter_GPa": 7685.792965273642,
+  "barrier": 156.44591876470366,
+  "depth": -253.83408935611777,
+  "reachable": false,
+  "x": 0.5150000000000126
+ },
+ "W|rc_ug": {
+  "P_enter_GPa": 6176.694803101992,
+  "barrier": 131.1807476251094,
+  "depth": -559.1013318370866,
+  "reachable": false,
+  "x": 0.5250000000000123
+ },
+ "W|tap": {
+  "P_enter_GPa": 43860.67736649404,
+  "barrier": 439.6701811505807,
+  "depth": -4178811.7495022877,
+  "reachable": false,
+  "x": 0.5800000000000112
+ },
+ "W|tap_force": null,
+ "W|tap_nudge": {
+  "P_enter_GPa": 31212.225081089826,
+  "barrier": 314.9779334205579,
+  "depth": -40616886105.844406,
+  "reachable": false,
+  "x": 0.6650000000000094
+ },
+ "W|tap_ug": {
+  "P_enter_GPa": 50093.35071316499,
+  "barrier": 484.49326061374535,
+  "depth": -3808385.9687967557,
+  "reachable": false,
+  "x": 0.5800000000000112
+ },
+ "W|ug": null,
+ "Yb|rc": {
+  "P_enter_GPa": 12.064011549023515,
+  "barrier": 0.7929934153395772,
+  "depth": -2.55888182413272,
+  "reachable": false,
+  "x": 0.7000000000000086
+ },
+ "Yb|rc_ug": {
+  "P_enter_GPa": 14.60941656445139,
+  "barrier": 1.1143779944341128,
+  "depth": -0.8136622624578156,
+  "reachable": false,
+  "x": 0.6600000000000095
+ },
+ "Yb|tap": {
+  "P_enter_GPa": 3.052654958327757,
+  "barrier": 0.14860269042062257,
+  "depth": -317.36929898250526,
+  "reachable": false,
+  "x": 0.8400000000000056
+ },
+ "Yb|tap_ug": {
+  "P_enter_GPa": 6.762053918726761,
+  "barrier": 0.42712838422494337,
+  "depth": -5.1377807875779,
+  "reachable": false,
+  "x": 0.7600000000000073
+ },
+ "Yb|ug": {
+  "P_enter_GPa": 12.653095032271711,
+  "barrier": 0.402524188539481,
+  "depth": -62.962153248781995,
+  "reachable": false,
+  "x": 0.8650000000000051
+ },
+ "Y|tap": {
+  "P_enter_GPa": 39.82393717934672,
+  "barrier": 1.8492718675314541,
+  "depth": -10.585677335729493,
+  "reachable": false,
+  "x": 0.7150000000000083
+ },
+ "Y|tap_ug": {
+  "P_enter_GPa": 42.65714919772683,
+  "barrier": 1.986983130611156,
+  "depth": -4.8865465553908685,
+  "reachable": false,
+  "x": 0.7050000000000085
+ },
+ "Y|ug": null,
+ "Zr|tap": null,
+ "Zr|tap_ug": null,
+ "Zr|ug": {
+  "P_enter_GPa": 34955.651639084426,
+  "barrier": 366.72712730236674,
+  "depth": -21806.0752643325,
+  "reachable": false,
+  "x": 0.5200000000000125
+ }
+}

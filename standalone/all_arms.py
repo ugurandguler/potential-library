@@ -9,8 +9,9 @@ latdyn on the path, plain for the isotropic ones (root, tap).
 """
 import json, os, sys
 import numpy as np
-STAND = r"C:\Users\Admin\Desktop\ugurpotential_screen\standalone"
-ANG = r"C:\Users\Admin\Desktop\ugurpotential_screen\angular"
+#  this tree, wherever it was cloned (fixed local paths until v1.4.7)
+STAND = os.path.dirname(os.path.abspath(__file__))
+ANG = os.path.join(os.path.dirname(STAND), "angular")
 A = "--ang" in sys.argv
 sys.argv = [sys.argv[0]] + (["--ug"] if A else [])
 sys.path.insert(0, STAND)

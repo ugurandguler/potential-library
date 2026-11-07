@@ -321,6 +321,16 @@ def main():
                         "every screen of the rule - " + mr.get("rule", "")
                         + " - which standalone/recommend_recut.py applies to "
                         "every element that has a re-cut, not by hand")
+                    #  v1.4.7: the rule's ground-state screen is bcc/fcc/hcp
+                    #  only; where an independent test has dhcp lower, say so
+                    dh = mr.get("dhcp_rel_meV")
+                    if dh is not None and dh < 0:
+                        trunc += (f".  The rule compares bcc, fcc and hcp only: "
+                                  f"dhcp lies {abs(dh):.2f} meV/atom below the "
+                                  f"fitted structure in an independent ground-state "
+                                  f"test (a separate implementation of the "
+                                  f"potential), a stacking preference, not a "
+                                  f"different crystal")
                 elif name == "rc":
                     why = "; ".join(mr.get("why") or [])
                     tap_bad = no_md_reason(lib[el], "tap")

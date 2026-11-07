@@ -26,7 +26,11 @@ assumed:
 
 The cell is built at the volume curve_mae scores the library at - the
 measurement's lattice constant where the record gives one - so a published
-potential and ours are evaluated at the same geometry.
+potential and ours are evaluated at the same geometry.  The exception is a
+potential whose pressure there exceeds PMAX: it is scored at its own
+zero-pressure lattice (box/relax), and the entry records p_meas_GPa and
+which lattice was used.
+    python3 phonon_published.py --pressure   # p_meas_GPa for the older entries
 
 Runs in WSL, where the LAMMPS build lives:
     python3 phonon_published.py            # every job -> phonon_published.json
@@ -57,6 +61,11 @@ SEARCH = [POTS, os.path.expanduser("~/nistpot")]
 WORK = os.path.expanduser("~/phonon_published")
 OUT = os.path.join(HERE, "phonon_published.json")
 H = 0.005              # A, central-difference step
+#  GPa.  Above this the potential is scored at its own zero-pressure lattice:
+#  the measured one leaves Agrawal et al.'s beryllium at +27 GPa (17.9 % against
+#  10.7 % at its own lattice), while the other 91 sit at a median 0.4 GPa and at
+#  most 6.0 (Marinica W-4), where scoring at the measurement's geometry is fair
+PMAX = 10.0
 SKIN = 0.3
 
 sys.path.insert(0, STAND)
@@ -225,6 +234,40 @@ def cutoff(d, style, cf, cry):
     return float(m[1]) - SKIN
 
 
+def pressure(d, style, cf, cry):
+    """GPa, of the potential at the geometry it is scored at"""
+    box, pos, _ = supercell(cry, 14.0)
+    write_data(os.path.join(d, "cell.data"), box, pos)
+    log = lammps(d, head(style, cf).replace("custom step pe", "custom step pe press")
+                 + "run 0 post no\n")
+    m = re.search(r"^\s*0\s+\S+\s+(\S+)\s*$", log, re.M)
+    if not m:
+        raise RuntimeError("no pressure in log: " + log[-600:])
+    return float(m[1]) / 1e4
+
+
+def own_lattice(d, style, cf, cry):
+    """(Crystal, a, c/a) at the potential's own zero pressure, the hexagonal
+    cell keeping its basal plane regular"""
+    box, pos, _ = supercell(cry, 14.0)
+    write_data(os.path.join(d, "cell.data"), box, pos)
+    hcp = cry.struct == "hcp"
+    relax = "aniso 0.0 couple xy" if hcp else "iso 0.0"
+    log = lammps(d, head(style, cf).replace("custom step pe", "custom step pe press")
+                 + "run 0 post no\n"
+                 "variable x0 equal $(lx)\nvariable z0 equal $(lz)\n"
+                 f"fix 1 all box/relax {relax} vmax 0.001\n"
+                 "minimize 1e-14 1e-12 20000 200000\n"
+                 'print "SCALE $(lx/v_x0:%.12f) $(lz/v_z0:%.12f) $(press:%.6f)"\n')
+    m = re.search(r"^SCALE (\S+) (\S+) (\S+)", log, re.M)
+    if not m or abs(float(m[3])) > 1.0:
+        raise RuntimeError("own lattice not found: " + log[-600:])
+    sx, sz = float(m[1]), float(m[2])
+    a = cry.a0 * sx
+    coa = cry.c_over_a * sz / sx if hcp else cry.c_over_a
+    return L.Crystal(cry.struct, a, coa), a, coa
+
+
 def read_forces(path, n):
     F = np.zeros((n, 3))
     lines = open(path).read().splitlines()
@@ -283,6 +326,11 @@ def force_constants(el, label, style, files, d, syms=None):
     cf = coeff(style, local, el, syms) if style != "ugur" else f"* * {local[0]} {el}"
     cry, a, coa = geometry(el)
     rc = cutoff(d, style, cf, cry)
+    p_meas = pressure(d, style, cf, cry)
+    lattice = "measured"
+    if abs(p_meas) > PMAX:
+        cry, a, coa = own_lattice(d, style, cf, cry)
+        lattice = "own zero-pressure"
     box, pos, lab = supercell(cry, 4 * rc + 1.0)
     write_data(os.path.join(d, "cell.data"), box, pos)
     n = len(pos)
@@ -336,7 +384,7 @@ def force_constants(el, label, style, files, d, syms=None):
         asr = max(asr, float(np.abs(s).max()))
         Phi[(k0, k0, (0, 0, 0))] -= s
     return dict(el=el, label=label, style=style, family=family(style), a=a, c_over_a=coa,
-                rc=rc, n_atoms=n, asr_before=asr,
+                rc=rc, n_atoms=n, asr_before=asr, p_meas_GPa=p_meas, lattice=lattice,
                 phi=[[i, j, list(R), b.tolist()] for (i, j, R), b in Phi.items()])
 
 
@@ -376,6 +424,31 @@ def main():
     for k in [k for k in done if k.split("|", 1)[1].split("+")[-1] in SUPERSEDED
               or any(x in k for x in ("ipr3",))]:
         del done[k]
+    if "--pressure" in sys.argv:
+        #  the pressure at the measured lattice, for force constants taken
+        #  before the PMAX rule; the ones above it are named for a rerun
+        for el, label, style, files, syms in jobs():
+            key = f"{el}|{label}"
+            r = done.get(key)
+            if not r or "phi" not in r or "p_meas_GPa" in r:
+                continue
+            d = os.path.join(WORK, re.sub(r"[^\w.+-]", "_", key) + "_p")
+            os.makedirs(d, exist_ok=True)
+            local = []
+            for k, f in enumerate(files):
+                if style == "meam" and k == 0:
+                    meam_library_ints(f, os.path.join(d, os.path.basename(f)))
+                else:
+                    shutil.copy(f, d)
+                local.append(os.path.basename(f))
+            cf = coeff(style, local, el, syms)
+            r["p_meas_GPa"] = pressure(d, style, cf, geometry(el)[0])
+            r["lattice"] = "measured"
+            print(f"{key:60s} {r['p_meas_GPa']:8.2f} GPa"
+                  + ("   ABOVE PMAX - rerun this element" if abs(r["p_meas_GPa"]) > PMAX else ""),
+                  flush=True)
+        json.dump(done, open(OUT, "w"))
+        return
     for el, label, style, files, syms in jobs():
         if el not in LIB or "exp_curve" not in LIB[el]:
             continue                     # no measured dispersion to score against

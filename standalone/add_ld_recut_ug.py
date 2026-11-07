@@ -8,14 +8,19 @@ This only reads that file, exactly as add_ug_overlay reads ug_results.json.
 If the file is absent the step is a no-op and the page draws the pair
 candidate alone, which is the correct behaviour before any angular run.
 
-    python add_ld_recut_ug.py
+    python add_ld_recut_ug.py            # rc_ug, from recut_ug_ld.json
+    python add_ld_recut_ug.py tap_ug     # tap_ug, from tap_ug_ld.json (v1.4.7)
 """
 import json
 import os
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-SRC = os.path.join(ROOT, "angular", "recut_ug_ld.json")
+ARM = sys.argv[1] if len(sys.argv) > 1 else "rc_ug"
+if ARM not in ("rc_ug", "tap_ug"):
+    raise SystemExit("arm must be rc_ug or tap_ug")
+SRC = os.path.join(ROOT, "angular", {"rc_ug": "recut_ug_ld.json", "tap_ug": "tap_ug_ld.json"}[ARM])
 
 
 def main():
@@ -27,7 +32,7 @@ def main():
     lib = json.load(open(path))
     n, skipped = 0, []
     for el, ld in sorted(src.items()):
-        rec = (lib.get(el) or {}).get("rc_ug")
+        rec = (lib.get(el) or {}).get(ARM)
         if not isinstance(rec, dict) or "m" not in rec:
             skipped.append(el)
             continue

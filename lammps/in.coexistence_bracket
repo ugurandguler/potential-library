@@ -50,6 +50,7 @@ variable MASS  index 180.948                          # atomic mass
 variable NX    index 6                                # cells across
 variable NZ    index 30                               # cells along z, the long axis
 variable TCOLD index 1200                             # where the solid is built
+variable SEED index 4928459                          # initial velocities; near Tm, run several
 variable THOT  index 6000                             # where the liquid half is melted
 variable NEQ   index 20000                            # steps per stage
 variable NHOLD index 60000                            # steps of competition at TTRY (120 ps)
@@ -84,7 +85,7 @@ thermo 2500
 thermo_style custom step temp pe press vol c_Tliq c_Tsol
 
 #  --- A: the whole cell SOLID, far below the melting point ---------------
-velocity all create ${TCOLD} 4928459 mom yes rot yes dist gaussian
+velocity all create ${TCOLD} ${SEED} mom yes rot yes dist gaussian
 fix 1 all npt temp ${TCOLD} ${TCOLD} 0.1 iso 0 0 1.0
 run ${NEQ}
 unfix 1

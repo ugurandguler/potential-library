@@ -40,15 +40,31 @@ as a basin at x = 0.99 in half the library.
 
     python compression.py                 # every element, tapered sets
     python compression.py Na Li --set tap
+    python compression.py --merge         # compression.json -> library.json
 """
 import json
 import os
 import sys
 
+import importlib.util
+
 import numpy as np
 
-import latdyn as L
 import refdata
+
+#  THE ANGULAR TREE'S latdyn, for every set (v1.4.7).  This file imported the
+#  pair latdyn, which has no Legendre factor, so the UG sets (ug, tap_ug,
+#  rc_ug) were scanned as if lam2 = lam4 = 0 with their own D, alpha, r0 - a
+#  different potential: tungsten's switched UG record came out at -6.68
+#  eV/atom at 0.9 a0 against -6.93 with the factor.  The angular latdyn with
+#  lam2 = lam4 = 0 is the pair one exactly, so one engine serves every set.
+#  Loaded by path so that refdata above stays this tree's.
+_spec = importlib.util.spec_from_file_location(
+    "latdyn_angular", os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "angular", "latdyn.py"))
+L = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(L)
+assert "lam2" in open(L.__file__, encoding="utf-8").read(), L.__file__
 
 #  An arm record is one that carries the potential's five parameters.  Nothing
 #  else in an element's record does - baseline_*, elasticT, dyn and mech carry
@@ -92,34 +108,58 @@ TOL = 5e-3
 KB = 8.617333262e-5
 
 
-def probe(el, rec, lo=0.55, step=0.005):
-    """(x_onset, barrier, depth) or (None, None, None) if the well is single"""
+#  0.50, not 0.55 (v1.4.7): an independent E(a) scan to 0.50 a0 found
+#  basins between the two for Ag (switched MAU and UG), Nb (both) and Pb
+#  (switched UG) that this scan, stopping at 0.55, reported as single wells
+EV_A3_GPA = 160.21766208
+
+
+def probe(el, rec, lo=0.50, step=0.005):
+    """(x_onset, barrier, depth, P_enter) or four Nones if the well is single
+
+    P_enter (v1.4.7) is the static pressure at which the crystal, held at 0 K,
+    falls in: the highest pressure p = -dE/dV the compressed branch sustains
+    between equilibrium and the barrier.  Above it the branch has no minimum
+    left.  `reachable` asks about heat (barrier against k_B T_melt); this asks
+    about load, and the two disagree - barium's re-cut record has a barrier
+    five times k_B T_melt and is entered at 1.9 GPa.  Zero where there is no
+    barrier at all.  The scan scales the cell uniformly (hcp at fixed c/a),
+    which for one-atom cubic cells is exactly what a relaxation at fixed
+    pressure does; an independent pressure scan agrees for Ba, Y and Lu and
+    stopped short of converging for Na."""
     e = refdata.ELEMENTS[el]
     pot = L.Potential.from_record(rec)
     xs = np.arange(1.10, lo, -step)
-    E = []
+    E, V = [], []
     for x in xs:
         cry = L.Crystal(e["struct"], e["a0"] * x, e.get("c_over_a"),
                         mass=refdata.MASSES[el])
+        V.append(cry.vol / len(cry.frac))
         try:
             E.append(L.energy(cry, pot))
         except Exception:
             E.append(np.nan)
-    E = np.array(E)
+    E, V = np.array(E), np.array(V)
     ok = np.isfinite(E)
     if not ok.any():
-        return None, None, None
+        return None, None, None, None
     #  the equilibrium the potential actually has, not the one it was given
-    i0 = int(np.nanargmin(np.where(ok, E, np.inf)[:len(xs) // 3]))
+    #  searched over a FIXED window, x >= 0.925: it was the first third of the
+    #  scan, which moved when the scan was extended to 0.50 and shifted
+    #  lithium's onset from 0.92 to 0.90 with nothing about lithium changed
+    i0 = int(np.nanargmin(np.where(ok & (xs >= 0.925 - 1e-9), E, np.inf)))
     E0 = E[i0]
     #  walk inward from there and look for a second, deeper region
     below = [i for i in range(i0 + 1, len(xs))
              if ok[i] and E[i] < E0 - TOL]
     if not below:
-        return None, None, None
+        return None, None, None, None
     i = below[0]
-    return float(xs[i]), float(np.nanmax(E[i0:i + 1]) - E0), \
-        float(np.nanmin(E[i:]) - E0)
+    barrier = float(np.nanmax(E[i0:i + 1]) - E0)
+    ib = i0 + int(np.nanargmax(E[i0:i + 1]))
+    p = -np.gradient(E, V) * EV_A3_GPA
+    p_enter = max(0.0, float(np.nanmax(p[i0:ib + 1]))) if barrier > TOL else 0.0
+    return float(xs[i]), barrier, float(np.nanmin(E[i:]) - E0), p_enter
 
 
 def main():
@@ -176,7 +216,7 @@ def main():
             rec = lib[el] if sub is None else lib[el].get(sub)
             if not rec or "m" not in rec:
                 continue
-            x, b, d = probe(el, rec)
+            x, b, d, pe = probe(el, rec)
             v = verdict(f"{el}|{key}")
             if v in ("collapsed", "disintegrated"):
                 bad.append(el)
@@ -187,7 +227,7 @@ def main():
             if reach:
                 hit.append(el)
             out[f"{el}|{key}"] = {"x": x, "barrier": b, "depth": d,
-                                  "reachable": bool(reach)}
+                                  "reachable": bool(reach), "P_enter_GPa": pe}
             print(f"{el:4s}{x:12.3f}{b:10.3f}{d:11.1f}"
                   f"{('YES' if reach else 'no'):>10s}{v:>10s}")
         print(f"\n  reachable at 600 K: {' '.join(hit) or 'none'}")
@@ -210,5 +250,36 @@ def main():
           f"{len(out)} refreshed)")
 
 
+def merge():
+    """compression.json -> each record's `compression`, in the shape
+    refresh_measured.py writes, and nothing else.  That file also rewrites
+    stable, min_cm1, R and the MD verdict, and it looks for the dispersion-
+    selected arm under the wrong key and does not know the nudge arm, so their
+    compression never reached the library."""
+    path = os.path.join(HERE, "library.json")
+    lib = json.load(open(path))
+    comp = json.load(open(os.path.join(HERE, "compression.json")))
+    n = 0
+    for key, c in comp.items():
+        el, arm = key.split("|", 1)
+        sub = SETS.get(arm, arm)
+        rec = lib.get(el) if sub is None else (lib.get(el) or {}).get(sub)
+        if not isinstance(rec, dict):
+            continue
+        rec["compression"] = ({"basin": False} if c is None else
+                              {"basin": True, "x": c["x"], "barrier": c["barrier"],
+                               "depth": c["depth"], "reachable": c["reachable"],
+                               "P_enter_GPa": c.get("P_enter_GPa")})
+        n += 1
+    tmp = path + ".tmp"
+    with open(tmp, "w") as fh:
+        json.dump(lib, fh, indent=1, sort_keys=True, default=str)
+    os.replace(tmp, path)
+    print(f"compression merged into {n} records")
+
+
 if __name__ == "__main__":
-    main()
+    if "--merge" in sys.argv:
+        merge()
+    else:
+        main()

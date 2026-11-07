@@ -45,7 +45,10 @@ KB = 8.617333262e-5            # eV/K
 THZ_TO_EV = 4.135667696e-3     # h * 1 THz in eV
 NA = 6.02214076e23
 T0 = 298.15
-MESH = 8
+#  16^3, not 8^3: on 8^3 the negative-gamma bcc records are not mesh-converged
+#  (Cr -2.80 at 8, -1.48 at 16, W -1.19/-0.50); 16^3 = 24^3 for every printed
+#  number (mesh audit, 2026-11-03)
+MESH = 16
 
 
 WINDOWS = (0.005, 0.01, 0.02, 0.03)
@@ -135,7 +138,7 @@ def main():
               f"{(3 * aL_model if aL_model else float('nan')):13.1f}{3 * aL_meas:12.1f}"
               f"{1e6 * a_pred:14.1f}")
     out["_note"] = ("gamma is the heat-capacity-weighted mode Grueneisen parameter at 298.15 K "
-                    f"on an {MESH}^3 mesh, from frequencies at +/-1 % of the lattice constant; "
+                    f"on a {MESH}^3 mesh, from frequencies at +/-1 % of the lattice constant; "
                     "gamma_exp is alpha_V B V / C_V with the measured alpha_V and B and the "
                     "record's own C_V; alpha_V_pred is the quasi-harmonic prediction from "
                     "gamma, alpha_V_model the molecular-dynamics value, both in 10^-6/K.")

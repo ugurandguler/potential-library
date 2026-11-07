@@ -19,6 +19,11 @@ confound that table was built to exclude.  A Voigt-Reuss-Hill average carries
 no such confound: it is what one tensor implies, whatever cutoff produced it.
 
     python add_mech_recut.py
+
+v1.4.7: the switched arms (tap, tap_ug) and the force-matched one (tap_force)
+are done the same way, because the page's parameter selector now offers
+them, and a selected arm with no `mech` of its own made the Hill table and
+the polar panel fall back to the hard-cut MAU record under the selected name.
 """
 import json
 import os
@@ -79,7 +84,7 @@ def main():
         cry = L.Crystal(e["struct"], float(e["a0"]), e.get("c_over_a"),
                         mass=refdata.MASSES[el])
         nat = len(cry.frac)
-        for arm in ("rc", "rc_ug"):
+        for arm in ("rc", "rc_ug", "tap", "tap_ug", "tap_force"):
             rec = v.get(arm)
             if not isinstance(rec, dict) or not isinstance(rec.get("Cij"), dict):
                 continue

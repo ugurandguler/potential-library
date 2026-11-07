@@ -167,6 +167,7 @@ change_box      all yz delta {dy} units box
 #  Relax along the normal only.  With the in-plane coordinates free the fault
 #  simply slides back out and every answer is zero.
 fix             1 all setforce 0.0 0.0 NULL
+{zrelax}
 min_style       cg
 minimize        1e-14 1e-12 20000 200000
 
@@ -183,10 +184,22 @@ displace_atoms  top move 0.0 {dy} 0.0 units box
 ''', "").replace("EFAULT", "EPERFECT")
 
 
+#  --zrelax: the box height is relaxed to zero normal stress as well.  With
+#  the height held, a fault that wants to open cannot, and the strain it would
+#  relieve is paid by the whole column instead: yttrium's fault opens by
+#  0.39 A when allowed and comes out 10 mJ/m^2 lower, -118 against -108
+#  (a vacuum slab, computed separately, gives the same -118).  Magnesium
+#  opens by 0.05 A and does not move.  The tilt is not touched, so the single
+#  continuous fault is kept.
+ZRELAX = "fix             2 all box/relax z 0.0 vmax 0.001"
+
+
 def one(job):
-    el, tag, frac = job
+    el, tag, frac = job[:3]
+    zrelax = len(job) > 3 and job[3]
     safe = tag.replace("|", "_").replace("/", "-").replace(".", "")
-    d = os.path.join(HERE, "sfruns", f"{el}_{safe}_{frac:.4f}")
+    d = os.path.join(HERE, "sfruns_zrelax" if zrelax else "sfruns",
+                     f"{el}_{safe}_{frac:.4f}")
     os.makedirs(d, exist_ok=True)
     try:
         style, pot = E.setup(d, el, tag)
@@ -264,7 +277,7 @@ def one(job):
     sgn = -1.0 if struct == "hcp" else 1.0
     txt = (PERFECT if frac == 0.0 else IN).format(
         style=style, coeff=coeff, skin=SKIN, zmid=mid,
-        dy=sgn * frac * 3.0 * part)
+        dy=sgn * frac * 3.0 * part, zrelax=ZRELAX if zrelax else "")
     lg = SF.run(d, txt, "in.sf")
     key = "EPERFECT" if frac == 0.0 else "EFAULT"
     e = SF.grab(lg, key)
@@ -320,6 +333,12 @@ def main():
         sets = argv[i + 1].split(",")
         del argv[i:i + 2]
     with_base = "--nobase" not in argv
+    zrelax = "--zrelax" in argv
+    nw = max(1, (os.cpu_count() or 4) - 2)
+    if "--workers" in argv:
+        i = argv.index("--workers")
+        nw = int(argv[i + 1])
+        del argv[i:i + 2]
     els = [a for a in argv if not a.startswith("--")]
     els = els or sorted(E.PACK)
     #  Say what is being left out and why, rather than filtering in silence.
@@ -341,22 +360,21 @@ def main():
     for el in els:
         for tag in sets:
             if tag in E.PACK.get(el, {}):
-                jobs += [(el, tag, f) for f in FRACS]
+                jobs += [(el, tag, f, zrelax) for f in FRACS]
         if with_base:
             for fn, _ in E.BASE.get(el, []):
                 if all(os.path.exists(os.path.join(E.POTDIR, g))
                        for g in fn.split("+")):
-                    jobs += [(el, "base|" + fn, f) for f in FRACS]
+                    jobs += [(el, "base|" + fn, f, zrelax) for f in FRACS]
     if not jobs:
         print("0 runs - fcc element or set name not recognised")
         return
-    nw = max(1, (os.cpu_count() or 4) - 2)
     print(f"{len(jobs)} runs, {nw} parallel processes", flush=True)
     with ProcessPoolExecutor(max_workers=nw) as ex:
         res = list(ex.map(one, jobs, chunksize=1))
 
     got = {}
-    for (el, tag, f), r in zip(jobs, res):
+    for (el, tag, f, _), r in zip(jobs, res):
         got.setdefault(f"{el}|{tag}", {})[f"{f:.6f}"] = r
 
     out = {}
@@ -391,7 +409,8 @@ def main():
         print(f"{el:4s}{lab[:28]:>28s}{isf:11.1f}{usf:11.1f}"
               f"{'':>8s}   {note}")
 
-    fp = os.path.join(HERE, "stacking.json")
+    #  a separate file: stacking.json is what the paper reads
+    fp = os.path.join(HERE, "stacking_zrelax.json" if zrelax else "stacking.json")
     old = {}
     if os.path.exists(fp):
         try:

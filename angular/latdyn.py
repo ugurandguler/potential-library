@@ -164,6 +164,38 @@ class Potential:
             return np.zeros_like(np.asarray(x, dtype=float))
         return self.C * self.D * self._f(x, self.alpha3, order)
 
+    def leg3(self, ra, rb):
+        """E3 and its ra/rb derivatives for one angle-free triplet, switches
+        included: (E, dE/dra, dE/drb, d2E/dra2, d2E/drb2, d2E/dra drb).
+
+        Ported from standalone/latdyn.Potential.leg3 (2026-11-04, v1.4.7).
+        Before it, force_constants and _gradient below used phi3'(ra + rb)
+        and phi3'' alone - no S(ra) S(rb) - although energy() applies the
+        switch per leg, so every switched angle-free record (re-cut MAU, and
+        the switched UG records whose search drove lam2 = lam4 = 0: Be, V, Zr)
+        got its hcp elastic constants and its spectrum from an unswitched
+        three-body term.  Found by computing the same elastic constants a second
+        way, by finite differences of energy(), 2026-11-01."""
+        x = ra + rb
+        g0 = self.phi3(x, 0)
+        g1 = self.phi3(x, 1)
+        g2 = self.phi3(x, 2)
+        if self.taper is None or not self.rcut3:
+            return g0, g1, g1, g2, g2, g2
+        Sa = float(self.switch(ra, self.rcut3, 0))
+        Sb = float(self.switch(rb, self.rcut3, 0))
+        Sa1 = float(self.switch(ra, self.rcut3, 1))
+        Sb1 = float(self.switch(rb, self.rcut3, 1))
+        Sa2 = float(self.switch(ra, self.rcut3, 2))
+        Sb2 = float(self.switch(rb, self.rcut3, 2))
+        SS = Sa * Sb
+        return (g0 * SS,
+                g1 * SS + g0 * Sa1 * Sb,
+                g1 * SS + g0 * Sa * Sb1,
+                g2 * SS + 2.0 * g1 * Sa1 * Sb + g0 * Sa2 * Sb,
+                g2 * SS + 2.0 * g1 * Sa * Sb1 + g0 * Sa * Sb2,
+                g2 * SS + g1 * Sa1 * Sb + g1 * Sa * Sb1 + g0 * Sa1 * Sb1)
+
 
 # --------------------------------------------------------------------------
 #  crystal
@@ -365,15 +397,15 @@ def force_constants(cry, pot):
     #  ---- three-body: phi3 = g(x), x = r_ij + r_ik ----
     if pot.C:
         for (i, (ja, Ra), (jb, Rb), ra, rb, na, nb_) in triplets(cry, pot):
-            x = ra + rb
-            g1, g2 = pot.phi3(x, 1), pot.phi3(x, 2)
+            #  per-leg switch: the legs get their own derivatives (leg3)
+            _, A1, A2, Haa, Hbb, Hab = pot.leg3(ra, rb)
             naa, nbb = np.outer(na, na), np.outer(nb_, nb_)
             Pa = (np.eye(3) - naa) / ra
             Pb = (np.eye(3) - nbb) / rb
             #  blocks in the (a, b, i) basis
-            Baa = g2 * naa + g1 * Pa
-            Bbb = g2 * nbb + g1 * Pb
-            Bab = g2 * np.outer(na, nb_)
+            Baa = Haa * naa + A1 * Pa
+            Bbb = Hbb * nbb + A2 * Pb
+            Bab = Hab * np.outer(na, nb_)
             #  a-a, b-b, a-b
             add(ja, ja, (0, 0, 0), Baa); add(i, i, (0, 0, 0), Baa)
             add(i, ja, Ra, -Baa);        add(ja, i, -Ra, -Baa)
@@ -665,10 +697,10 @@ def _gradient(cry, pot):
         G[j] += 0.5 * pot.phi2(r, 1) * (d / r)
     if pot.C:
         for (i, (ja, _), (jb, _), ra, rb, na, nb_) in triplets(cry, pot):
-            g1 = pot.phi3(ra + rb, 1)
-            G[ja] += g1 * na
-            G[jb] += g1 * nb_
-            G[i] -= g1 * (na + nb_)
+            _, A1, A2, _, _, _ = pot.leg3(ra, rb)
+            G[ja] += A1 * na
+            G[jb] += A2 * nb_
+            G[i] -= A1 * na + A2 * nb_
     return G
 
 

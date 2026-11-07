@@ -38,8 +38,8 @@ authors:
     given-names: "Emre"
     affiliation: "Ankara Hacı Bayram Veli University"
     orcid: "https://orcid.org/0000-0002-4733-7861"
-version: "1.4.6"
-date-released: "2026-10-31"
+version: "1.4.7"
+date-released: "2026-11-07"
 license: GPL-2.0-only
 #  The concept DOI.  Zenodo mints it once and keeps it pointing at the newest
 #  release, so it is the one that can live in a file that ships inside the

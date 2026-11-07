@@ -17,7 +17,10 @@ is how the re-cut dispersion table went stale for a release.
 
 An element's re-cut is RECOMMENDED for MD when all of these hold:
 
-  cold    stable on mesh AND path; the fitted structure is its ground state;
+  cold    stable on mesh AND path; the fitted structure is the lowest of bcc,
+          fcc and hcp (struct_rank.py compares those three - dhcp is not in
+          it, and for six recommended records it lies 0.2-0.6 meV/atom below
+          fcc: dhcp_independent.json, carried as `dhcp_rel_meV`, v1.4.7);
           the 300 K molecular-dynamics screen holds the crystal
   warm    thermal expansion positive
           C11 does not STIFFEN between the lowest molecular-dynamics
@@ -73,7 +76,8 @@ KB = 8.617333262e-5                                  # eV/K, as fit.py
 
 WORSE_PTS = 2.0
 C11_RATIO_MAX = 1.00
-RULE = ("stable, ground state, MD screen; expansion > 0; C11 not stiffening "
+RULE = ("stable, lowest of bcc, fcc and hcp, MD screen; expansion > 0; "
+        "C11 not stiffening "
         "between the lowest MD temperature and 300 K; 300 K elastic error and "
         f"measured dispersion no more than {WORSE_PTS:g} points worse than the "
         "switched set")
@@ -127,7 +131,7 @@ def decide(el, v):
     if r.get("stable") is not True:
         why.append("imaginary modes on the mesh or path")
     if (r.get("ground") or {}).get("ok") is not True:
-        why.append("the fitted structure is not its ground state")
+        why.append("the fitted structure is not the lowest of bcc, fcc and hcp")
     md = r.get("md_screen") or {}
     if md.get("collapsed") or md.get("lost"):
         why.append("does not hold the crystal in the MD screen")
@@ -169,6 +173,10 @@ def decide(el, v):
     return "tap", why, facts
 
 
+DHCP = (json.load(open(os.path.join(HERE, "dhcp_independent.json")))
+        if os.path.exists(os.path.join(HERE, "dhcp_independent.json")) else {})
+
+
 def main():
     path = os.path.join(HERE, "library.json")
     lib = json.load(open(path))
@@ -181,6 +189,11 @@ def main():
         s, why, facts = decide(el, v)
         v["md_recommended"] = {"set": s, "why": why, "rule": RULE,
                                "facts": facts}
+        #  not a screen, a disclosure: the fourth close-packed stacking, where
+        #  an independent ground-state test has it below the fitted structure
+        d = DHCP.get(f"{el}|rc")
+        if d is not None:
+            v["md_recommended"]["dhcp_rel_meV"] = d["dhcp_rel_meV"]
         (rec if s == "rc" else none if s == "none" else keep).append((el, why))
     tmp = path + ".tmp"
     with open(tmp, "w") as fh:

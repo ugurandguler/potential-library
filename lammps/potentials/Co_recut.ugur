@@ -3,7 +3,7 @@
 # pair_style ugur
 # pair_coeff * * Co_recut.ugur Co
 #
-# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  RECOMMENDED for molecular dynamics on Co, in place of Co_taper.ugur, which still ships.  It passes every screen of the rule - stable, ground state, MD screen; expansion > 0; C11 not stiffening between the lowest MD temperature and 300 K; 300 K elastic error and measured dispersion no more than 2 points worse than the switched set - which standalone/recommend_recut.py applies to every element that has a re-cut, not by hand
+# Truncation: switched from 0.85 of each cutoff to the cutoff, quintic, C2 - energy is conserved in MD.  RECOMMENDED for molecular dynamics on Co, in place of Co_taper.ugur, which still ships.  It passes every screen of the rule - stable, lowest of bcc, fcc and hcp, MD screen; expansion > 0; C11 not stiffening between the lowest MD temperature and 300 K; 300 K elastic error and measured dispersion no more than 2 points worse than the switched set - which standalone/recommend_recut.py applies to every element that has a re-cut, not by hand
 # MD: structure screened - holds its shape at 600 K (293 K, as equipartition requires).  This tested the SHAPE, not energy conservation; for that see the truncation line above.
 #
 # Lattice stability: screened on the 8^3 and 9^3 meshes AND along the

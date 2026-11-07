@@ -416,13 +416,18 @@ BINARIES = dict(
 
 TRANSFER = dict(
     caption="Zero free parameters: the single-element fits frozen and the binary "
-            "cross terms used exactly as fitted, applied to configurations with "
+            "cross terms used as fitted, applied to configurations with "
             "three, four and five species from the authors' own test file. "
             "Force error in eV/Å; the DFT column is the error of predicting no "
             "force at all.",
     source="240 configurations with three, four and five species, taken from the "
            "dataset authors’ own independent test file, which no fit in this "
-           "work has touched. Nothing is refitted for this table.",
+           "work has touched. Nothing is refitted for this table. The cross terms come "
+           "from a first fit of the binaries (each pair fitted once, on 20 of its 30 configurations, from three starts), not the cross-validated fits of the binaries table; "
+           "rerun with those (for each pair and form, the fold with the lowest "
+           "training cost), every error here is 0.01–0.07 eV/Å lower and the best "
+           "form of each row is unchanged (UG-2 without liquid, FS with it), though "
+           "MAU and FS change places in two rows.",
     cols=["Set", "n", "DFT rms", "MAU", "UG", "FS", "UG-2"],
     rows=[["crystals, 3/4/5 species", "120", "0.956", "0.655", "0.618", "0.685", "0.482"],
           ["five-species HEA", "40", "0.868", "0.686", "0.637", "0.678", "0.494"],
@@ -435,7 +440,9 @@ EXTERNAL = dict(
             "whose data this work uses. Elastic constants in GPa, mixing energy "
             "in meV per atom. Still zero free parameters.",
     source="128-atom random cells at their own relaxed volume, three chemical "
-           "arrangements, positions relaxed at every strain. Reference: "
+           "arrangements, positions relaxed at every strain. Cross terms: for each "
+           "pair and form, the cross-validation fold of the binaries table with the "
+           "lowest training cost (chosen without the hold-out). Reference: "
            "Byggmästar, Nordlund and Djurabekova, Phys. Rev. B 104, 104101 "
            "(2021), Table II.",
     cols=["", "a (Å)", "E<sub>mix</sub>", "B", "C<sub>11</sub>",
@@ -454,7 +461,8 @@ STABILITY = dict(
             "relaxed C11−C12, C44 and B are all positive.",
     source="54-atom random 50:50 solutions, two chemical arrangements per pair, "
            "reference volume taken from the alloy’s own energy minimum rather "
-           "than an experimental lattice table.",
+           "than an experimental lattice table. The fitted cross term is the transfer "
+           "table’s, from a first fit of the binaries (each pair fitted once, on 20 of its 30 configurations, from three starts).",
     cols=["Screen", "MAU", "UG", "FS", "UG-2"],
     rows=[["Bain, unfitted mixing rule", "18/20", "20/20", "8/20", "13/20"],
           ["Bain, fitted cross term", "18/20", "17/20", "14/20", "19/20"],
@@ -477,6 +485,7 @@ DEFECTS = dict(
            "below fifteen is what is left after the rows a configuration cannot "
            "answer. The vacancies that come out negative sit on V for UG and "
            "UG-2, on Nb and V for MAU, and on Mo and Nb for FS. "
+           "Cross terms as in the transfer table, from a first fit of the binaries (each pair fitted once, on 20 of its 30 configurations, from three starts). "
            "Reference: Byggmästar et al. (2021): the vacancy value is their DFT "
            "average, the migration range is their tabGAP's own mean over some "
            "1100 nudged-elastic-band barriers, from Nb (1.06) to W (1.56).",
@@ -515,7 +524,11 @@ ALLOY_PUB = dict(
            "universal mixing rule - nothing is fitted to the alloy; Nitol 2024 "
            "fits its pairs to density-functional data; Chen 2019/2020 fit theirs to "
            "dilute-solute data. Mo-Nb, Mo-V and Nb-W have no published potential "
-           "that could be run here.",
+           "that could be run here. Huang et al. 2021 (MEAM, Nb-Ta) is missing from the "
+           "comparison as first run, because current LAMMPS refuses its library file, "
+           "which writes an integer field as a decimal; with that field rewritten it gives 1.369 eV/Å on "
+           "Nb-Ta, the same as Fereidonnejad et al. 2022, whose Nb and Ta parameters "
+           "it shares, so the row is unchanged.",
     cols=["Pair", "best fitted here", "best published", "better"],
     rows=[["Mo-Ta", "MAU 0.549", "Zhou 2004 EAM 0.528", "published"], ["Mo-W", "UG-2 0.664", "Zhou 2004 EAM 0.448", "published"], ["Nb-Ta", "UG-2 0.463", "Nitol 2024 MEAM 0.812", "fitted here"], ["Nb-V", "UG 0.408", "Nitol 2024 MEAM 0.625", "fitted here"], ["Ta-V", "UG-2 0.422", "Nitol 2024 MEAM 0.496", "fitted here"], ["Ta-W", "UG-2 0.689", "Zhou 2004 EAM 0.540", "published"], ["V-W", "UG-2 0.675", "Chen 2019/2020 FS 0.824", "fitted here"]],
     best=[None, None, None, None])
@@ -880,9 +893,14 @@ configurations of each pair that are neither liquid nor dimer, five-fold
 cross-validated so that every configuration is held out exactly once. The
 ternary fit frees fifteen to seventeen parameters across three unlike pairs and
 is scored on the dataset authors&rsquo; own test file. <b>The transfer table
-fits nothing at all</b>: the cross terms are used exactly as the binaries left
-them, on configurations with three, four and five species from a file no fit
-here has touched.</p>
+fits nothing at all</b>: the cross terms are taken as they came out of a first
+fit of the binaries (each pair fitted once, on 20 of its 30 configurations, from
+three starts) and used on configurations with three, four and five species from
+a file no fit here has touched. The stability screens and the point defects use
+the same terms; the MoNbTaVW table uses, for each pair and form, the
+cross-validation fold with the lowest training cost. The cross-validated terms
+make the transfer errors 0.01&ndash;0.07&nbsp;eV/&Aring; lower without changing
+which form is best.</p>
 
 <h3>The screens</h3>
 <p><b>Bain</b> is the volume-conserving tetragonal path through a 54-atom random

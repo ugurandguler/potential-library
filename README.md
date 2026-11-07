@@ -24,10 +24,10 @@ change has been reported as absent when the file on disk already had it.
 
 **Before anything else, if you want to run this in LAMMPS:** `pair_style ugur`
 is not a LAMMPS package. Copy `lammps/pair_ugur.cpp`, `lammps/pair_ugur.h` and
-`lammps/ugurpot.h` into your LAMMPS `src/` and rebuild — `lammps/README.md`
-section 0 has the two commands and the one-line check that it took. For the
+`lammps/ugurpot.h` into your LAMMPS `src/` and rebuild — **Installation** below has
+every step, and `lammps/README.md` a first run to check it against. For the
 Python side you need Python 3 and **numpy**, and that is the whole requirement
-for the analysis and for rebuilding the page. Three optional packages appear
+for the analysis and for rebuilding the page. Four optional packages appear
 and none is needed to use the library: `esprima`, which `make_gui.py` uses to
 parse the page's own JavaScript before writing it and skips with a message if
 absent; `mp_api` and `jarvis`, used only by the `fetch_*.py` scripts that
@@ -38,7 +38,7 @@ The library reproduces **the elastic tensor at the experimental lattice
 constant** as well as tabulated EAM does, and that is what it was fitted to. It
 is a statement about the second derivative of the energy at fixed coordination.
 On the measured phonons, which it was not fitted to, published EAM and MEAM
-potentials do better for 21 of the 29 metals they cover (7.4 % against 10.2 %
+potentials do better for 21 of the 29 metals they cover (7.1 % against 10.2 %
 of the highest frequency; the paragraph *Published potentials do better on
 these curves* below has the details).
 
@@ -49,14 +49,17 @@ identical code:
 | quantity | how it does |
 | --- | --- |
 | elastic constants C_ij | median RMS 1.45 % (UG), 5.83 % (MAU) |
-| ground state of the model | the fitted structure is the lowest of bcc, fcc and hcp in **0 of 38** switched MAU records and 4 of 38 switched UG; the structure the model prefers sits a median 29 meV/atom lower (chromium 412). The re-cut arm is the exception, 21 of 23, and its selection rule screens for it. Nineteen published potentials run through the same code: 18 right. The hard-cut arms cannot be asked — their pair term does not vanish at the cutoff and the three structures hold different neighbour counts inside it, so the differences reach 19 eV/atom (iridium) and are truncation, not energy. `lammps/struct_rank.py`, in `library.json` as `<arm>.ground` |
+| ground state of the model | the fitted structure is the lowest of bcc, fcc and hcp in **0 of 38** switched MAU records and 4 of 38 switched UG; the structure the model prefers sits a median 29 meV/atom lower (chromium 412). The re-cut arm is the exception, 21 of 23, and its selection rule screens for it — among bcc, fcc and hcp, which is all the rule compares: in an independent ground-state test (seven prototypes relaxed with the cell free, on a separate implementation of the potential) a fourth close-packed stacking, dhcp, lies 0.2–0.6 meV/atom below fcc for six of the recommended re-cut records (Au, Ca, Cu, Pb, Pt, Sr), a preference between stackings of the same planes rather than a different crystal (`standalone/dhcp_independent.json`). Nineteen published potentials run through the same code: 18 right. The hard-cut arms cannot be asked — their pair term does not vanish at the cutoff and the three structures hold different neighbour counts inside it, so the differences reach 19 eV/atom (iridium) and are truncation, not energy. `lammps/struct_rank.py`, in `library.json` as `<arm>.ground` |
 | vacancy formation energy | **2.25× the median of the published classical potentials** in JARVIS-FF (not DFT) for the switched arms, over the 21 elements that have one, and above it in 18 of the 21. The hard-cut reference sets are closer on the median (1.05 MAU, 1.55 UG) and **turn negative**: 13 elements in MAU, 17 in UG. The switched arms give no negative anywhere. `lammps/vacancy.py`, all 38 elements and all four sets, in `lammps/vacancy_*.json`; **not carried in `library.json`, so this is the one row not on the page** |
 | surface energies | **2.9× DFT**; of the 38 records whose facet ordering can be decided at all, 3 come out right |
 | intrinsic stacking fault | negative in 45 of the 50 records where it is defined |
 | thermal expansion | 28 % low (median 0.72 of experiment over the 59 records that keep their structure); 4 records (Na, Ta) contract on heating. 15 body-centred records leave bcc during the expansion runs themselves and carry no coefficient |
-| self-interstitial formation energy | 23 of the 26 cubic records give a positive value, median 2.71 eV over a range of 0.33–12.53 — a spread far wider than the metals themselves have. For Ba, Cr and Li no energy comes back at all: the extra atom falls into the hole in the repulsive core. The dumbbell chosen agrees with the established ordering in 13 of 13 fcc records (⟨100⟩) and 8 of 10 bcc (⟨111⟩). Hexagonal elements are not attempted — the three orientations measured are cubic directions. `lammps/interstitial.py`, in `library.json` as `interstitial` |
+| self-interstitial formation energy | 23 of the 26 cubic records give a positive value, median 2.71 eV over a range of 0.33–12.53 — a spread far wider than the metals themselves have. For Ba, Cr and Li the energy runs far below zero (about −5 × 10⁴, −180 and −1 × 10⁵ eV), and not through the triplet hole of the squeeze probe: in Ba and Li the inserted atom tips the cell into the collapse under uniform compression, and in Cr the whole cell rearranges from bcc to a close-packed structure. The dumbbell chosen agrees with the established ordering in 13 of 13 fcc records (⟨100⟩) and 8 of 10 bcc (⟨111⟩); Mo and Ta take ⟨100⟩, and for Ta the two lie within 3 meV. Hexagonal elements are not attempted — the three orientations measured are cubic directions. `lammps/interstitial.py`, in `library.json` as `interstitial` |
+| energy hole inside the repulsive core (triplet squeeze) | three atoms in a line, squeezed along both legs together, fall into an energy hole that neither the uniform-compression scan nor the first-shell screen reaches: the three-body term with C < 0 runs to minus infinity as the legs close while the pair term resists one bond at a time. It is there in 14 of 38 hard MAU records, 13 of 38 hard UG, 20 of 38 switched MAU, 19 of 38 switched UG, 13 of 23 re-cut, 12 of 22 re-cut UG and 1 of 7 force-matched (Nb), and in every side candidate. **Of the 15 re-cut records recommended for MD, 9 have it** (Ag, Au, Ca, Cu, Mg, Ni, Pb, Pd, Pt); Ba, Co, Ir, Re, Rh and Sr do not. The barrier in front of it, in total triplet energy, is absent on the scan grid for the hard MAU niobium record, at most 50 eV for 67 of the 101 records that have the hole, and far beyond reach for a few (more than 10¹¹ eV for hard platinum); a crystal's surrounding atoms raise it, but a calculation that brings atoms close enough falls in: an independent grain-boundary calculation did for the re-cut Ag, Au, Pb and Pd records. The element page warns for each set that has it, and the download table marks the file. `standalone/squeeze_probe.py`, in `library.json` as `<set>.squeeze` |
+| collapses outside the fitted crystal (independent tests) | the library's screens all start from the fitted structure. An independent ground-state test (seven prototypes relaxed with the cell free, on a separate implementation of the potential), and for five switched records an open one falls far below the fitted structure, to energies no metal has: Li switched MAU (A15 339, simple cubic 141, diamond 47 eV/atom below bcc), Li switched UG (simple cubic 197, diamond 24), Ba switched MAU (diamond 20), Ba switched UG (diamond 5.7) and Na switched MAU (simple cubic 2.1). With a vacancy and the cell free to relax, Cr switched UG turns close-packed and its vacancy energy runs to −85 and −345 eV in two relaxations (the library's own vacancy energies are at fixed cell); V force-matched leaves bcc with the cell free even without a vacancy (5.5 % denser, 0.055 eV/atom lower). The element page warns for each of these sets. `standalone/collapse_independent.json`, in `library.json` as `<set>.independent_collapse` |
+| collapse under static pressure | the compression screen asks whether heat can carry a crystal into a collapsed basin (barrier against k_B T_melt); load is a different question. Compressed uniformly at 0 K, six of the records recommended for MD fall into such a basin: Ba (re-cut) at 1.9 GPa, Na (switched) at 2.3, Yb (switched) at 3.1, Y (switched) at 40, K (switched UG) at 42 and Lu (switched) at 59 GPa. The element page gives the pressure for every set that has a basin below 100 GPa. `standalone/compression.py`, in `library.json` as `<set>.compression.P_enter_GPa` |
 | B′, the pressure derivative of the bulk modulus | not fitted anywhere, so it is the first quantity the fit was never shown. Over the 32 elements with a measured value the switched arm's median is 3.06 against 4.42, within 1 for 11 of them, and **negative — which no metal is** — for 9. Published potentials through the identical scan: within 1 for 20 of 28. `lammps/eos.py`, in `library.json` as `eos` |
-| Grüneisen parameter γ | median 0.82 against 1.57 implied by the measured expansion, bulk modulus and heat capacity — about half, which is the expansion row above restated in the phonons. For 5 records (Fe, Mo, Rb, Ta, W) γ changes sign between a 1 % and a 3 % volume window and is not defined at that resolution; for 6 (Cr, K, Li, Na, Nb, V) it is negative in every window. `standalone/gruneisen.py`, in `library.json` as `gruneisen` |
+| Grüneisen parameter γ | median 0.88 against 1.55 implied by the measured expansion, bulk modulus and heat capacity, over the 32 records where it is defined — about half, which is the expansion row above restated in the phonons. For 6 records (Cs, Fe, Mo, Rb, Ta, W) γ changes sign between a 1 % and a 3 % volume window and is not defined at that resolution; for 6 (Cr, K, Li, Na, Nb, V) it is negative in every window. On a 16³ mesh: 8³, used up to release 1.4.6, was not converged for the negative-γ bcc records. `standalone/gruneisen.py`, in `library.json` as `gruneisen` |
 | temperature dependence of C_ij | with the measured expansion added back, the sign is right for 22 of 25 values of dC₁₁/dT and 22 of 25 of dC₄₄/dT, over 28 elements — but the rate is 0.96 of the measured one for C₁₁ and 0.40 for C₄₄. The shear constant is the difficult one at 0 K too, and heating does not change which. `standalone/tempcoef_compare.py`, in `library.json` as `tempcoef` |
 
 **So: do not use these parameters for defect energies, surface energies,
@@ -187,8 +190,9 @@ the ceiling should not be moved to accommodate results produced under it.
 
 The caveat above says not to use these parameters for melting. That is now a
 number rather than a caution. Tantalum's force-matched record melts at
-**2625 ± 125 K against an experimental 3290** — about twenty per cent low, at
-zero pressure. (Release 1.4.3 said 2250 ± 250 K; see below for why that moved.)
+**2500 ± 250 K against an experimental 3290** — about a quarter (24 %) low, at
+zero pressure. (Release 1.4.3 said 2250 ± 250 K and releases 1.4.4 to 1.4.6
+said 2625 ± 125 K; see below for why it moved.)
 
 It was measured wrongly first, and the failure is worth recording because it
 produced a plausible number. A two-phase coexistence run returned 3438 K, which
@@ -206,7 +210,7 @@ the solid at 1200 K — never at the melting point, where it nucleates at random
 holds them there. `lammps/phase_gate.py` then reads which phase won:
 
 ```
-lmp -in in.coexistence_bracket -var TTRY 2500
+lmp -in in.coexistence_bracket -var TTRY 2500 -var SEED 4928459
 python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
 ```
 
@@ -214,7 +218,7 @@ python phase_gate.py *.dump --halves --data perfect.data --a 3.3052
 | --- | --- | --- | --- |
 | 2000 K | 0.760 / 0.802 | the liquid half froze | Tm above 2000 |
 | 2250 K | 0.847 / 0.857 | the liquid half froze | Tm above 2250 |
-| 2500 K | 0.751 / 0.708 | the liquid half froze | Tm above 2500 |
+| 2500 K | 0.751 / 0.708, 0.699 / 0.793, 0.072 / 0.066, 0.072 / 0.040 (four velocity seeds) | two runs froze, two melted | Tm at 2500, within the bracket |
 | 2750 K | 0.068 / 0.098 | the solid half melted | Tm below 2750 |
 
 **What changed the number, and what is not known.** The copy of
@@ -224,14 +228,16 @@ pressure in its last three stages, which leaves the cell at about 2 GPa near
 comment came from zero-pressure runs; it now runs every stage after the first
 at zero pressure. A 40 ps hold does not decide: at every trial temperature from
 2000 to 2750 K the two halves still differ when it ends, so the default is now
-120 ps, which decides all four. The earlier 2250 ± 250 K came from
-zero-pressure runs started from a different cell, one of which ended at 2250 K
-with both halves disordered; that cell was not archived, the released file
-reproduces neither that run nor its number at either hold time, and why is not
-known. **The value to use is 2625 ± 125 K** — it is the one this input
-reproduces, its four trial temperatures are all decided and its trajectory
-ships with the release. The earlier figure is kept here so that nobody meeting
-it in 1.4.3 mistakes it for an independent confirmation.
+120 ps, which decides every run. **One run per temperature was not enough at
+2500 K.** Releases 1.4.4 to 1.4.6 rested on a single run there, which froze,
+and quoted 2625 ± 125 K. Three more runs that differ only in the seed of the
+initial velocities (`-var SEED`; 1357911, 2468024, 8642097) end one solid and
+two liquid, so 2500 K lies at the melting point within what the bracket
+resolves: every run is solid at 2250 K and liquid at 2750 K, and **the value to
+use is 2500 ± 250 K**, where ±250 K is half the width of that bracket. The
+earlier 2250 ± 250 K came from zero-pressure runs started from a different
+cell that was not archived; the run-to-run spread at 2500 K accounts for the
+difference, and the two brackets overlap.
 
 **That is the whole measurement**: at a fixed temperature and zero pressure,
 whether the solid melts or the liquid freezes *is* the answer, so it needs no
@@ -291,6 +297,29 @@ AU ⊂ MAU ⊂ UG — each contains the previous one exactly as a special case
 (s₃ = 1 recovers AU, λ₂ = λ₄ = 0 recovers MAU), so none of them replaces
 another.
 
+## Parameter sets: the names used on the page and in this README
+
+MAU and UG name the *form*. A parameter *set* is a form together with its
+cut-off, and each element carries several. The page uses these names
+everywhere — in the parameter selector, in the curve legends and in the
+download table — and so does this README.
+
+| set | file | form | cut-off | use | elements |
+| --- | --- | --- | --- | --- | --- |
+| **hard MAU** | `El.ugur` | MAU | hard | static properties and lattice dynamics; not MD — the energy jumps at the cut-off | 38 |
+| **hard UG** | `El.ugur.ang` | UG | hard | as hard MAU, with the angular factor | 38 |
+| **switched MAU** | `El_taper.ugur` | MAU | switched over the outer 15 % | molecular dynamics, unless the element's page recommends the re-cut or says no set is fit for MD | 38 |
+| **switched UG** | `El_taper.ugur.ang` | UG | switched | molecular dynamics with the angular factor | 38 |
+| **re-cut** | `El_recut.ugur` | MAU | switched, pair cut-off moved into a gap between neighbour shells | the recommended MD set for 15 elements; a candidate for the other 8 | 23 |
+| **re-cut UG** | `El_recut.ugur.ang` | UG | as re-cut | candidate, never the recommendation | 22 |
+| **force-matched** | `El_force_taper.ugur` | MAU | switched | fitted to DFT forces with the measured elastic constants held; a candidate | 7 |
+| **dispersion-selected (hard)** | `El_disp.ugur` | MAU | hard | side candidate: the same targets and elastic residual as hard MAU, chosen among the solutions that residual cannot tell apart by the better phonon dispersion; not MD, not published | 4 (Ag, Cu, Pb, Pd) |
+| **nudge-constrained (switched)** | `El_nudge_taper.ugur` | MAU | switched | side candidate: the best solution in the switched MAU pool that survives a 10⁻⁵ Å displacement, which the shipped one does not; it pays for that in elastic accuracy; not published | 5 (Cr, Fe, Mo, Nb, W) |
+
+The last two ship only so the page's comparisons can be checked with the
+files they were made with. `lammps/potentials/README` describes every file
+stem.
+
 ## Layout
 
 ```
@@ -305,7 +334,8 @@ lammps/       pair_ugur.cpp, the pair style, and the drivers that measured
               npt_expansion.py, elastic_T.py, and the melting measurement
               (in.coexistence_bracket, in.coexistence, phase_gate.py).
               potentials/ holds our own .ugur files; the published baselines
-              are not redistributed.
+              are not redistributed.  README.md there: building and a first
+              run; README_1995_table.md: the historical pair table.
 docs/         index.html, the interactive library.  GitHub Pages serves from
               here.  forms.html beside it is a separate study page: the
               published form against two embedding variants on five bcc
@@ -321,6 +351,25 @@ is a molecular-dynamics kernel. They agree on the energy to 10⁻¹¹ eV/atom an
 the pressure to 10⁻⁶ GPa (`lammps/validate_pair.py`),
 which is what makes a disagreement anywhere else a real result rather than a
 bug in one of them.
+
+## Installation
+
+```
+git clone https://github.com/ugurandguler/potential-library.git
+cp potential-library/lammps/pair_ugur.cpp potential-library/lammps/pair_ugur.h \n   potential-library/lammps/ugurpot.h  <lammps>/src/
+cd <lammps>/src && make serial                 # or make mpi, or your usual target
+./lmp_serial -h | grep -i ugur                 # must list ugur and ugur/ang
+```
+
+`pair_style ugur` is not a LAMMPS package: it is these three files, so no `make yes-...` is
+involved, and a CMake build picks them up on the next configure (`cmake ../cmake && cmake --build
+.`). Then take the two lines at the top of any file in `lammps/potentials/` - `pair_style ugur`
+(or `ugur/ang` for a `.ugur.ang` file) and its `pair_coeff` line - into an input script.
+`lammps/README.md` gives a first run on copper with the energy it should conserve, and says which
+file to take for what; the table of parameter sets above says what each file stem is. This was
+checked on 2026-11-03 against a fresh clone of this repository and the `stable` branch of LAMMPS.
+
+The analysis and the page need only Python 3 and numpy (see the top of this file).
 
 ## Running it
 
@@ -355,18 +404,22 @@ One thing to know before running `refresh.py`: it **overwrites
 `standalone/potential.html` with what your checkout can compute**, which is
 less than the shipped page. This was measured, not estimated — the repository
 was copied into an empty directory, with no access to the tree it was built
-in, and run, most recently on 2026-10-31. All 157 Python files compile,
-`selftest.py` passes every check, and `refresh.py` completes its twenty-five
-steps in under two minutes. The page it writes is about 3.5 MB against the
-shipped 8.2 MB, and what is missing is data that is not ours to redistribute or
-is too large to carry:
+in, and run, most recently on 2026-11-07. All 160 Python files compile,
+`selftest.py` passes every check, and `refresh.py` completes its twenty-nine
+steps in about two and a half minutes. The page it writes is about 3.5 MB
+against the shipped 10.5 MB. Every value the rebuild does compute was compared
+key by key with the shipped library and is identical, except the switched-arm
+column of the published-potential phonon scores, which needs the switched arm.
+What is missing is data that is not ours to redistribute or is too large to
+carry:
 
 | missing from a rebuild | why |
 | --- | --- |
 | Materials Project, MC3D, JARVIS overlays | fetched data. Set `MP_API_KEY` for the first; the other two need their own downloads |
 | the switched arms `tap` and `tap_ug` | written by `add_taper_overlay.py` from the `dense_*.json` search output, which is gigabytes and is not carried |
 | the re-cut candidate arms | `add_candidates.py` reads `refit/`, which is not published |
-| *nothing else* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 22 rows and 21 curves appear (rhenium has one measured frequency, not a curve). Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
+| the force-matched arm, and the measurements made at temperature or on a defect: elastic constants against temperature, surface, stacking and ground-state energies, the MD screen, the nudge test, and the published-potential baselines beside them | made by producers outside the chain, most of which read cluster output that is not carried; `refresh.py`'s docstring lists them |
+| *not missing* | the finite-temperature panel **is** rebuilt: `finiteT.json` ships and the page reads it, so all 22 rows and 21 curves appear (rhenium has one measured frequency, not a curve). Only regenerating that file needs the switched arm, and `make_finiteT.py` says so rather than failing obscurely |
 
 Every one of those steps says what it could not do and continues, rather than
 failing. **The shipped `docs/index.html` is the complete page** and carries all
@@ -468,10 +521,13 @@ MEAM, on 29 metals — was taken through LAMMPS by finite differences
 by `curve_mae.py` with the library's own reading of the measured points
 (`standalone/curve_mae_published.py`), so only the force constants differ.
 Applied to the library's own copper record, that route reproduces the analytic
-frequencies to 0.0002 THz. A MEAM library file that writes an integer field as
+frequencies to 0.0002 THz. Each is scored at the measured lattice, except a
+file whose pressure there exceeds 10 GPa: Agrawal *et al.*'s beryllium sits at
++27 GPa and is scored at its own zero-pressure lattice (10.7 % against 17.9 %;
+`PMAX` in `phonon_published.py`). A MEAM library file that writes an integer field as
 a decimal, which current LAMMPS rejects, is read with those fields rewritten as
 integers and no value changed (`meam_library_ints` in that script). Over the 29 metals the element's median published
-potential is off by **7.4 %** of the highest measured frequency, the hard-cut
+potential is off by **7.1 %** of the highest measured frequency, the hard-cut
 library by **10.2 %**; the published one is closer for 21 of the 29, and the
 library only for Au, Be, Ca, K, Mg, Pd, Pt and Zr. No published potential was found
 for Ba, Lu, Sc, Tl and Yb. Each element's page lists its own numbers under the
