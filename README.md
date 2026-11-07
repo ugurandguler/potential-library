@@ -615,8 +615,8 @@ Every release is archived at Zenodo and gets its own DOI, and there is a second
 DOI for the library as a whole:
 [10.5281/zenodo.22924195](https://doi.org/10.5281/zenodo.22924195), which always
 resolves to the newest release. Point a reader at that one; **name the
-release's own DOI when you report a result** — v1.4.6 is
-[10.5281/zenodo.23842582](https://doi.org/10.5281/zenodo.23842582), and the
+release's own DOI when you report a result** — v1.4.7 is
+[10.5281/zenodo.24034806](https://doi.org/10.5281/zenodo.24034806), and the
 others are listed on the Zenodo record. `CITATION.cff` carries the
 all-versions DOI rather than a release's own, because Zenodo does not mint a
 release's DOI until after that release is published, so it cannot be inside it.
