@@ -9,10 +9,15 @@ elastic collapse, and it is worth asking the question directly rather than
 along one particular path - so each candidate structure is built, its lattice
 constants relaxed, and the energies compared.
 
-Every published potential tested alongside puts the right structure lowest,
-by 135 to 232 meV/atom.  That is not a coincidence: a potential meant for
-dynamics is checked against the competing phases as a matter of course, and
-this library's objective never looked at any structure but the fitted one.
+Of the nineteen published potentials tested alongside (each element's
+ground-state panel on the page), eighteen put the right structure lowest - by
+134 to 257 meV/atom for Mo, Nb, Ta and V, by 1 to 24 for the others - and one,
+Na_v2, puts hcp 3.2 meV/atom below bcc.  The margin is no coincidence: a
+potential meant for dynamics is checked against the competing phases as a
+matter of course, and this library's objective never looked at any structure
+but the fitted one.  (Written when only the group-5 and -6 metals had been
+run, this said every published potential gets it right; counted again
+2026-11-07.)
 
 The comparison is per atom at the relaxed lattice constant of each structure,
 so it is independent of the cell and of the fitted volume.  hcp relaxes c/a as
